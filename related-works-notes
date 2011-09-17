@@ -1,0 +1,3 @@
+JS Type Inference
+  - Vardoulakis's CFA2-based approach
+  - Anderson's recursive-type based inference for JS0
