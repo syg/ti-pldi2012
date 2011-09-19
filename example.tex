@@ -1,4 +1,160 @@
 
 \section{Example and Motivation}
 
-Hello!
+Something something something.
+
+\begin{verbatim}
+function Box(v) {
+  this.v = v;
+}
+
+function use(a) {
+  var res = 0;
+  for (var i = 0; i < 1000; i++) {
+    var v = a[i].v;
+    res = res + v;
+  }
+  return res;
+}
+
+function main() {
+  var a = [];
+  for (var i = 0; i < 1000; i++)
+    a[i] = new Box(i);
+  use(a);
+}
+\end{verbatim}
+
+Most operations in this fragment of code interact with type information,
+and need knowledge of the involved types to be efficiently compiled.
+We are particularly interested in the addition in
+\code{res + v} as performed in the \code{use()} function.
+In Javascript, it is legal to add any two values together, with the
+operands coerced if necessary into strings or numbers and a string
+concatenation or numeric addition performed.
+
+Without static information about the types of \code{res} and \code{v},
+a JIT compiler must emit code to check the types of these two values,
+with several paths handling the possible combinations of
+operand types.
+Moreover, every time values are copied around, the compiler must emit
+code to keep track of the types of the involved values, using either
+a separate type tag for the value or a specialized marshaling format.
+This incurs a large runtime overhead on the generated code,
+greatly increases the complexity of the compiler,
+and makes effective implementation of important optimizations like
+register allocation and loop invariant code motion much harder.
+
+If we know the types of \code{res} and \code{v}, we can compile
+code which performs an integer addition with no type checks or need
+to keep track of the types of \code{res} and \code{v}.
+With static knowledge of all types involved in the program, the compiler can
+in many cases generate code similar to that produced for a statically
+typed language such as Java, and using similar optimizations.
+
+We can infer types for all variables and heap values in this program
+purely statically.
+
+Analysis Analysis Analysis.
+
+This inference analysis does not account for all possible behaviors
+of Javascript programs.
+A few such behaviors in the example are described below.
+
+\begin{itemize}
+
+\item The read of \code{a[i]} may access a {\it hole} in the array.
+Out of bounds array accesses in Javascript do not throw an exception,
+but instead return the corresponding property in the object's prototype
+(usually an undefined value).
+The same holds for missing values in the middle of an array
+(assigning to just \code{a[0]} and \code{a[2]} leaves a missing
+value at \code{a[1]}).
+
+The type information computed for array \code{a} only accounts for
+values which were explicitly assigned to elements of \code{a}, and not the
+result of reading holes.
+
+\item The addition \code{res + v} may overflow.
+Javascript has a single number type which does not distinguish between
+integers and doubles.
+However, it is extremely important for performance that Javascript compilers
+distinguish integer and double values, and try to represent numbers as
+integers wherever possible.
+An addition of two integers may overflow and produce a number which can
+only be represented as a double.
+This behavior is rare, and for precision our analysis assumes
+such overflows do not happen.
+
+\end{itemize}
+
+All behaviors which the analysis does not account for must be caught
+by runtime checks, which will dynamically modify the inferred types
+for the program to reflect those new behaviors.
+If \code{a[i]} accesses a hole, the inferred types for the result must be
+updated with the value read out of the array.
+If \code{res + v} overflows, the inferred types for the result must be
+marked as possibly a double.
+The cost of these runtime checks is much less than the overhead induced
+by not statically knowing the types of values, and in many cases these
+checks can be eliminated entirely (see Section~\ref{XXX}).
+
+These runtime checks illustrate the key invariant our analysis
+preserves: inferred types must conservatively model all types for
+variables and object properties which currently exist, but not those
+which could exist in the future.
+This has a few important implications:
+
+\begin{itemize}
+
+\item The program can be analyzed incrementally, as code starts to execute.
+Code which has never executed does not need to be analyzed.
+This is necessary for Javascript due to dynamic code loading through
+\code{eval()} and similar mechanisms, and is also important for reducing
+startup analysis time on websites, which often load several megabytes of
+code and only execute a fraction of it.
+
+\item Assumptions about types made by the JIT compiler can be invalidated
+at almost any time.
+This affects the correctness of the JIT'ed code, and the virtual machine
+must be able to support recompiling or discarding JIT'ed code at any time.
+We discuss our handling of this in Section~\ref{XXX}.
+
+\end{itemize}
+
+This invariant is also critical to our handling of polymorphic code
+within a program.
+Consider the following extension to the example program:
+
+\begin{verbatim}
+function other() {
+  var v = new Box("hello!");
+}
+\end{verbatim}
+
+Executing the \code{other()} function will cause \code{Box} objects
+to be created which hold strings,
+illustrating the use of \code{Box} as a polymorphic structure.
+Our analysis does not distinguish \code{Box} objects created in different
+places, and the result of the \code{a[i].v} access in \code{use()} will
+be regarded as potentially producing a string.
+Naively, solving the constraints produced by the analysis will mark
+\code{a[i].v}, \code{v}, \code{res + v}, and \code{res} as all producing
+either an integer or a string, even if \code{use()} behaves in a monomorphic
+fashion and only ever works on \code{Box} objects containing integers.
+
+This problem of imprecision leaking across the program is serious, as even
+if a program is by and large monomorphic the precision of analysis results on
+it can easily be poisoned by a small amount of polymorphic code.
+
+We deal with uses of polymorphic structures and functions using runtime checks.
+At all array and other property accesses, we keep track of both the set of
+types which {\bf could} be observed for the access and the set of types
+which {\bf has} been observed.
+The former will be a superset of the latter, and if the two are different then
+we insert a runtime check, a {\it type barrier} to check for conformance
+between whatever value is read out and the observed type set.
+Mismatches lead to updates of the observed type set, and because our
+invariant only requires inferred types to reflect observed types, it is
+safe to only solve analysis constraints with respect to the observed types.
+
