@@ -1,8 +1,65 @@
 
 \section{Analysis}
 
+For every expression in a Javascript program or a subset (CLARIFY),
+we need to compute a set of possible types for that expression.
+Types can be primitive --- int, number, string, bool, null
+or undefined --- or object types --- equivalence classes for
+Javascript objects.
+
+Since the analysis runs in a browser as code is trying to execute,
+both time and space are at a premium and must be minimized.
+To be viable for deployment, the analysis must satisfy the following:
+
+\begin{itemize}
+
+\item Time and memory used must be linear in the size of the analyzed code.
+
+\item Querying results for an expression must take near-constant time,
+to avoid changing the performance characteristics of the compiler.
+
+\item Results must be correct if only compiled code is analyzed.
+
+\end{itemize}
+
+Section~\ref{XXX} describes object types, Section~\ref{XXX} describes
+generation of the type constraints which forms the static portion of
+the analysis, and Section~\ref{XXX} describes type barriers and the
+other runtime checks which form the dynamic portion of the analysis.
+
+\subsection{Object Types}
+
+TODO
 
 \subsection{Type Constraints}
 
+TODO
 
-\subsection{Type Barriers}
+\subsection{Runtime Checks}
+
+TODO
+
+As described in Section~\ref{XXX}, type barriers are a form of runtime
+check designed to retain precision when a program contains polymorphic code.
+
+TODO
+
+For any subset constraint $A \subseteq B$, we are free to restrict
+propagation of types which are in $A$ but have never been observed for $B$,
+so long as we include a runtime check for values read into $B$ and update
+it with any newly observed types.
+
+The presence or absence of type barriers for a given subset constraint
+is not monotonic with respect to the contents of the type sets in the program.
+As new types are discovered, new type barriers may be required, but existing
+ones may become unnecessary.
+However, it is always safe to perform the runtime check for a given barrier,
+albeit less efficient.
+
+\subsection{Interpreter Warmup}
+
+TODO
+
+\subsection{Supplemental Analysis}
+
+TODO

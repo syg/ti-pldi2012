@@ -1,3 +1,127 @@
 
 \section{Implementation}
 
+We have implemented this analysis for SpiderMonkey, the Javascript engine
+in Firefox.
+We have also modified the engine's JIT compiler, JaegerMonkey, to use
+inferred type information when generating code.
+Without type information, JaegerMonkey generates code in a fairly mechanical
+translation from the original SpiderMonkey bytecode for a script.
+By using types, we were able to improve the quality of this
+baseline generated code, as well as add several optimizations that
+are impractical without types: linear scan register allocation, loop invariant
+code motion, and function call inlining.
+
+TODO
+
+\subsection{Recompilation}
+
+As described in Section~\ref{XXX}, computed type information can change as
+a result of runtime checks, newly analyzed code or other dynamic behavior.
+For compiled code to rely on this type information, we must be able
+to recompile the code in response to changes in types while that code is
+still running.
+
+Compiling a script will only query type information, and will not change it.
+The type sets queried can be for any expression or lvalue in the program,
+independent of the script being compiled,
+and the dependencies of a compiled script need to be encoded efficiently
+and precisely, to avoid unnecessary recompilation.
+
+As each script is compiled, we keep track of all type information queried
+by the compiler.
+Afterwards, the dependencies are encoded as recompilation constraints,
+in the same manner as the type constraints generated during analysis itself.
+When new types are possible for the type sets associated with a recompilation
+constraint, the compiled script is marked for recompilation.
+Since we represent the contents of type sets explicitly and eagerly resolve
+constraints (Section~\ref{XXX}), new types immediately
+trigger recompilation with little overhead.
+
+When starting this project, the best strategy for recompilation
+was not apparent.
+We originally tried to immediately generate new JIT code for a script,
+scan the stack for calls made from the script's old code and patch the
+associated return addresses with the corresponding addresses in the
+new code.
+This is a simple design and easy to implement, but had a few major problems:
+
+\begin{itemize}
+
+\item When recompiling a script, the compiler had to be sure to generate
+a superset of the calls which appeared in the original script.
+This places complicated constraints on the optimizations that
+can be done when compiling or recompiling.
+
+\item If many type sets change within a short time period (but not all at
+the same time), the recompiler could thrash and repeatedly recompile a
+method, incurring large overhead.
+
+\end{itemize}
+
+To address these, we changed the design so that return addresses of
+calls made by the old code were replaced with the addresses of
+a few specialized trampolines.
+The JIT code for the script is discarded, and the script is not
+immediately recompiled.
+After control returns to the trampolines, they use metadata added to
+the calling frame to assemble
+a valid state for the Javascript engine's bytecode interpreter,
+and resume execution in the interpreter.
+Once the script warms back up by being called or taking loop back edges
+(Section~\ref{XXX}), it is recompiled in the same manner as its
+initial compilation.
+
+Since the initial compilation and recompilations occur independently
+from one another, the compiler is free to implement any optimization it
+wants provided that a valid interpreter state can always be recovered ---
+only information which is provably dead (regardless of currently known types)
+can be discarded.
+In practice this restriction has not been a problem for
+implementing optimizations.
+
+Additionally, since the script will execute in the interpreter some before
+being recompiled, thrashing is reduced, and thresholds can be adjusted to
+increase the amount of time spent interpreting if thrashing is detected
+dynamically.
+
+\subsection{Memory Management}
+
+Two major goals of JIT compilation in a web browser stand in stark contrast
+to one another: generate code that is as fast as possible, and use as little
+memory as possible.
+JIT code can consume a large amount of memory, and the type sets and constraints
+computed by our analysis consume even more (NUMBERS).
+We reconcile these by observing how browsers are used in practice:
+to surf the web.
+The web page being viewed, content being generated and Javascript code which
+is running are constantly changing.
+The compiler and analysis need to not just quickly adapt to new scripts that are
+running, but also to quickly discard regenerable data allocated for
+old scripts that are no longer running much, even if the old scripts are still
+reachable and not subject to garbage collection.
+
+We do this with a simple trick:
+on every garbage collection, we throw away all JIT code and as much analysis
+information as possible.
+Only the input information which is computed by interpreting
+a script is retained (Section~\ref{XXX}),
+as if no scripts had ever been analyzed and all
+execution happened in the warmup phase.
+All type constraints are discarded, as well as all type sets for
+intermediate expressions in scripts.
+This constitutes the great majority of the memory allocated for analysis
+(NUMBERS).
+As described in Section~\ref{XXX}, the retained types are sufficient to
+recover type information for all intermediate expressions in each script,
+should they be reanalyzed and recompiled.
+
+In Firefox, garbage collections typically happen every several seconds.
+If the user is quickly changing pages or tabs, unused JIT code and analysis
+information will be quickly destroyed.
+If the user is staying on one page, active scripts may be repeatedly
+recompiled and reanalyzed, but the timeframe between collections keeps this
+as a small portion of overall runtime.
+When many tabs are open (the case where memory usage is most important
+for the browser), analysis information typically accounts
+for less than 2\% of the browser's overall memory usage (more NUMBERS).
