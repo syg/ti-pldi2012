@@ -1,11 +1,15 @@
 
 \section{Analysis}
 
-For every expression in a Javascript program or a subset (CLARIFY),
-we need to compute a set of possible types for that expression.
-Types can be primitive --- int, number, string, bool, null
-or undefined --- or object types --- equivalence classes for
+For every expression or variable $x$ in a Javascript program,
+we need to compute a set of possible types $T(v)$.
+Types can be primitive --- \code{int}, \code{number}, \code{string},
+\code{bool}, \code{null}
+or \code{undefined} --- or object types --- equivalence classes for
 Javascript objects.
+The \code{int} type indicates a number expressible as a signed 32-bit integer,
+and is subsumed by \code{number} --- \code{int} is added to all type
+sets containing \code{number}.
 
 Since the analysis runs in a browser as code is trying to execute,
 both time and space are at a premium and must be minimized.
@@ -33,9 +37,106 @@ TODO
 
 \subsection{Type Constraints}
 
-TODO
+We model the semantics of Javascript and how types flow through the
+program as constraints between type sets.
+This modeling is {\it incomplete}: it does not account for all possible
+behaviors of Javascript expressions and statements.
+All behaviors excluded by the type constraints must be detected at runtime
+and their effect on types in the program dynamically recorded.
 
-\subsection{Runtime Checks}
+We describe the constraints and checks required for a simplified form
+of the language: assignment, addition, property accesses, element accesses,
+and function calls between variables.
+
+\subsubsection{\code{x = y}}
+
+Assignments in Javascript are completely modeled by a subset constraint
+$T(y) \subseteq T(x)$.
+
+\begin{equation*}
+\frac{t \in T(y)}{t \in T(x)}
+\end{equation*}
+
+\subsubsection{\code{x = y + z}}
+
+Addition in Javascript is very complicated. It is defined for any
+combination of values, can perform either a numeric addition or
+string concatenation, and can even perform function calls if either of
+its operands is an object (calling their \code{valueOf} or
+\code{toString} members, producing a number or string).
+
+Using incomplete modeling lets us cut through this complexity.
+The vast majority of dynamic additions in Javascript programs (NUMBERS)
+are adding two numbers or concatenating two strings.
+We statically model exactly these cases, and use runtime checks to monitor
+the results produced by adding other combinations of values,
+at little runtime cost.
+
+Rules for addition of number and string values are below.
+
+\begin{equation*}
+\frac{int \in T(y) ~~~ int \in T(z)}{int \in T(x)}
+\end{equation*}
+
+\begin{equation*}
+\frac{number \in T(y) ~~~ int \in T(z)}{number \in T(x)}
+~~~~
+\frac{int \in T(y) ~~~ number \in T(z)}{number \in T(x)}
+\end{equation*}
+
+\begin{equation*}
+\frac{string \in T(y)}{string \in T(x)}
+~~~~
+\frac{string \in T(z)}{string \in T(x)}
+\end{equation*}
+
+The above rules are themselves incomplete for addition of two integers:
+the result will be marked as an integer, ignoring the possibility of
+integer overflow.
+When adding two integers overflows, the result is not expressible in
+32 bits, and has type \code{number}.
+Overflow is extremely rare, and accounting for it statically would require
+us to mark the result of all additions as arbitrary numbers,
+except in the limited cases where we can prove no overflow is possible.
+
+Ignoring overflow statically forces us to use runtime checks when overflows
+occur.
+There is no extra runtime cost associated with these checks, as the code
+generated for integer additions requires an overflow check regardless.
+
+\subsubsection{\code{x = y.f}}
+
+\begin{eqnarray*}
+\frac{t \in T(y) ~~~ o = O(t) ~~~ t' \in T(prop(o,f))}{t' \in T(x)}
+\end{eqnarray*}
+
+\subsubsection{\code{y.f = x}}
+
+\begin{eqnarray*}
+\frac{t \in T(x) ~~~ t' \in T(y) ~~~ o = O(t')}{t \in T(prop(o,f))}
+\end{eqnarray*}
+
+\subsubsection{\code{x = y[z]}, \code{y[z] = x}}
+
+\begin{eqnarray*}
+\frac{t \in T(y) ~~~ o = O(t) ~~~ t' \in T(index(o))}{t' \in T(x)}
+\end{eqnarray*}
+
+\begin{eqnarray*}
+\frac{t \in T(x) ~~~ t' \in T(y) ~~~ o = O(t')}{t \in T(index(o))}
+\end{eqnarray*}
+
+\subsubsection{\code{x = y(z)}}
+
+\begin{eqnarray*}
+\frac{f \in T(y) ~~~ F(f) ~~~ t \in T(z)}{t \in T(arg(f, 0))}
+\end{eqnarray*}
+
+\begin{eqnarray*}
+\frac{f \in T(y) ~~~ F(f) ~~~ t \in T(retval(f))}{t \in T(x)}
+\end{eqnarray*}
+
+\subsection{Type Barriers}
 
 TODO
 
