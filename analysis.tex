@@ -1,7 +1,7 @@
 
 \section{Analysis}
 
-For every expression or variable $x$ in a Javascript program,
+For every expression $v$ in a Javascript program,
 we need to compute a set of possible types $T(v)$.
 Types can be primitive --- \code{int}, \code{number}, \code{string},
 \code{bool}, \code{null}
@@ -10,6 +10,8 @@ Javascript objects.
 The \code{int} type indicates a number expressible as a signed 32-bit integer,
 and is subsumed by \code{number} --- \code{int} is added to all type
 sets containing \code{number}.
+An additional type \code{unknown} indicates a type set whose contents
+could be anything, and subsumes all other types.
 
 Since the analysis runs in a browser as code is trying to execute,
 both time and space are at a premium and must be minimized.
@@ -33,7 +35,37 @@ other runtime checks which form the dynamic portion of the analysis.
 
 \subsection{Object Types}
 
-TODO
+To reason about the effects of property accesses, we need type information
+for Javascript objects and their properties.
+We associate every Javascript object with an {\it object type} $o$.
+A type $t$ is an object if $O(t)$.
+When $o \in T(v)$ for some expression $v$, then the possible values
+for $v$ when it is executed include all Javascript objects with type $o$.
+
+Types are assigned to Javascript objects according to their prototype:
+all Javascript objects with the same type have the same prototype.
+Additionally, objects with the same prototype have the same type,
+except for plain \code{Object}, \code{Array} and \code{Function} objects.
+\code{Object} and \code{Array} objects have the same type if they were
+allocated at the same location in a script,
+and \code{Function} objects have the same type if they are closures
+for the same script.
+
+The type of an object is independent from the properties it has;
+objects which are structurally identical may have different types,
+and objects with the same type may have different structures.
+This is crucial for efficient analysis.
+Properties can be added or deleted to Javascript objects at any time,
+and using structural typing would make an object's type a
+flow-sensitive property.
+
+Instead, for each object type we compute the {\it possible} properties
+which objects of that type can have, and the possible types of those
+properties.
+These are represented as type sets $Prop(o,f)$ and $Index(o)$.
+$Prop(o,f)$ captures the possible types of a non-integer property
+$f$ for objects with type $o$, while $Index(o)$ captures the possible
+types of all integer properties of all objects with type $o$.
 
 \subsection{Type Constraints}
 
@@ -90,6 +122,12 @@ Rules for addition of number and string values are below.
 \frac{string \in T(z)}{string \in T(x)}
 \end{equation*}
 
+\begin{equation*}
+\frac{unknown \in T(y)}{unknown \in T(x)}
+~~~~
+\frac{unknown \in T(z)}{unknown \in T(x)}
+\end{equation*}
+
 The above rules are themselves incomplete for addition of two integers:
 the result will be marked as an integer, ignoring the possibility of
 integer overflow.
@@ -101,32 +139,38 @@ except in the limited cases where we can prove no overflow is possible.
 
 Ignoring overflow statically forces us to use runtime checks when overflows
 occur.
-There is no extra runtime cost associated with these checks, as the code
-generated for integer additions requires an overflow check regardless.
+There is no extra runtime cost associated with these checks, as
+generating code for integer additions requires an overflow check regardless.
 
 \subsubsection{\code{x = y.f}}
 
+TODO
+
 \begin{eqnarray*}
-\frac{t \in T(y) ~~~ o = O(t) ~~~ t' \in T(prop(o,f))}{t' \in T(x)}
+\frac{t \in T(y) ~~~ O(t) ~~~ t' \in Prop(t,f)}{t' \in T(x)}
 \end{eqnarray*}
 
 \subsubsection{\code{y.f = x}}
 
+TODO --- unknown type
+
 \begin{eqnarray*}
-\frac{t \in T(x) ~~~ t' \in T(y) ~~~ o = O(t')}{t \in T(prop(o,f))}
+\frac{t \in T(x) ~~~ t' \in T(y) ~~~ O(t')}{t \in Prop(t',f)}
 \end{eqnarray*}
 
 \subsubsection{\code{x = y[z]}, \code{y[z] = x}}
 
 \begin{eqnarray*}
-\frac{t \in T(y) ~~~ o = O(t) ~~~ t' \in T(index(o))}{t' \in T(x)}
+\frac{t \in T(y) ~~~ O(t) ~~~ t' \in Index(t)}{t' \in T(x)}
 \end{eqnarray*}
 
 \begin{eqnarray*}
-\frac{t \in T(x) ~~~ t' \in T(y) ~~~ o = O(t')}{t \in T(index(o))}
+\frac{t \in T(x) ~~~ t' \in T(y) ~~~ O(t')}{t \in Index(t')}
 \end{eqnarray*}
 
 \subsubsection{\code{x = y(z)}}
+
+TODO --- skip this?
 
 \begin{eqnarray*}
 \frac{f \in T(y) ~~~ F(f) ~~~ t \in T(z)}{t \in T(arg(f, 0))}
