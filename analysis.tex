@@ -1,49 +1,103 @@
-
 \section{Analysis}
 
-For every expression $v$ in a Javascript program,
-we need to compute a set of possible types $T(v)$.
-Types can be primitive --- \code{int}, \code{number}, \code{string},
-\code{bool}, \code{null}
-or \code{undefined} --- or object types --- equivalence classes for
-Javascript objects.
-The \code{int} type indicates a number expressible as a signed 32-bit integer,
-and is subsumed by \code{number} --- \code{int} is added to all type
-sets containing \code{number}.
-An additional type \code{unknown} indicates a type set whose contents
-could be anything, and subsumes all other types.
+We present our analysis in two parts, the static ``may-have-type'' analysis
+and the dynamic ``must-have-type'' analysis. The algorithm is based on
+Andersen-style constraint-based pointer analysis. The static analysis, unlike
+static type reconstruction algorithms, is intentionally \textit{incomplete}
+with respect to the semantics of JavaScript. It does not account for all
+possible behaviors of expressions and statements and only generates
+constraints that model a ``may-have-type'' relation. All behaviors excluded by
+the type constraints must be detected at runtime and their effects on types in
+the program dynamically recorded. The analysis runs in the browser as methods
+are trying to execute: code is analyzed method-at-a-time.
 
-Since the analysis runs in a browser as code is trying to execute,
-both time and space are at a premium and must be minimized.
-To be viable for deployment, the analysis must satisfy the following:
+%% This paragraph and list doesn't seem to fit in the analysis section, this is more about performance. -ed
+%
+%Since the analysis runs in a browser as code is trying to execute, both time and space are at a premium and must be minimized. To be viable for deployment, our analysis must satisfy the following:
+%
+%\begin{itemize}
+%
+%\item Time and memory used must be linear in the size of the analyzed code.
+%
+%\item Querying results for an expression must take near-constant time, to avoid changing the performance characteristics of the compiler.
+%
+%% What does this mean? Interaction between "must" and "if only" is strange. -ed
+%\item Results must be correct if only compiled code is analyzed.
+%
+%\end{itemize}
 
-\begin{itemize}
+We describe constraint generation and checks required for a simplified core of
+JavaScript expressions and statements, shown in Figure~\ref{fig:js-core}. We
+let $f,x$ range over variables, $p$ range over property names, $n$ range over
+numeric literals, and $s$ range over string literals.
 
-\item Time and memory used must be linear in the size of the analyzed code.
+The types over which we are trying to infer is also shown in
+Figure~\ref{fig:js-core}. The types can be primitive, \code{int},
+\code{number}, or \code{string}, object types, $O$\footnote{In full
+  JavaScript, we also have the primitive types \code{bool}, \code{null}, and
+  \code{undefined}.}. The \code{int} type indicates a number expressible as a
+signed 32-bit integer, and is subsumed by \code{number} --- \code{int} is
+added to all type sets containing \code{number}. Finally, the \emph{sets} of
+types that the static analysis tries to compute for every expression is either
+a set of types or a function type from sets of types to sets of types.
 
-\item Querying results for an expression must take near-constant time,
-to avoid changing the performance characteristics of the compiler.
+\begin{figure}
+\begin{align*}
+v & ::= n\ |\ s && \text{values}\\
+e & ::= v\ |\ x\ |\ e + e\ |\ x.p\ |\ x[p]\ |\ f(x) && \text{expressions}\\
+s & ::= x = e\ |\ x.p = e\ |\ x[p] = e && \text{statements}\\
+\\
+\tau & ::= \code{int}\ |\ \code{number}\ |\ \code{string}\ |\ o && \text{types}\\
+T & ::= \mathcal{P}(\tau)\ |\ T \rightarrow T && \text{type sets}\\
+\\
+C & ::= T \supseteq T\ |\ C \vee C\ |\ C \wedge C\ |\ C \Rightarrow C && \text{constraints}
+\end{align*}
+\caption{Simplified JavaScript Core, Types, and Constraints}
+\label{fig:js-core}
+\end{figure}
 
-\item Results must be correct if only compiled code is analyzed.
+\begin{figure*}
+\begin{align*}
+\rulename{Int} & \inferrule{}{\judge^e n : T_n} && \{T_n \supseteq \{\code{int}\}\}\\
+\rulename{String} & \inferrule{}{\judge^e s : T_s} && \{T_s \supseteq \{\code{string}\}\}\\
+\rulename{Var} & \inferrule{}{\judge^e x : T_x} && \\
+\rulename{Add} & \inferrule{\judge^e x : T_x ~~~ \judge^e y : T_y}{\judge^e x + y : T_{x+y}} &&
+\left\{
+\begin{array}{l}
+T_x \supseteq \{\code{int}\} \wedge T_y \supseteq \{\code{int}\} \Rightarrow T_{x+y} \supseteq \{\code{int}\},\\
+T_x \supseteq \{\code{int}\} \wedge T_y \supseteq \{\code{number}\} \Rightarrow T_{x+y} \supseteq \{\code{number}\},\\
+T_x \supseteq \{\code{number}\} \wedge T_y \supseteq \{\code{int}\} \Rightarrow T_{x+y} \supseteq \{\code{number}\},\\
+T_x \supseteq \{\code{string}\} \vee T_y \supseteq \{\code{string}\} \Rightarrow T_{x+y} \supseteq \{\code{string}\}
+\end{array}
+\right\}\\
+\rulename{Prop} & \inferrule{\judge^e x : T_x}{\judge^e x.p : T_{x.p}} && \{T_x \supseteq \{o\} \Rightarrow T_{x.p} \supseteq \mathit{prop}(o,p)\}\\
+\rulename{Index} & \inferrule{\judge^e x : T_x}{\judge^e x[p] : T_{x[p]}} && \{T_x \supseteq \{o\} \Rightarrow T_{x[p]} \supseteq \mathit{index}(o)\}\\
+\rulename{App} & \inferrule{\judge^e f : T_{\mathit{dom}(f)} \rightarrow T_{\mathit{cod}(f)} ~~~ \judge^e x : T_x}{\judge^e f(x) : T_{f(x)}} && \{T_{\mathit{dom}(f)} \supseteq T_x, T_{f(x)} \supseteq T_{\mathit{cod}(f)}\}\\
+\rulename{AssignVar} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x = e : \text{\textbullet}} && \{T_x \supseteq T_e\}\\
+\rulename{AssignProp} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x.p = e : \text{\textbullet}} && \{T_x \supseteq \{o\} \Rightarrow \mathit{prop}(o,p) \supseteq T_e\}\\
+\rulename{AssignIndex} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x[p] = e : \text{\textbullet}} && \{T_x \supseteq \{o\} \Rightarrow \mathit{index}(o) \supseteq T_e\}
+\end{align*}
+\caption{Constraint Generation Rules}
+\label{fig:constraint-rules}
+\end{figure*}
 
-\end{itemize}
-
-Section~\ref{XXX} describes object types, Section~\ref{XXX} describes
-generation of the type constraints which forms the static portion of
-the analysis, and Section~\ref{XXX} describes type barriers and the
-other runtime checks which form the dynamic portion of the analysis.
+Section~\ref{sec:object-types} describes object types in more detail,
+Section~\ref{sec:constraints} describes generation of the type constraints
+which forms the static portion of the analysis, and Section~\ref{XXX}
+describes type barriers and the other runtime checks which form the dynamic
+portion of the analysis.
 
 \subsection{Object Types}
+\label{sec:object-types}
 
 To reason about the effects of property accesses, we need type information
-for Javascript objects and their properties.
-We associate every Javascript object with an {\it object type} $o$.
-A type $t$ is an object if $O(t)$.
-When $o \in T(v)$ for some expression $v$, then the possible values
-for $v$ when it is executed include all Javascript objects with type $o$.
+for JavaScript objects and their properties.
+We associate every JavaScript object with an {\it object type} $o$.
+When $o \in T_e$ for some expression $e$, then the possible values
+for $e$ when it is executed include all JavaScript objects with type $o$.
 
-Types are assigned to Javascript objects according to their prototype:
-all Javascript objects with the same type have the same prototype.
+Types are assigned to JavaScript objects according to their prototype:
+all JavaScript objects with the same type have the same prototype.
 Additionally, objects with the same prototype have the same type,
 except for plain \code{Object}, \code{Array} and \code{Function} objects.
 \code{Object} and \code{Array} objects have the same type if they were
@@ -51,134 +105,67 @@ allocated at the same location in a script,
 and \code{Function} objects have the same type if they are closures
 for the same script.
 
-The type of an object is independent from the properties it has;
-objects which are structurally identical may have different types,
-and objects with the same type may have different structures.
-This is crucial for efficient analysis.
-Properties can be added or deleted to Javascript objects at any time,
-and using structural typing would make an object's type a
+The type of an object is nominal: it is independent from the properties it
+has. Objects which are structurally identical may have different types, and
+objects with the same type may have different structures. This is crucial for
+efficient analysis. Properties can be added or deleted to JavaScript objects
+at any time, and using structural typing would make an object's type a
 flow-sensitive property.
 
 Instead, for each object type we compute the {\it possible} properties
 which objects of that type can have, and the possible types of those
 properties.
-These are represented as type sets $Prop(o,f)$ and $Index(o)$.
-$Prop(o,f)$ captures the possible types of a non-integer property
-$f$ for objects with type $o$, while $Index(o)$ captures the possible
+These are represented as type sets $prop(o,p)$ and $index(o)$.
+The set $prop(o,f)$ captures the possible types of a non-integer property
+$p$ for objects with type $o$, while $index(o)$ captures the possible
 types of all integer properties of all objects with type $o$.
 
 \subsection{Type Constraints}
+\label{sec:constraints}
 
-We model the semantics of Javascript and how types flow through the
-program as constraints between type sets.
-This modeling is {\it incomplete}: it does not account for all possible
-behaviors of Javascript expressions and statements.
-All behaviors excluded by the type constraints must be detected at runtime
-and their effect on types in the program dynamically recorded.
+The static portion of our analysis generates constraints on the flow of types
+through the program. We model the semantics of JavaScript by assigning to each
+expression a \emph{type set} which denotes the set of types that it may
+have. It is important to note that these statically-generated constraints do
+not model the entirety of JavaScript semantics. Not every type that the
+expression may have is in the statically determined set.
 
-We describe the constraints and checks required for a simplified form
-of the language: assignment, addition, property accesses, element accesses,
-and function calls between variables.
+The syntax of constraints are shown in Figure~\ref{fig:js-core}. The main
+workhorse constraint is the subset constraint; the rest are simple first-order
+logic constraints. Rules for the constraint generation functions,
+$\mathcal{C}_e(e)$ for expressions and $\mathcal{C}_s(s)$ for statements, are
+shown in Figure~\ref{fig:constraint-rules}. Statically analyzing a method,
+then, is taking the union of the results from applying $\mathcal{C}_s$ to every
+statement in the method.
 
-\subsubsection{\code{x = y}}
+The \textsc{Int} and \textsc{String} rules for literals and the \textsc{Var}
+rule for variables do the obvious things.
 
-Assignments in Javascript are completely modeled by a subset constraint
-$T(y) \subseteq T(x)$.
+\textsc{Add} is complex, as addition in JavaScript is very complicated. It is
+defined for any combination of values, can perform either a numeric addition,
+string concatenation, or even function calls if either of its operands is an
+object (calling their \code{valueOf} or \code{toString} members, producing a
+number or string).
 
-\begin{equation*}
-\frac{t \in T(y)}{t \in T(x)}
-\end{equation*}
+Using incomplete modeling lets us cut through this complexity. The vast
+majority of dynamic additions in JavaScript programs (NUMBERS) are adding two
+numbers or concatenating two strings. We statically model exactly these cases,
+and use runtime checks to monitor the results produced by adding other
+combinations of values, at little runtime cost.
 
-\subsubsection{\code{x = y + z}}
-
-Addition in Javascript is very complicated. It is defined for any
-combination of values, can perform either a numeric addition or
-string concatenation, and can even perform function calls if either of
-its operands is an object (calling their \code{valueOf} or
-\code{toString} members, producing a number or string).
-
-Using incomplete modeling lets us cut through this complexity.
-The vast majority of dynamic additions in Javascript programs (NUMBERS)
-are adding two numbers or concatenating two strings.
-We statically model exactly these cases, and use runtime checks to monitor
-the results produced by adding other combinations of values,
-at little runtime cost.
-
-Rules for addition of number and string values are below.
-
-\begin{equation*}
-\frac{int \in T(y) ~~~ int \in T(z)}{int \in T(x)}
-\end{equation*}
-
-\begin{equation*}
-\frac{number \in T(y) ~~~ int \in T(z)}{number \in T(x)}
-~~~~
-\frac{int \in T(y) ~~~ number \in T(z)}{number \in T(x)}
-\end{equation*}
-
-\begin{equation*}
-\frac{string \in T(y)}{string \in T(x)}
-~~~~
-\frac{string \in T(z)}{string \in T(x)}
-\end{equation*}
-
-\begin{equation*}
-\frac{unknown \in T(y)}{unknown \in T(x)}
-~~~~
-\frac{unknown \in T(z)}{unknown \in T(x)}
-\end{equation*}
-
-The above rules are themselves incomplete for addition of two integers:
-the result will be marked as an integer, ignoring the possibility of
-integer overflow.
-When adding two integers overflows, the result is not expressible in
-32 bits, and has type \code{number}.
-Overflow is extremely rare, and accounting for it statically would require
-us to mark the result of all additions as arbitrary numbers,
-except in the limited cases where we can prove no overflow is possible.
+Note that even the integer addition rule we have given is incomplete: the
+result will be marked as an integer, ignoring the possibility of
+overflow. When addition of two integers overflows, the result is not
+expressible in 32 bits, and has type \code{number}. Overflow is extremely
+rare, and accounting for it statically would require us to mark the result of
+all additions as arbitrary numbers, except in the limited cases where we can
+prove no overflow is possible.
 
 Ignoring overflow statically forces us to use runtime checks when overflows
-occur.
-There is no extra runtime cost associated with these checks, as
-generating code for integer additions requires an overflow check regardless.
+occur. There is no extra runtime cost associated with these checks, as the
+code generated for integer additions requires an overflow check regardless.
 
-\subsubsection{\code{x = y.f}}
-
-TODO
-
-\begin{eqnarray*}
-\frac{t \in T(y) ~~~ O(t) ~~~ t' \in Prop(t,f)}{t' \in T(x)}
-\end{eqnarray*}
-
-\subsubsection{\code{y.f = x}}
-
-TODO --- unknown type
-
-\begin{eqnarray*}
-\frac{t \in T(x) ~~~ t' \in T(y) ~~~ O(t')}{t \in Prop(t',f)}
-\end{eqnarray*}
-
-\subsubsection{\code{x = y[z]}, \code{y[z] = x}}
-
-\begin{eqnarray*}
-\frac{t \in T(y) ~~~ O(t) ~~~ t' \in Index(t)}{t' \in T(x)}
-\end{eqnarray*}
-
-\begin{eqnarray*}
-\frac{t \in T(x) ~~~ t' \in T(y) ~~~ O(t')}{t \in Index(t')}
-\end{eqnarray*}
-
-\subsubsection{\code{x = y(z)}}
-
-TODO --- skip this?
-
-\begin{eqnarray*}
-\frac{f \in T(y) ~~~ F(f) ~~~ t \in T(z)}{t \in T(arg(f, 0))}
-\end{eqnarray*}
-
-\begin{eqnarray*}
-\frac{f \in T(y) ~~~ F(f) ~~~ t \in T(retval(f))}{t \in T(x)}
-\end{eqnarray*}
+TODO explanation for other rules.
 
 \subsection{Type Barriers}
 
@@ -208,3 +195,8 @@ TODO
 \subsection{Supplemental Analysis}
 
 TODO
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End: 
