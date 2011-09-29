@@ -8,8 +8,8 @@ with respect to the semantics of JavaScript. It does not account for all
 possible behaviors of expressions and statements and only generates
 constraints that model a ``may-have-type'' relation. All behaviors excluded by
 the type constraints must be detected at runtime and their effects on types in
-the program dynamically recorded. The analysis runs in the browser as methods
-are trying to execute: code is analyzed method-at-a-time.
+the program dynamically recorded. The analysis runs in the browser as functions
+are trying to execute: code is analyzed function-at-a-time.
 
 %% This paragraph and list doesn't seem to fit in the analysis section, this is more about performance. -ed
 %
@@ -28,29 +28,30 @@ are trying to execute: code is analyzed method-at-a-time.
 
 We describe constraint generation and checks required for a simplified core of
 JavaScript expressions and statements, shown in Figure~\ref{fig:js-core}. We
-let $f,x$ range over variables, $p$ range over property names, $n$ range over
-numeric literals, and $s$ range over string literals.
+let $f,x$ range over variables, $p$ range over property names, $i$ range over
+integer literals, and $s$ range over string literals.
 
 The types over which we are trying to infer is also shown in
 Figure~\ref{fig:js-core}. The types can be primitive, \code{int},
-\code{number}, \code{string}, or an object type $o$\footnote{In full
-  JavaScript, we also have the primitive types \code{bool}, \code{null}, and
-  \code{undefined}.}. The \code{int} type indicates a number expressible as a
-signed 32-bit integer, and is subsumed by \code{number} --- \code{int} is
-added to all type sets containing \code{number}. Finally, the \emph{sets} of
-types that the static analysis tries to compute for every expression is either
-a set of types or a function type from sets of types to sets of types.
+\code{number}, \code{string}, an object type $o$, or a function
+type\footnote{In full JavaScript, we also have the primitive types
+  \code{bool}, \code{null}, and \code{undefined}.}. The \code{int} type
+indicates a number expressible as a signed 32-bit integer, and is subsumed by
+\code{number} --- \code{int} is added to all type sets containing
+\code{number}. Finally, we have sets of types which the static analysis
+computes. The domain and codomain of the function type are defined over type
+sets.
 
 \begin{figure}
 \begin{align*}
-v & ::= n\ |\ s && \text{values}\\
-e & ::= v\ |\ x\ |\ e + e\ |\ x.p\ |\ x[p]\ |\ f(x) && \text{expressions}\\
-s & ::= x = e\ |\ x.p = e\ |\ x[p] = e && \text{statements}\\
+v & ::= i\ |\ s\ |\ \text{\code{\{\}}} && \text{values}\\
+e & ::= v\ |\ x\ |\ e + e\ |\ x.p\ |\ x[i]\ |\ f(x) && \text{expressions}\\
+s & ::= x = e\ |\ x.p = e\ |\ x[i] = e && \text{statements}\\
 \\
-\tau & ::= \code{int}\ |\ \code{number}\ |\ \code{string}\ |\ o && \text{types}\\
-T & ::= \mathcal{P}(\tau)\ |\ T \rightarrow T && \text{type sets}\\
+\tau & ::= \code{int}\ |\ \code{number}\ |\ \code{string}\ |\ o\ |\ T \rightarrow T && \text{types}\\
+T & ::= \mathcal{P}(\tau) && \text{type sets}\\
 \\
-C & ::= T \supseteq T\ |\ C \vee C\ |\ C \wedge C\ |\ C \Rightarrow C && \text{constraints}
+C & ::= T \supseteq T\ && \text{constraints}
 \end{align*}
 \caption{Simplified JavaScript Core, Types, and Constraints}
 \label{fig:js-core}
@@ -58,24 +59,71 @@ C & ::= T \supseteq T\ |\ C \vee C\ |\ C \wedge C\ |\ C \Rightarrow C && \text{c
 
 \begin{figure*}
 \begin{align*}
-\rulename{Int} & \inferrule{}{\judge^e n : T_n} && \{T_n \supseteq \{\code{int}\}\}\\
-\rulename{String} & \inferrule{}{\judge^e s : T_s} && \{T_s \supseteq \{\code{string}\}\}\\
-\rulename{Var} & \inferrule{}{\judge^e x : T_x} && \\
+\rulename{Int} & \inferrule{}{\judge^e i : T_i} &&
+\left\{
+\begin{array}{l}
+T_i \supseteq \{\code{int}\}
+\end{array}
+\right\}\\
+\rulename{String} & \inferrule{}{\judge^e s : T_s} &&
+\left\{
+\begin{array}{l}
+T_s \supseteq \{\code{string}\}
+\end{array}
+\right\}\\
+\rulename{Object} & \inferrule{}{\judge^e \text{\code{\{\}}} : T_{\text{\code{\{\}}}}} &&
+\left\{
+\begin{array}{l}
+T_{\text{\code{\{\}}}} \supseteq \{o\}
+\end{array}
+\right\} \text{ where $o$ fresh}\\
+\rulename{Var} & \inferrule{}{\judge^e x : T_x} && \emptyset\\
 \rulename{Add} & \inferrule{\judge^e x : T_x ~~~ \judge^e y : T_y}{\judge^e x + y : T_{x+y}} &&
 \left\{
 \begin{array}{l}
-T_x \supseteq \{\code{int}\} \wedge T_y \supseteq \{\code{int}\} \Rightarrow T_{x+y} \supseteq \{\code{int}\},\\
-T_x \supseteq \{\code{int}\} \wedge T_y \supseteq \{\code{number}\} \Rightarrow T_{x+y} \supseteq \{\code{number}\},\\
-T_x \supseteq \{\code{number}\} \wedge T_y \supseteq \{\code{int}\} \Rightarrow T_{x+y} \supseteq \{\code{number}\},\\
-T_x \supseteq \{\code{string}\} \vee T_y \supseteq \{\code{string}\} \Rightarrow T_{x+y} \supseteq \{\code{string}\}
+T_{x+y} \supseteq \{\code{int}\}\ |\ \code{int} \in T_x \wedge \code{int} \in T_y,\\
+T_{x+y} \supseteq \{\code{number}\}\ |\ \code{int} \in T_x \wedge \code{number} \in T_y,\\
+T_{x+y} \supseteq \{\code{number}\}\ |\ \code{number} \in T_x \wedge \code{int} \in T_y,\\
+T_{x+y} \supseteq \{\code{string}\}\ |\ \code{string} \in T_x \vee \code{string} \in T_y
 \end{array}
 \right\}\\
-\rulename{Prop} & \inferrule{\judge^e x : T_x}{\judge^e x.p : T_{x.p}} && \{T_x \supseteq \{o\} \Rightarrow T_{x.p} \supseteq \mathit{prop}(o,p)\}\\
-\rulename{Index} & \inferrule{\judge^e x : T_x}{\judge^e x[p] : T_{x[p]}} && \{T_x \supseteq \{o\} \Rightarrow T_{x[p]} \supseteq \mathit{index}(o)\}\\
-\rulename{App} & \inferrule{\judge^e f : T_{\mathit{dom}(f)} \rightarrow T_{\mathit{cod}(f)} ~~~ \judge^e x : T_x}{\judge^e f(x) : T_{f(x)}} && \{T_{\mathit{dom}(f)} \supseteq T_x, T_{f(x)} \supseteq T_{\mathit{cod}(f)}\}\\
-\rulename{AssignVar} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x = e : \text{\textbullet}} && \{T_x \supseteq T_e\}\\
-\rulename{AssignProp} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x.p = e : \text{\textbullet}} && \{T_x \supseteq \{o\} \Rightarrow \mathit{prop}(o,p) \supseteq T_e\}\\
-\rulename{AssignIndex} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x[p] = e : \text{\textbullet}} && \{T_x \supseteq \{o\} \Rightarrow \mathit{index}(o) \supseteq T_e\}
+\rulename{Prop} & \inferrule{\judge^e x : T_x}{\judge^e x.p : T_{x.p}} &&
+\left\{
+\begin{array}{l}
+T_{x.p} \supseteq \mathit{prop}(o,p)\ |\ o \in T_x
+\end{array}
+\right\}\\
+\rulename{Index} & \inferrule{\judge^e x : T_x}{\judge^e x[i] : T_{x[i]}} &&
+\left\{
+\begin{array}{l}
+T_{x[i]} \supseteq \mathit{index}(o)\ |\ o \in T_x
+\end{array}
+\right\}\\
+\rulename{App} & \inferrule{\judge^e f : T_f ~~~ \judge^e x : T_x}{\judge^e f(x) : T_{f(x)}} &&
+\left\{
+\begin{array}{l}
+T_{\mathit{dom}(f)} \supseteq T_x\ |\ T_{\mathit{dom}(f)} \rightarrow T_{\mathit{cod}(f)} \in T_f,\\
+T_{f(x)} \supseteq T_{\mathit{cod}(f)}\ |\ T_{\mathit{dom}(f)} \rightarrow T_{\mathit{cod}(f)} \in T_f
+\end{array}
+\right\}\\
+\rulename{AssignVar} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x = e : \text{\textbullet}} &&
+\left\{
+\begin{array}{l}
+T_x \supseteq T_e
+\end{array}
+\right\}\\
+\rulename{AssignProp} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x.p = e : \text{\textbullet}} &&
+\left\{
+\begin{array}{l}
+\mathit{prop}(o,p) \supseteq T_e\ |\ o \in T_x
+\end{array}
+\right\}\\
+\rulename{AssignIndex} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x[i] = e : \text{\textbullet}} &&
+\left\{
+\begin{array}{l}
+\mathit{index}(o) \supseteq T_e\ |\ o \in T_x
+\end{array}
+\right\}
 \end{align*}
 \caption{Constraint Generation Rules}
 \label{fig:constraint-rules}
@@ -105,6 +153,10 @@ allocated at the same location in a script,
 and \code{Function} objects have the same type if they are closures
 for the same script.
 
+For the sake of brevity and ease of exposition, our simplified JavaScript core
+only contains the ability to construct \code{Object}-prototyped object
+literals via the \code{\{\}} syntax.
+
 The type of an object is nominal: it is independent from the properties it
 has. Objects which are structurally identical may have different types, and
 objects with the same type may have different structures. This is crucial for
@@ -112,13 +164,13 @@ efficient analysis. Properties can be added or deleted to JavaScript objects
 at any time, and using structural typing would make an object's type a
 flow-sensitive property.
 
-Instead, for each object type we compute the {\it possible} properties
-which objects of that type can have, and the possible types of those
-properties.
-These are represented as type sets $prop(o,p)$ and $index(o)$.
-The set $prop(o,f)$ captures the possible types of a non-integer property
-$p$ for objects with type $o$, while $index(o)$ captures the possible
-types of all integer properties of all objects with type $o$.
+Instead, for each object type we compute the {\it possible} properties which
+objects of that type can have, and the possible types of those properties.
+These are represented as type sets $\mathit{prop}(o,p)$ and
+$\mathit{index}(o)$. The set $\mathit{prop}(o,f)$ captures the possible types
+of a non-integer property $p$ for objects with type $o$, while
+$\mathit{index}(o)$ captures the possible types of all integer properties of
+all objects with type $o$.
 
 \subsection{Type Constraints}
 \label{sec:constraints}
@@ -130,18 +182,17 @@ have. It is important to note that these statically-generated constraints do
 not model the entirety of JavaScript semantics. Not every type that the
 expression may have is in the statically determined set.
 
-The syntax of constraints are shown in Figure~\ref{fig:js-core}. The main
-workhorse constraint is the subset constraint; the rest are simple first-order
-logic constraints. Rules for the constraint generation functions,
-$\mathcal{C}_e(e)$ for expressions and $\mathcal{C}_s(s)$ for statements, are
-shown in Figure~\ref{fig:constraint-rules}. Statically analyzing a method,
-then, is taking the union of the results from applying $\mathcal{C}_s$ to every
-statement in the method.
+The syntax of constraints are shown in Figure~\ref{fig:js-core}. Our only
+constraint is the subset constraint. Rules for the constraint generation
+functions, $\mathcal{C}_e(e)$ for expressions and $\mathcal{C}_s(s)$ for
+statements, are shown in Figure~\ref{fig:constraint-rules}. Statically
+analyzing a method, then, is taking the union of the results from applying
+$\mathcal{C}_s$ to every statement in the method.
 
-The \textsc{Int} and \textsc{String} rules for literals and the \textsc{Var}
-rule for variables do the obvious things.
+The \textsc{Int}, \textsc{String}, and \textsc{Object} rules for literals and
+the \textsc{Var} rule for variables are straightforward.
 
-\textsc{Add} is complex, as addition in JavaScript is very complicated. It is
+The \textsc{Add} rule is complex, as addition in JavaScript is very complicated. It is
 defined for any combination of values, can perform either a numeric addition,
 string concatenation, or even function calls if either of its operands is an
 object (calling their \code{valueOf} or \code{toString} members, producing a
@@ -199,6 +250,13 @@ The effects on $prop(o,f)$ resulting from assignments to a string
 index \code{x["f"]} must be accounted for with runtime checks.
 
 TODO --- lose \textsc{App}?
+
+The reader may wonder where function types come from, as our simplified
+JavaScript core does not contain function declarations. Recall that the
+analysis is run function-at-a-time. At the end of analysis, the type sets of
+the formal parameters and the return value are gathered and a function type is
+constructed for the current function. We omit this detail from the
+formalization.
 
 \subsection{Type Barriers}
 
