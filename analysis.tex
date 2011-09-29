@@ -165,7 +165,40 @@ Ignoring overflow statically forces us to use runtime checks when overflows
 occur. There is no extra runtime cost associated with these checks, as the
 code generated for integer additions requires an overflow check regardless.
 
-TODO explanation for other rules.
+\textsc{Prop} accesses a named property $f$ from the possible objects
+referred to by $x$,
+with the result the union of $prop(o,f)$ for all such objects.
+This rule is complete only in cases where the object referred to by $x$
+(or its prototype) actually has the $f$ property.
+Accesses on properties which are not actually part of an object simply
+produce the \code{undefined} value.
+
+As with integer overflow, accesses on missing properties are rare
+(NUMBERS), and yet in most cases it is impractical or impossible
+to prove a property access is on an object which definitely has the
+property. In such cases we should not pollute the resulting type
+sets with \code{undefined}, and use runtime checks to add the \code{undefined}
+type to accesses which are dynamically found to be on missing properties.
+
+\textsc{Index} is similar to \textsc{Prop}, with the added problem
+that any property of the object could be accessed.
+In Javascript, \code{x["f"]} is equivalent to \code{x.f}, so an index
+operation on an object can access a potentially
+infinite number of type sets $prop(o,f)$.
+The vast majority of index operations are on integers, however, (NUMBERS)
+which we collapse into a single type set $index(o,f)$.
+Any indexed access which is on a non-integer property, or is on an
+integer property which is missing from an object,
+must be accounted for with runtime checks in the same manner as \textsc{Prop}.
+
+\textsc{AssignVar}, \textsc{AssignProp} and \textsc{AssignIndex} invert
+the corresponding read expressions.
+These rules are complete, except that \textsc{AssignIndex} presumes that
+an integer property is being accessed.
+The effects on $prop(o,f)$ resulting from assignments to a string
+index \code{x["f"]} must be accounted for with runtime checks.
+
+TODO --- lose \textsc{App}?
 
 \subsection{Type Barriers}
 
