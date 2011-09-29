@@ -32,23 +32,22 @@ let $f,x$ range over variables, $p$ range over property names, $i$ range over
 integer literals, and $s$ range over string literals.
 
 The types over which we are trying to infer is also shown in
-Figure~\ref{fig:js-core}. The types can be primitive, \code{int},
-\code{number}, \code{string}, an object type $o$, or a function
-type\footnote{In full JavaScript, we also have the primitive types
-  \code{bool}, \code{null}, and \code{undefined}.}. The \code{int} type
-indicates a number expressible as a signed 32-bit integer, and is subsumed by
-\code{number} --- \code{int} is added to all type sets containing
-\code{number}. Finally, we have sets of types which the static analysis
-computes. The domain and codomain of the function type are defined over type
-sets.
+Figure~\ref{fig:js-core}. The types can be primitive, \code{undefined},
+\code{int}, \code{number}, \code{string}, an object type $o$, or a function
+type\footnote{In full JavaScript, we also have the primitive types \code{bool}
+  and \code{null}.}. The \code{int} type indicates a number expressible as a
+signed 32-bit integer, and is subsumed by \code{number} --- \code{int} is
+added to all type sets containing \code{number}. Finally, we have sets of
+types which the static analysis computes. The domain and codomain of the
+function type are defined over type sets.
 
 \begin{figure}
 \begin{align*}
-v & ::= i\ |\ s\ |\ \text{\code{\{\}}} && \text{values}\\
+v & ::= \code{undefined}\ |\ i\ |\ s\ |\ \text{\code{\{\}}} && \text{values}\\
 e & ::= v\ |\ x\ |\ e + e\ |\ x.p\ |\ x[i]\ |\ f(x) && \text{expressions}\\
 s & ::= x = e\ |\ x.p = e\ |\ x[i] = e && \text{statements}\\
 \\
-\tau & ::= \code{int}\ |\ \code{number}\ |\ \code{string}\ |\ o\ |\ T \rightarrow T && \text{types}\\
+\tau & ::= \code{undefined}\ |\ \code{int}\ |\ \code{number}\ |\ \code{string}\ |\ o\ |\ T \rightarrow T && \text{types}\\
 T & ::= \mathcal{P}(\tau) && \text{type sets}\\
 \\
 C & ::= T \supseteq T\ && \text{constraints}
@@ -59,6 +58,12 @@ C & ::= T \supseteq T\ && \text{constraints}
 
 \begin{figure*}
 \begin{align*}
+\rulename{Undefined} & \inferrule{}{\judge^e \code{undefined} : T_{\code{undefined}}} &&
+\left\{
+\begin{array}{l}
+T_{\code{undefined}} \supseteq \{\code{undefined}\}
+\end{array}
+\right\}\\
 \rulename{Int} & \inferrule{}{\judge^e i : T_i} &&
 \left\{
 \begin{array}{l}
@@ -167,7 +172,7 @@ flow-sensitive property.
 Instead, for each object type we compute the {\it possible} properties which
 objects of that type can have, and the possible types of those properties.
 These are represented as type sets $\mathit{prop}(o,p)$ and
-$\mathit{index}(o)$. The set $\mathit{prop}(o,f)$ captures the possible types
+$\mathit{index}(o)$. The set $\mathit{prop}(o,p)$ captures the possible types
 of a non-integer property $p$ for objects with type $o$, while
 $\mathit{index}(o)$ captures the possible types of all integer properties of
 all objects with type $o$.
@@ -189,8 +194,9 @@ statements, are shown in Figure~\ref{fig:constraint-rules}. Statically
 analyzing a method, then, is taking the union of the results from applying
 $\mathcal{C}_s$ to every statement in the method.
 
-The \textsc{Int}, \textsc{String}, and \textsc{Object} rules for literals and
-the \textsc{Var} rule for variables are straightforward.
+The \textsc{Undefined}, \textsc{Int}, \textsc{String}, and \textsc{Object}
+rules for literals and the \textsc{Var} rule for variables are
+straightforward.
 
 The \textsc{Add} rule is complex, as addition in JavaScript is very complicated. It is
 defined for any combination of values, can perform either a numeric addition,
@@ -216,38 +222,38 @@ Ignoring overflow statically forces us to use runtime checks when overflows
 occur. There is no extra runtime cost associated with these checks, as the
 code generated for integer additions requires an overflow check regardless.
 
-\textsc{Prop} accesses a named property $f$ from the possible objects
+\textsc{Prop} accesses a named property $p$ from the possible objects
 referred to by $x$,
-with the result the union of $prop(o,f)$ for all such objects.
+with the result the union of $\mathit{prop}(o,p)$ for all such objects.
 This rule is complete only in cases where the object referred to by $x$
-(or its prototype) actually has the $f$ property.
+(or its prototype) actually has the $p$ property.
 Accesses on properties which are not actually part of an object simply
-produce the \code{undefined} value.
+produce the \code{undefined} value of type \code{undefined}.
 
-As with integer overflow, accesses on missing properties are rare
-(NUMBERS), and yet in most cases it is impractical or impossible
-to prove a property access is on an object which definitely has the
-property. In such cases we should not pollute the resulting type
-sets with \code{undefined}, and use runtime checks to add the \code{undefined}
-type to accesses which are dynamically found to be on missing properties.
+As with integer overflow, accesses on missing properties are rare (NUMBERS),
+and yet in most cases it is impractical or impossible to prove that an object
+\emph{definitely} has some property.  In such cases we should not dilute the
+resulting type sets with \code{undefined}. We should instead use runtime
+checks to add the \code{undefined} type to accesses which are dynamically
+found to be on missing properties.
 
-\textsc{Index} is similar to \textsc{Prop}, with the added problem
-that any property of the object could be accessed.
-In Javascript, \code{x["f"]} is equivalent to \code{x.f}, so an index
-operation on an object can access a potentially
-infinite number of type sets $prop(o,f)$.
-The vast majority of index operations are on integers, however, (NUMBERS)
-which we collapse into a single type set $index(o,f)$.
-Any indexed access which is on a non-integer property, or is on an
-integer property which is missing from an object,
-must be accounted for with runtime checks in the same manner as \textsc{Prop}.
+\textsc{Index} is similar to \textsc{Prop}, with the added problem that any
+property of the object could be accessed.  In JavaScript, \code{x["p"]} is
+equivalent to \code{x.p}. If $x$ has the object type $o$, an index operation
+can access a potentially infinite number of type sets $\mathit{prop}(o,p)$. We
+do not model this case in our core language, as the vast majority of index
+operations are on integers, (NUMBERS) which we collapse into a single type set
+$\mathit{index}(o)$.  In full JavaScript, any indexed access which is on a
+non-integer property, or is on an integer property which is missing from an
+object, must be accounted for with runtime checks in the same manner as
+\textsc{Prop}.
 
-\textsc{AssignVar}, \textsc{AssignProp} and \textsc{AssignIndex} invert
-the corresponding read expressions.
-These rules are complete, except that \textsc{AssignIndex} presumes that
-an integer property is being accessed.
-The effects on $prop(o,f)$ resulting from assignments to a string
-index \code{x["f"]} must be accounted for with runtime checks.
+\textsc{AssignVar}, \textsc{AssignProp} and \textsc{AssignIndex} invert the
+corresponding read expressions.  These rules are complete, except that
+\textsc{AssignIndex} presumes that an integer property is being accessed.
+Again, in full JavaScript, the effects on $\mathit{prop}(o,p)$ resulting from
+assignments to a string index \code{x["p"]} on some $x$ with object type $o$
+must be accounted for with runtime checks.
 
 TODO --- lose \textsc{App}?
 
