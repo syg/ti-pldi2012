@@ -1,0 +1,93 @@
+\section{Related Work}
+
+There is an enormous literature on points-to analysis, JIT compilation, and
+type inference, and we must skip many of them in interest of space.
+
+The most relevant work on type inference for JavaScript to the current work is
+Logozzo and Venter's work on rapid atomic type analysis \cite{Logozzo10}.
+Like ours, their analysis is also designed to be used online in the context of
+JIT compilation and must be able to pay for itself. Unlike ours, their
+analysis is purely static and much more sophisticated, utilizing a theory of
+integers to better infer integral types vs floating point types. We eschew
+sophistication in favor of simplicity and speed. Our evaluation shows that
+even a much simpler static analysis, when coupled with dynamic checks, perform
+very well ``in the wild''. While their results show impressive speed ups,
+their results on the SunSpider benchmarks were on the scale of hundreds of
+milliseconds while ours are in the tens of milliseconds. Our analysis is more
+practical in that it handles the \emph{entirety} of JavaScript. In particular,
+we have improved handling of what Logozzo and Venter termed ``havoc''
+statements, such as \code{eval}, which make static analysis results
+imprecise. As Richards et al. argued in their surveys, real-world use of
+\code{eval} is pervasive, between 50\% and 82\% for popular websites
+\cite{Richards11, Richards10}.
+
+Other works of type inference for JavaScript are more formal. The work of
+Anderson et al. describes a structual object type system with subtyping over
+an idealized subset of JavaScript \cite{Anderson05}. As objects in JavaScript
+are extensible, structural object types is a flow-sensitive property. Thiemann
+and Jensen et al.'s typing frameworks approach this problem by using recency
+types \cite{Thiemann05, Jensen09}. The work of Jensen et al. is in the context
+of better tooling for JavaScript, and their experiments suggest that the
+algorithm is not suitable for online use in a JIT compiler. Again, these
+analyses do not perform well in the presence of statically uncomputable
+builtin functions such as \code{eval}.
+
+Performing static type inference on dynamic languages have been proposed at
+least as early as Aiken and Murphy \cite{Aiken91}. More related in spirit to
+the current work are the works of the the implementors of the Self language
+\cite{Ungar87}. In implementing type inference for JavaScript, we faced many
+challenges similar to what they faced decades earlier \cite{Ungar92,
+  Agesen94}. Agesen outlines the design space for type inference algorithms
+along the dimensions of efficiency and precision. We, too, strived for an
+algorithm that is both fast and efficient; whereas Plevyak and Chien hit the
+sweet spot by using an iterative algorithm \cite{Plevyak93}, we chose to do so
+by supplementing the static analysis by runtime checks. Our experience with
+the tracing just-in-time compilation technique \cite{GalVEE09, GalPLDI09} have
+demonstrated that solely using type feedback limits the optimizations that we
+can perform. The compiled code is also frequently overspecialized, resulting
+in frequent compilation and lower efficiency.
+
+Agesen and H\"olzle compared the static approach of type inference with the
+dynamic approach of type feedback and describes the strengths and weaknesses
+of both \cite{Agesen95}. Our system tries to achieve the best of both
+worlds. The greatest difficulty in static type inference for polymorphic
+dynamic languages, whether functional or object-oriented, is the need to
+compute both data and control flow during type inference. We solve this by
+using run-time information (type barriers) where static analyses do poorly,
+e.g. determining the particular field of a polymorphic receiver or the
+particular function bound to a variable. Our type barriers may be seen as a
+type cast that only succeeds on type identity, a special case of of Glew and
+Palsberg's use of type casts in their work on method inlining \cite{Glew02}.
+
+Framing the type inference problem as a flow problem is a well-known approach
+\cite{Oxhoj92, Palsberg91}; practical examples include Self's inferencer
+\cite{Agesen93TI}.  Generalizing Hindley/Milner-style type inference to type
+set inclusion from type set equality has been approached at least as early as
+Mitchell's work on type inference and Thatte's work on partial types
+\cite{Mitchell84, Thatte88}. Aiken and Wimmers presented general results on
+type inference using subset constraints \cite{Aiken93}, and Wand showed how to
+frame inference of principal types in function languages as a constraint
+problem \cite{Wand87}. Our work, formally, is much simpler than many such
+proposed solutions to solving type constraints as we do not employ type
+variables and the static portion of our analysis need not be sound. No
+unification is required to arrive a solution --- a solution always exists by
+simple propagation.
+
+Other hybrid approaches to typing, such as Cartwright and Fagan's soft typing
+and Taha and Siek's gradual typing, have been largely for the purposes of
+correctness and early error detection \cite{Cartwright91, Siek06,
+  Siek07}. Soft typing inserts run-time checks, and gradual typing focuses on
+the interaction of code with type annotation and code without
+annotation. These works are \emph{prescriptive}, in that they helps enforce a
+typing discipline, while ours is \emph{subscriptive}, in that we are inferring
+types to help JIT compilation.
+
+% Notes on other things to cite:
+% We take efficiency of analyses to be used in JIT compilers as the ability to pay for themselves, reference chez scheme.
+% Say somewhere and cite that pointer analysis scales well in the wild despite O(n^3).
+% Future work: perhaps talk about pluggable static portions? parametrised. CFA2, Chambers's Fast Interprocedural Class Analysis paper
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End: 
