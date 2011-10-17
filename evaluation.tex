@@ -6,23 +6,19 @@
 TODO
 
 \begin{figure*}
-\begin{tabular}{|l|c|r@{.}lr|r@{.}lr|r@{.}l|r@{.}lr@{.}l|r@{.}l|r@{.}lr@{.}l|r@{.}l|}
+\begin{tabular}{|l|r@{.}lr|r@{.}lr|r@{.}l|r@{.}lr@{.}l|r@{.}l|r@{.}lr@{.}l|r@{.}l|}
 
 \hline
 
 \hline
 
-%     &     &          & \multicolumn{4}{|c||}{Sunspider-0.9.1} & \multicolumn{4}{|c|}{Sunspider-0.9.1 x20} \\
-%\hline
-%Test & LOC & Analysis & JM & JM+TM & JM+TI & Ratio & JM & JM+TM & JM+TI & Ratio \\
-
-     &     & \multicolumn{3}{|c|}{JM}
+           & \multicolumn{3}{|c|}{JM}
            & \multicolumn{3}{|c|}{JM+TI}
            & \multicolumn{2}{|c|}{}
-           & \multicolumn{6}{|c|}{Sunspider-0.9.1 x1}
-           & \multicolumn{6}{|c|}{Sunspider-0.9.1 x20} \\
+           & \multicolumn{6}{|c|}{x1 Times}
+           & \multicolumn{6}{|c|}{x20 Times} \\
 \hline
-Test & LOC & \multicolumn{2}{|c|}{Time} & \#
+Test       & \multicolumn{2}{|c|}{Time} & \#
            & \multicolumn{2}{|c|}{Time} & \#
            & \multicolumn{2}{|c|}{Ratio}
            & \multicolumn{2}{|c|}{JM}
@@ -34,68 +30,68 @@ Test & LOC & \multicolumn{2}{|c|}{Time} & \#
 
 \hline
 
-3d-cube                  & 337 & 2&68 & 15 & 8&21 & 24 & 3&06
+3d-cube                  & 2&68 & 15 & 8&21 & 24 & 3&06
     & 14&1 & 16&6 & 1&18 & 226&9 & 138&8 & &61 \\
-3d-morph                 & 54  & &55 & 2   & 1&59 & 7  & 2&89 
+3d-morph                 & &55 & 2   & 1&59 & 7  & 2&89 
     & 9&8  & 10&3 & 1&05 & 184&7 & 174&6 & &95 \\
-3d-raytrace              & 441 & 2&25 & 19 & 6&04 & 22 & 2&68
+3d-raytrace              & 2&25 & 19 & 6&04 & 22 & 2&68
     & 14&7 & 15&6 & 1&06 & 268&6 & 152&2 & &57 \\
-access-binary-trees      & 50  & &63 & 4   & 1&03 & 7  & 1&63
+access-binary-trees      & &63 & 4   & 1&03 & 7  & 1&63
     & 6&1  & 5&2 & &85   & 101&4 & 70&8  & &7 \\
-access-fannkuch          & 66  & &65  & 1  & 2&43 & 4  & 3&76
+access-fannkuch          & &65  & 1  & 2&43 & 4  & 3&76
     & 15&3 & 10&1 & &66  & 289&9 & 113&7 & &39 \\
-access-nbody             & 169 & 1&01 & 5  & 1&49 & 5  & 1&47
+access-nbody             & 1&01 & 5  & 1&49 & 5  & 1&47
     & 9&9  & 5&3 & &54   & 175&6 & 73&2  & &42 \\
-access-nsieve            & 38  & &28 & 1   & &63 & 2   & 2&25
+access-nsieve            & &28 & 1   & &63 & 2   & 2&25
     & 6&9  & 4&5 & &65   & 143&1 & 90&7  & &63 \\
-bitops-3bit-bits-in-byte & 32  & &28 & 2   & &58 & 3   & 2&07
+bitops-3bit-bits-in-byte & &28 & 2   & &58 & 3   & 2&07
     & 1&7  & &8 & &47    & 29&9 & 10&0   & &33 \\
-bitops-bits-in-byte      & 21  & &29 & 2   & &54 & 3   & 1&86
+bitops-bits-in-byte      & &29 & 2   & &54 & 3   & 1&86
     & 7&0  & 4&8 & &69   & 139&4 & 85&4  & &61 \\
-bitops-bitwise-and       & 28  & &24 & 1   & &39 & 1   & 1&63
+bitops-bitwise-and       & &24 & 1   & &39 & 1   & 1&63
     & 6&1  & 3&1 & &51   & 125&2 & 63&7  & &51 \\
-bitops-nsieve-bits       & 32  & &35 & 1   & &73 & 2   & 2&09
+bitops-nsieve-bits       & &35 & 1   & &73 & 2   & 2&09
     & 6&0  & 3&6 & &6    & 116&1 & 63&9  & &55 \\
-controlflow-recursive    & 25  & &38 & 3   & &65 & 6   & 1&71
+controlflow-recursive    & &38 & 3   & &65 & 6   & 1&71
     & 2&6  & 2&7 & 1&04  & 49&4  & 42&3  & &86 \\
-crypto-aes               & 422 & 2&04 & 14 & 6&61 & 23 & 3&24
+crypto-aes               & 2&04 & 14 & 6&61 & 23 & 3&24
     & 9&3  & 10&9 & 1&17 & 162&6 & 107&7 & &66 \\
-crypto-md5               & 286 & 1&81 & 9  & 3&42 & 13 & 1&89
+crypto-md5               & 1&81 & 9  & 3&42 & 13 & 1&89
     & 6&1  & 6&0 & &98   & 62&0  & 27&1  & &44 \\
-crypto-sha1              & 224 & &88 & 7   & 2&46 & 11 & 2&8
+crypto-sha1              & &88 & 7   & 2&46 & 11 & 2&8
     & 3&1  & 4&0 & 1&29  & 44&2  & 19&4  & &44 \\
-date-format-tofte        & 299 & &93 & 21  & 2&27 & 24 & 2&44
+date-format-tofte        & &93 & 21  & 2&27 & 24 & 2&44
     & 16&4 & 18&3 & 1&12 & 316&6 & 321&8 & 1&02 \\
-date-format-xparb        & 417 & &88 & 7   & 1&26 & 6  & 1&43
+date-format-xparb        & &88 & 7   & 1&26 & 6  & 1&43
     & 11&6 & 14&8 & 1&28 & 219&4 & 285&1 & 1&3 \\
-math-cordic              & 95  & &45 & 3   & &94 & 5   & 2&09
+math-cordic              & &45 & 3   & &94 & 5   & 2&09
     & 7&4  & 3&4 & &46   & 141&0 & 50&3  & &36 \\
-math-partial-sums        & 33  & &47 & 1   & 1&03 & 3  & 2&19
+math-partial-sums        & &47 & 1   & 1&03 & 3  & 2&19
     & 14&1 & 12&4 & &88  & 278&4 & 232&6 & &84 \\
-math-spectral-norm       & 51  & &54 & 5   & 1&39 & 9  & 2&57
+math-spectral-norm       & &54 & 5   & 1&39 & 9  & 2&57
     & 5&0  & 3&4 & &68   & 92&6  & 51&2  & &55 \\
-regexp-dna               & 1712 & &0 & 0   & &0 & 0    & 0&
+regexp-dna               & &0 & 0   & &0 & 0    & 0&
     & 16&3 & 16&1 & &99  & 254&5 & 268&8 & 1&06 \\
-string-base64            & 135 & &87 & 3   & 1&9 & 5   & 2&18
+string-base64            & &87 & 3   & 1&9 & 5   & 2&18
     & 7&8  & 6&5 & &83   & 151&9 & 103&6 & &68 \\
-string-fasta             & 85  & &59 & 4   & 1&7 & 9   & 2&88
+string-fasta             & &59 & 4   & 1&7 & 9   & 2&88
     & 10&0 & 7&3 & &73   & 124&0 & 93&4  & &75 \\
-string-tagcloud          & 265 & &54 & 4   & 1&54 & 6  & 2&85
+string-tagcloud          & &54 & 4   & 1&54 & 6  & 2&85
     & 21&0 & 24&3 & 1&16 & 372&4 & 433&4 & 1&17 \\
-string-unpack-code       & 67  & &89 & 8   & 2&65 & 16 & 2&98
+string-unpack-code       & &89 & 8   & 2&65 & 16 & 2&98
     & 24&4 & 26&7 & 1&09 & 417&6 & 442&5 & 1&06 \\
-string-validate-input    & 89  & &58 & 4   & 1&65 & 8  & 2&84
+string-validate-input    & &58 & 4   & 1&65 & 8  & 2&84
     & 10&2 & 9&5 & &93   & 216&6 & 184&1 & &85 \\
 
 \hline
 
-Overall                  & 5473 & 21&06 & 146 & 53&13 & 224 & 2&52
+Overall                  & 21&06 & 146 & 53&13 & 224 & 2&52
     & 261&9 & 246&4 & &94 & 4703&6 & 3700&3 & &79 \\
 
 \hline
 
 \end{tabular}
-\caption{Sunspider benchmark results}
+\caption{Sunspider-0.9.1 benchmark results}
 \end{figure*}
 
 \subsection{Website Performance}
