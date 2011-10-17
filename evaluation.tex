@@ -6,6 +6,7 @@
 TODO
 
 \begin{figure*}
+\begin{center}
 \begin{tabular}{|l|r@{.}lr|r@{.}lr|r@{.}l|r@{.}lr@{.}l|r@{.}l|r@{.}lr@{.}l|r@{.}l|}
 
 \hline
@@ -91,8 +92,59 @@ Overall                  & 21&06 & 146 & 53&13 & 224 & 2&52
 \hline
 
 \end{tabular}
+\end{center}
 \caption{Sunspider-0.9.1 benchmark results}
 \end{figure*}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{|l|r@{.}lr@{.}l|r@{.}l|}
+\hline
+Test & \multicolumn{2}{|c|}{JM}
+     & \multicolumn{2}{|c|}{JM+TI}
+     & \multicolumn{2}{|c|}{Ratio} \\
+\hline
+ai-astar & 889&4 & 137&8 & &15 \\
+audio-beat-detection & 641&0 & 374&8 & &58 \\
+audio-dft & 627&8 & 352&6 & &56 \\
+audio-fft & 494&0 & 229&8 & &47 \\
+audio-oscillator & 518&0 & 221&2 & &43 \\
+imaging-gaussian-blur & 4351&4 & 730&0 & &17 \\
+imaging-darkroom & 699&6 & 586&8 & &84 \\
+imaging-desaturate & 821&2 & 209&2 & &25 \\
+json-parse-financial & 116&6 & 119&2 & 1&02 \\
+json-stringify-tinderbox & 80&0 & 78&8 & &99 \\
+crypto-aes & 201&6 & 158&0 & &78 \\
+crypto-ccm & 127&8 & 133&6 & 1&05 \\
+crypto-pbkdf2 & 454&8 & 350&2 & &77 \\
+crypto-sha256-iterative & 153&2 & 106&2 & &69 \\
+\hline
+Total & 10176&4 & 3778&2 & &37 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Kraken-1.1 benchmark results}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{|l|cc|r@{.}l|}
+\hline
+Test & JM & JM+TI & \multicolumn{2}{|c|}{Ratio} \\
+Richards & 4497 & 7152 & 1&59 \\
+DeltaBlue & 3250 & 9087 & 2&8 \\
+Crypto & 5205 & 13376 & 2&57 \\
+RayTrace & 3733 & 3217 & &86 \\
+EarleyBoyer & 4546 & 6291 & 1&38 \\
+RegExp & 1547 & 1316 & &85 \\
+Splay & 4775 & 7049 & 1&48 \\
+\hline
+Total & 3702 & 5555 & 1&5 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{V8 (version 6) benchmark results}
+\end{figure}
 
 \subsection{Website Performance}
 
