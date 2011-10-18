@@ -1,9 +1,11 @@
 
 \section{Example and Motivation}
+\label{sec:example}
 
 TODO
 
-\begin{verbatim}
+\begin{figure}
+\begin{lstlisting}
 function Box(v) {
   this.v = v;
 }
@@ -23,9 +25,12 @@ function main() {
     a[i] = new Box(i);
   use(a);
 }
-\end{verbatim}
+\end{lstlisting}
+\caption{Motivating Example}
+\label{fig:motivating-example}
+\end{figure}
 
-Most operations in this fragment of code interact with type information,
+Most operations in Figure~\ref{fig:motivating-example} interact with type information,
 and need knowledge of the involved types to be efficiently compiled.
 We are particularly interested in the addition in
 \code{res + v} as performed in the \code{use()} function.
@@ -126,11 +131,11 @@ This invariant is also critical to our handling of polymorphic code
 within a program.
 Consider the following extension to the example program:
 
-\begin{verbatim}
+\begin{lstlisting}
 function other() {
   var v = new Box("hello!");
 }
-\end{verbatim}
+\end{lstlisting}
 
 Executing the \code{other()} function will cause \code{Box} objects
 to be created which hold strings,

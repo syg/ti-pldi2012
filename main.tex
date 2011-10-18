@@ -1,6 +1,7 @@
 \documentclass[preprint]{sigplanconf}
 
 \usepackage[T1]{fontenc}
+\usepackage[scaled=0.80]{beramono}
 \usepackage{amsmath}
 \usepackage{stmaryrd}
 \usepackage{amsfonts}
@@ -11,13 +12,24 @@
 \usepackage{mathpartir}
 
 %\newcommand{\code}[1]{{\scriptsize {\tt #1}}}
-\newcommand{\code}[1]{{\tt #1}}
+\newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\judge}{\vdash}
 \newcommand{\rulename}[1]{{[\textsc{#1}]\quad}}
 
 % Comment out lineno for final draft.
 \usepackage{lineno}
 \linenumbers
+
+% JavaScript language definition.
+\lstdefinelanguage{JavaScript}
+{morekeywords={var,let,function,new,if,else,switch,while,catch,try,finally,throw,true,false,eval,with,undefined,case,default,do,break,for,in,continue,return},
+  keywordstyle=\ttfamily\bfseries,
+  sensitive=false,
+  comment=[l]{//},
+  morestring=[b]",
+  morestring=[b]',
+  mathescape=true}
+\lstset{captionpos=t,xleftmargin=5pt,columns=flexible,basicstyle=\ttfamily,showstringspaces=false,escapechar=\#,language=JavaScript}
 
 \title{Fast and Precise Hybrid Type Inference for JavaScript}
 % Author info left blank for double blind submission.
