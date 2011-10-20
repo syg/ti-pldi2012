@@ -1,9 +1,55 @@
 
 \section{Evaluation}
 
-\subsection{Benchmark Perfomance}
+We evaluate the effectiveness of our analysis in two ways.
+Section~\ref{XXX} compares the performance on major Javascript benchmarks
+of a single compiler which does or doesn't use analyzed type information.
+Section~\ref{XXX} examines the behavior of the analysis on a selection of
+websites which heavily use Javascript, to gauge the effectiveness of the
+analysis in practice.
 
-TODO
+\subsection{Benchmark Performance}
+
+As described in Section~\ref{XXX}, we have integrated our analysis into
+the Jaegermonkey JIT compiler used in Firefox.
+We compare performance of the compiler used both without the analysis (JM)
+and with the analysis (JM+TI).
+JM+TI adds several major optimizations to JM (Section~\ref{XXX}),
+and requires additional compilations due to dynamic type changes
+(Section~\ref{XXX}).
+Figure~\ref{XXX} shows the effect of these changes on the popular
+SunSpider Javascript benchmark \cite{XXX}.
+
+The JM and JM+TI sections of Figure~\ref{XXX} show the total amount of time
+spent compiling and the total number of compilations for both versions of
+the compiler.
+For JM+TI, compilation time also includes time spent generating and solving
+type constraints, which is small: 4ms for the entire benchmark.
+JM performs 146 compilations, while JM+TI performs 224, an increase of 78.
+The total compilation time for JM+TI is 2.52 times that of JM, an increase
+of 32ms, due a combination of recompilations, type analysis and the extra
+complexity of the added optimizations.
+
+Despite the significant extra compilation cost, the type-based optimizations
+performed by JM+TI quickly pay for themselves. The $\times$1 and
+$\times$20 sections
+of Figure~\ref{XXX} show the running times of the two versions of the
+compiler on the benchmark run once and modified to run twenty times,
+respectively.
+In the single run case JM+TI is a 6.3\% improvement over JM.
+One run of SunSpider completes in less than 250ms, which makes it
+difficult to get an optimization to pay for itself on this benchmark.
+Javascript heavy webpages are typically viewed for longer than
+$\frac{1}{4}$ of a second, and longer execution times better show the effect
+of type based optimizations.
+When run twenty times, the speedup given by JM+TI increases to 27.1\%.
+
+Figures~\ref{XXX} and~\ref{XXX} compare the performance of JM and JM+TI
+on two other popular benchmarks, the V8 \cite{XXX} and Kraken \cite{XXX} suites.
+These suites run for several seconds each, far longer than SunSpider,
+and show a larger speedup.
+V8 scores (which are given as a rate, rather than a raw time) improve by 50\%,
+and Kraken scores improve by a factor of 2.69.
 
 \begin{figure*}
 \begin{center}
@@ -14,16 +60,16 @@ TODO
            & \multicolumn{3}{c}{JM}
            & \multicolumn{3}{c}{JM+TI}
            & \multicolumn{2}{c}{}
-           & \multicolumn{6}{c}{$\times$1 Times}
-           & \multicolumn{6}{c}{$\times$20 Times} \\
+           & \multicolumn{6}{c}{$\times$1 Times (ms)}
+           & \multicolumn{6}{c}{$\times$20 Times (ms)} \\
 
 \cmidrule(r){2-4}
 \cmidrule{5-7}
 \cmidrule(r){10-15}
 \cmidrule{16-21}
 
-Test       & \multicolumn{2}{c}{Time (s)} & \#
-           & \multicolumn{2}{c}{Time (s)} & \#
+Test       & \multicolumn{2}{c}{Time (ms)} & \#
+           & \multicolumn{2}{c}{Time (ms)} & \#
            & \multicolumn{2}{c}{Ratio}
            & \multicolumn{2}{c}{JM}
            & \multicolumn{2}{c}{JM+TI}
