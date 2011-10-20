@@ -2,38 +2,44 @@
 \section{Example and Motivation}
 \label{sec:example}
 
-TODO
-
 \begin{figure}
 \begin{lstlisting}
-function Box(v) {
-  this.v = v;
-}
-
-function use(a) {
-  var res = 0;
-  for (var i = 0; i < 1000; i++) {
-    var v = a[i].v;
-    res = res + v;
-  }
-  return res;
-}
-
-function main() {
-  var a = [];
-  for (var i = 0; i < 1000; i++)
-    a[i] = new Box(i);
-  use(a);
-}
+1   function Box(v) {
+2     this.f = v;
+3   }
+4
+5   function use(a) {
+6     var res = 0;
+7     for (var i = 0; i < 1000; i++) {
+8       var v = a[i].f;
+9       res = res + v;
+10    }
+11    return res;
+12  }
+13
+14  function main() {
+15    var a = [];
+16    for (var i = 0; i < 1000; i++)
+17      a[i] = new Box(10);
+18    use(a);
+19  }
 \end{lstlisting}
 \caption{Motivating Example}
 \label{fig:motivating-example}
 \end{figure}
 
-Most operations in Figure~\ref{fig:motivating-example} interact with type information,
-and need knowledge of the involved types to be efficiently compiled.
-We are particularly interested in the addition in
-\code{res + v} as performed in the \code{use()} function.
+Consider the example Javascript program in Figure~\ref{fig:motivating-example}.
+This program constructs an array of \code{Box} objects wrapping integer
+values, and calls a \code{use} method which adds up the contents of all
+those \code{Box} objects.
+No types are specified for any of the variables or other values used
+in this program, in keeping with Javascript's dynamically typed nature.
+However, most operations in this program interact with type information,
+and knowledge of the involved types is needed for the code to
+be efficiently compiled.
+
+In particular, we are interested in the addition
+\code{res + v} on line 9.
 In Javascript, it is legal to add any two values together, with the
 operands coerced if necessary into strings or numbers and a string
 concatenation or numeric addition performed.
@@ -57,28 +63,52 @@ With static knowledge of all types involved in the program, the compiler can
 in many cases generate code similar to that produced for a statically
 typed language such as Java, and using similar optimizations.
 
-We can infer types for all variables and heap values in this program
-purely statically.
+We can infer possible types for \code{res} and \code{v} statically,
+by reasoning about the effect the program's assignments
+and operations have on values produced later.
+This is illustrated below (for brevity, this reasoning does not consider
+the possibility of functions \code{Box} and \code{use} being overwritten).
 
-TODO
+\begin{enumerate}
+\item On line 17, \code{main} passes an integer when constructing \code{Box}
+      objects. On line 2, \code{Box} assigns its parameter to the result's
+      \code{f} property. Thus, \code{Box} objects can have an
+      integer property \code{f}.
+\item Also on line 17, \code{main} assigns a \code{Box} object to an element
+      of \code{a}. On line 15, \code{a} is assigned an array literal,
+      so the elements of that literal could be \code{Box} objects.
+\item On line 18, \code{main} passes \code{a} to \code{use}, so \code{a}
+      within \code{use} can refer to the array created line 15.
+      When \code{use} accesses an element of \code{a} on line 8,
+      per \#2 the result can be a \code{Box} object.
+\item On line 8, property \code{f} of a value at \code{a[i]} is assigned to \code{v}.
+      Per \#3 \code{a[i]} can be a \code{Box} object, and per \#1 the
+      \code{f} property can be an integer. Thus, \code{v} can be an integer.
+\item On line 6, \code{res} is assigned an integer. Since \code{v} can be
+      an integer, \code{res + v} can be an integer.
+      When that addition is assigned to \code{res} on line 9, the assigned
+      type is consistent with the known possible types of \code{res}.
+\end{enumerate}
 
-This inference analysis does not account for all possible behaviors
-of Javascript programs.
-A few such behaviors in the example are described below.
+To be useful for compilation, we need to know not just {\bf some}
+possible types for variables, but {\bf all} possible types.
+In this sense, the static inference above is unsound, and does not account
+for all possible behaviors of the program.
+A few such behaviors are described below.
 
 \begin{itemize}
 
 \item The read of \code{a[i]} may access a {\it hole} in the array.
 Out of bounds array accesses in Javascript do not throw an exception,
 but instead return the corresponding property in the object's prototype
-(usually an undefined value).
+(usually the \code{undefined} value).
 The same holds for missing values in the middle of an array
 (assigning to just \code{a[0]} and \code{a[2]} leaves a missing
 value at \code{a[1]}).
 
-The type information computed for array \code{a} only accounts for
-values which were explicitly assigned to elements of \code{a}, and not the
-result of reading holes.
+\item Similarly, the read of \code{a[i].v} may be accessing a property
+which is not actually held by \code{a[i]} or a prototype, and may produce the
+\code{undefined} value.
 
 \item The addition \code{res + v} may overflow.
 Javascript has a single number type which does not distinguish between
@@ -88,13 +118,22 @@ distinguish integer and double values, and try to represent numbers as
 integers wherever possible.
 An addition of two integers may overflow and produce a number which can
 only be represented as a double.
-This behavior is rare, and for precision our analysis assumes
-such overflows do not happen.
 
 \end{itemize}
 
-All behaviors which the analysis does not account for must be caught
-by runtime checks, which will dynamically modify the inferred types
+In some cases these behaviors can be proved statically to not occur,
+but usually they cannot be ruled out.
+If we try to capture these behaviors statically, many element or property
+accesses will be marked as possibly undefined and many integer operations
+will be marked as possibly overflowing.
+The resulting type information will be too imprecise to be useful for
+JIT compilation.
+
+We address this problem by combining static inference about types
+with targeted dynamic type checks.
+All behaviors which are not accounted for statically must be caught
+by dynamic checks.
+When triggered, these checks will modify the inferred types
 for the program to reflect those new behaviors.
 If \code{a[i]} accesses a hole, the inferred types for the result must be
 updated with the value read out of the array.
@@ -114,9 +153,10 @@ This has a few important implications:
 
 \item The program can be analyzed incrementally, as code starts to execute.
 Code which has never executed does not need to be analyzed.
-This is necessary for Javascript due to dynamic code loading through
+This is necessary for Javascript due to dynamic code generation
+and loading through
 \code{eval()} and similar mechanisms, and is also important for reducing
-startup analysis time on websites, which often load several megabytes of
+analysis time on websites, which often load several megabytes of
 code and only execute a fraction of it.
 
 \item Assumptions about types made by the JIT compiler can be invalidated
