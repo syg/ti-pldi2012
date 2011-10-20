@@ -3,26 +3,26 @@
 \label{sec:example}
 
 \begin{figure}
-\begin{lstlisting}
-1   function Box(v) {
-2     this.f = v;
-3   }
-4
-5   function use(a) {
-6     var res = 0;
-7     for (var i = 0; i < 1000; i++) {
-8       var v = a[i].f;
-9       res = res + v;
-10    }
-11    return res;
-12  }
-13
-14  function main() {
-15    var a = [];
-16    for (var i = 0; i < 1000; i++)
-17      a[i] = new Box(10);
-18    use(a);
-19  }
+\begin{lstlisting}[xleftmargin=18pt]
+function Box(v) {
+  this.f = v;
+}
+
+function use(a) {
+  var res = 0;
+  for (var i = 0; i < 1000; i++) {
+    var v = a[i].f;
+    res = res + v;
+  }
+  return res;
+}
+
+function main() {
+  var a = [];
+  for (var i = 0; i < 1000; i++)
+    a[i] = new Box(10);
+  use(a);
+}
 \end{lstlisting}
 \caption{Motivating Example}
 \label{fig:motivating-example}
@@ -202,4 +202,9 @@ between whatever value is read out and the observed type set.
 Mismatches lead to updates of the observed type set, and because our
 invariant only requires inferred types to reflect observed types, it is
 safe to only solve analysis constraints with respect to the observed types.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End: 
 
