@@ -206,16 +206,16 @@ Total & 3702 & 5555 & 1&50 \\
 \begin{center}
 \begin{tabular}{lrrrrrrrrrrrrrrr}
 \toprule
-& \multicolumn{4}{c}{Inferred Precision (\%)}
+& \multicolumn{3}{c}{Inferred Precision (\%)} &
 & \multicolumn{4}{c}{Arithmetic (\%)}
 & \multicolumn{4}{c}{Indexes (\%)} \\
 
-\cmidrule(r){2-5}
+\cmidrule(r){2-4}
 \cmidrule(r){6-9}
 \cmidrule{10-13}
 
 Test
-& Mono & Di & Poly & Barrier
+& Mono & Di & Poly & Barrier (\%)
 & Int & Double & Other & Unknown
 & Int & Double & Other & Unknown \\
 \midrule
@@ -230,15 +230,19 @@ youtube        & 83 & 11 & 6 & 38 & 50 & 27 & 19 & 4 & 33 & 0 & 38 & 29 \\
 ztype          & 91 & 1 & 9 & 52 & 43 & 41 & 8 & 8 & 79 & 9 & 12 & 0 \\
 280slides      & 79 & 3 & 19 & 64 & 48 & 51 & 1 & 0 & 6 & 0 & 91 & 2 \\
 membench50     & 76 & 11 & 13 & 49 & 65 & 7  & 18 & 10 & 44 & 0 & 47 & 10 \\
+\hline
 sunspider      & 99 & 0  & 1  & 7  & 72 & 21 & 7  & 0  & 95 & 0 & 4  & 1  \\
 v8bench        & 86 & 7  & 7  & 26 & 98 & 1  & 0  & 0  & 100 & 0 & 0 & 0  \\
 kraken         & 100 & 0 & 0  & 3  & 61 & 37 & 2  & 0  & 100 & 0 & 0 & 0  \\
+\hline
 angrybirds     & 97 & 2 & 1 & 93 & 22 & 78 & 0 & 0 & 88 & 8 & 0 & 5 \\
 gameboy        & 88 & 0 & 12 & 16 & 54 & 36 & 3 & 7 & 88 & 0 & 0 & 12 \\
 bullet         & 84 & 0 & 16 & 92 & 54 & 38 & 0 & 7 & 79 & 20 & 0 & 1 \\
 lights         & 97 & 1 & 2 & 15 & 34 & 66 & 0 & 1 & 95 & 0 & 4 & 1 \\
 FOTN           & 98 & 1 & 1 & 20 & 39 & 61 & 0 & 0 & 96 & 0 & 3 & 0 \\
 monalisa       & 99 & 1 & 0 & 4 & 94 & 3 & 2 & 0 & 100 & 0 & 0 & 0 \\
+\hline
+overall        & 84.7 & 5.7 & 9.8 & 41.4 & & & & 6.2 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -267,9 +271,11 @@ youtube        & 100 & 0 & 0 & 32 & 49 & 19 \\
 ztype          & 100 & 0 & 0 & 23 & 76 & 0 \\
 280slides      & 88 & 12 & 0 & 23 & 56 & 21 \\
 membench50     & 80 & 4 & 16 & 35 & 58 & 6 \\
+\hline
 sunspider      & 93 & 6 & 1 & 81 & 19 & 0 \\
 v8bench        & 7 & 93 & 0 & 64 & 36 & 0 \\
 kraken         & 99 & 0 & 0 & 96 & 4 & 0 \\
+\hline
 angrybirds     & 90 & 0 & 10 & 22 & 76 & 2 \\
 gameboy        & 98 & 0 & 2 & 6 & 94 & 0 \\
 bullet         & 4 & 96 & 0 & 32 & 65 & 3 \\
@@ -303,9 +309,11 @@ reddit         & 59 & 3 & 37 & 13 & 45 & 17 & 4 \\
 youtube        & 57 & 3 & 40 & 28 & 33 & 0 & 19 \\
 ztype          & 46 & 0 & 54 & 63 & 47 & 95 & 5 \\
 membench50     & 49 & 5 & 47 & 29 & 24 & 29 & 6 \\
+\hline
 sunspider      & 94 & 1 & 5 & 6 & 1 & 9 & 0 \\
 v8bench        & 78 & 4 & 18 & 1 & 1 & 6 & 0 \\
 kraken         & 98 & 0 & 2 & 2 & 1 & 2 & 0 \\
+\hline
 angrybirds     & 9 & 0 & 90 & 93 & 23 & 24 & 2 \\
 gameboy        & 81 & 4 & 15 & 7 & 12 & 12 & 0 \\
 bullet         & 38 & 0 & 62 & 79 & 59 & 0 & 3 \\
@@ -320,7 +328,127 @@ monalisa       & 56 & 1 & 44 & 41 & 0 & 16 & 0 \\
 
 \subsection{Website Performance}
 
-TODO
+INTRO % describe sample pages, contrast websites and games/demos
+
+\begin{enumerate}
+
+\item How polymorphic are values read at access sites?  (\ref{XXX})
+
+\item How polymorphic are heap objects?  (\ref{XXX})
+
+\item How polymorphic are performed operations?  (\ref{XXX})
+
+\item How polymorphic are the objects used at access sites?  (\ref{XXX})
+
+\item How important are type barriers?  (\ref{XXX})
+
+\end{enumerate}
+
+\subsubsection{Access Site Polymorphism}
+
+The degree of polymorphism used in practice is of utmost importance
+for our analysis.
+The analysis is sound and will always compute a lower bound on the possible
+types that can appear at the various points in a program,
+so the precision of the generated type information is limited for
+access sites and operations which are polymorphic in practice.
+
+INTRODUCE THIS EARLIER?
+
+\begin{itemize}
+
+\item Monomorphic sites have only ever produced a single kind of value.
+Two values are of the same kind if either they are primitives of the same
+type (Figure~\ref{XXX}) or if they are both objects with possibly different
+object types.
+Access sites containing objects of multiple types can often be optimized
+just as well as sites containing objects of a single type, as long as
+all the observed object types share common attributes. See Section~\ref{XXX}.
+Values read at such sites use an untyped representation (Section~\ref{XXX}).
+
+\item Dimorphic sites have produced either strings or objects (but not both),
+and also at most one of the \code{undefined}, \code{null} or a boolean value.
+At such sites, even though multiple kinds are possible an untyped
+representation can still be used,
+as a single test on the unboxed form will determine the type.
+The untyped representation of objects and strings are pointers,
+whereas \code{undefined}, \code{null} and booleans are either zero or one.
+
+\item Polymorphic sites have produced values of multiple kinds,
+and compiled code must use a typed representation which keeps track of
+the value's kind.
+
+\end{itemize}
+
+The inferred precision section of Figure~\ref{XXX} shows the fractions
+of dynamic element and property reads which were at a site inferred
+as producing
+either monomorphic, dimorphic, or polymorphic sets of values.
+All these sites have type barriers on them, so the set of inferred types
+is equivalent to the set of observed types.
+
+The category used for a dynamic access is determined from the types
+inferred at the time of the access.
+Since the types inferred for an access site can grow as a program executes,
+dynamic accesses at the same site can contribute to different
+columns over time.
+
+Averaged across pages, 84.7\% of reads were at monomorphic
+sites, and 90.2\% were at monomorphic or dimorphic sites.
+The latter figure is 85.9\% for websites, 97.3\% for benchmarks,
+and 94.7\% for games and demos; websites are more polymorphic than games
+and demos, but by and large behave in a monomorphic fashion.
+
+\subsubsection{Barrier Frequency}
+
+Examining the frequency with which type barriers are required
+gives insight to the precision of the model of the heap constructed by
+the analysis.
+
+The barrier section of Figure~\ref{XXX} shows the frequencies of
+element and property accesses on sampled pages which required a barrier.
+Averaged across pages, barriers were required on 41.4\% of such accesses.
+There is a large disparity between websites and other pages.
+Websites were fairly homogenous, requiring barriers on between 35\%
+and 74\% of accesses (averaging 50\%), while benchmarks,
+games and demos were generally
+much lower, averaging 13\% except for two outliers above 90\%.
+
+The larger proportion of barriers required for websites indicates that
+heap layouts and types tend to be more complicated for websites than for
+games and demos.
+Still, the presence of the type barriers themselves means that we
+detect as monomorphic the very large proportion of access sites which are,
+with only a small amount of barrier checking overhead incurred by the
+more complicated heaps.
+
+DISCUSS OUTLIERS
+
+\subsubsection{Operation Precision}
+
+The arithmetic and index sections of Figure~\ref{XXX} show the frequency
+of inferred types for arithmetic operations and the index operand of
+element accesses, respectively.
+These are operations for which precise type information is crucial
+for efficient compilation, and give a sense of the precision of type
+information for operations which do not have associated type barriers.
+
+In the arithmetic section, the integer, double, other and unknown columns indicate,
+respectively,
+operations on known integers which give an integer result,
+operations on integers or doubles which give a double result,
+operations on any other type of known value,
+and operations where at least one of the operand types is unknown.
+Overall, precise types were found for 93.8\% of arithmetic operations,
+including 90.2\% of operations performed by websites.
+Comparing websites with other pages, websites tend to do far more
+arithmetic on non-numeric values --- 16.8\% vs. 1.6\% ---
+and considerably less arithmetic on doubles --- 14.8\% vs. 37.9\%.
+
+\subsubsection{Access Site Precision}
+
+\subsubsection{Precision Without Barriers}
+
 
 %%% Local Variables: 
 %%% mode: latex
