@@ -150,7 +150,7 @@ T_x \supseteq T_e
 
 Section~\ref{sec:object-types} describes object types in more detail,
 Section~\ref{sec:constraints} describes generation of the type constraints
-which forms the static portion of the analysis and the semantic checks
+which forms the static portion of the analysis and the semantic triggers
 these require at runtime, and Section~\ref{sec:barriers}
 describes the use of type barriers to improve analysis precision.
 
@@ -204,8 +204,8 @@ through the program. We model the semantics of JavaScript by assigning to each
 expression a \emph{type set} which denotes the set of types that it may
 have. It is important to note that these statically-generated constraints do
 not model the entirety of JavaScript semantics. Each constraint is augmented
-with semantic checks to fill in the remaining possible behaviors of the
-operation; we informally describe the required semantic checks for each rule.
+with triggers to fill in the remaining possible behaviors of the
+operation; we informally describe the required triggers for each rule.
 
 The syntax of constraints are shown in Figure~\ref{fig:js-core}. We have the
 standard subset constraint, $\supseteq$, and a \emph{barrier subset
@@ -235,7 +235,7 @@ Using incomplete modeling lets us cut through this complexity.
 Additions in Javascript programs are typically used to add two numbers
 or concatenate a string with something else.
 We statically model exactly these cases,
-and use semantic checks to monitor the results produced by adding other
+and use semantic triggers to monitor the results produced by adding other
 combinations of values, at little runtime cost.
 
 Note that even the integer addition rule we have given is incomplete: the
@@ -245,7 +245,7 @@ expressible in 32 bits, and has type \code{number}.
 Integer overflows are very rare, and as described in Section~\ref{XXX}
 we avoid pessimistically marking all possibly-overflowing additions as producing
 a double, by detecting overflowing additions dynamically
-and using a semantic check to mark the addition's result accordingly.
+and using a trigger to mark the addition's result as a double.
 
 \textsc{Prop} accesses a named property $p$ from the possible objects referred
 to by $x$, with the result the union of $\mathit{prop}(o,p)$ for all such
@@ -257,9 +257,9 @@ value of type \code{undefined}.
 As with integer overflow, accesses on missing properties are rare,
 and yet in most cases it is impractical or impossible to prove that an object
 \emph{definitely} has some property. In such cases we should not dilute the
-resulting type sets with \code{undefined}. We instead use a semantic check
-on execution paths producing the \code{undefined} value to update the
-result type of the access.
+resulting type sets with \code{undefined}. We instead use a trigger
+on execution paths accessing a missing property to update the result type
+of the access with \code{undefined}.
 
 \textsc{Index} is similar to \textsc{Prop}, with the added problem that any
 property of the object could be accessed.  In JavaScript, \code{x["p"]} is
@@ -271,7 +271,7 @@ all index operations as operating on an integer,
  which we collapse into a single type set
 $\mathit{index}(o)$.  In full JavaScript, any indexed access which is on a
 non-integer property, or is on an integer property which is missing from an
-object, must be accounted for with semantic checks in the same manner as
+object, must be accounted for with triggers in the same manner as
 \textsc{Prop}.
 
 Our analysis is flow-insensitive, so the \textsc{If} rule is simply the union

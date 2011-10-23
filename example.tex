@@ -103,8 +103,8 @@ A few such behaviors are described below.
 
 \item The read of \code{a[i]} may access a {\it hole} in the array.
 Out of bounds array accesses in Javascript do not throw an exception,
-but instead produce the \code{undefined} value if a prototype of the
-array does not have a matching property.
+but instead produce the \code{undefined} value if the array's prototype
+does not have a matching property.
 Such holes can also be in the middle of an array;
 assigning to just \code{a[0]} and \code{a[2]} leaves a missing
 value at \code{a[1]}.
@@ -133,24 +133,23 @@ The resulting type information will be too imprecise to be useful for
 JIT compilation.
 
 We address this problem by combining static inference about types
-with targeted dynamic type checks.
+with targeted dynamic type updates.
 Behaviors which are not accounted for statically must be caught dynamically,
 which will trigger modification of the inferred types to reflect
 those new behaviors.
 If \code{a[i]} accesses a hole, the inferred types for the result must be
-updated with the value read out of the array.
+marked as possibly undefined.
 If \code{res + v} overflows, the inferred types for the result must be
 marked as possibly a double.
 
-These are {\it semantic checks}, in that the generated code requires
-them regardless in order to correctly model the semantics of the language.
-With or without analysis, code needs to test whether it is reading a
-hole from an array or whether an integer addition overflowed.
-The analysis thus incurs no additional runtime cost by requiring
-these checks, and a tiny runtime cost in the very rare cases when the
-check is actually triggered.
+With or without analysis, the generated code needs to test for array holes
+and integer overflow in order to correctly model the semantics of the language.
+These and other dynamic type updates are {\it semantic triggers}:
+they are placed on already existing, rarely taken execution paths,
+and incur a cost to update the inferred types only the first time that
+execution path is taken for an operation.
 
-The presence of these runtime checks illustrates the key invariant our analysis
+The presence of these triggers illustrates the key invariant our analysis
 preserves: inferred types must conservatively model all types for
 variables and object properties which currently exist, but not those
 which could exist in the future.
@@ -169,7 +168,8 @@ code and only execute a fraction of it.
 \item Assumptions about types made by the JIT compiler can be invalidated
 at almost any time.
 This affects the correctness of the JIT'ed code, and the virtual machine
-must be able to support recompiling or discarding JIT'ed code at any time.
+must be able to support recompiling or discarding JIT'ed code at any time,
+including (and especially) when that code is on the stack.
 We discuss our handling of this in Section~\ref{XXX}.
 
 \end{itemize}
@@ -217,7 +217,7 @@ outside of \code{main} then the possible types of the \code{a[i].f} access
 will be updated and \code{res} and \code{v} will be marked as possibly
 strings by resolving the analysis constraints.
 
-Type barriers differ from the semantic checks described earlier in that
+Type barriers differ from the semantic triggers described earlier in that
 they are not required by the semantics of the language and do not need to
 be performed if our analysis is not being used.
 These checks are cheap, though, and we are effectively betting that the
