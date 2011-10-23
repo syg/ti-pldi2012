@@ -90,6 +90,9 @@ the possibility of functions \code{Box} and \code{use} being overwritten).
       type is consistent with the known possible types of \code{res}.
 \end{enumerate}
 
+This reasoning can be captured with inclusion constraints; we compute
+sets of possible types for each value and model the flow of values between
+these sets as subset relationships.
 To be useful for compilation, we need to know not just {\bf some}
 possible types for variables, but {\bf all} possible types.
 In this sense, the static inference above is unsound, and does not account
@@ -100,11 +103,11 @@ A few such behaviors are described below.
 
 \item The read of \code{a[i]} may access a {\it hole} in the array.
 Out of bounds array accesses in Javascript do not throw an exception,
-but instead return the corresponding property in the object's prototype
-(usually the \code{undefined} value).
-The same holds for missing values in the middle of an array
-(assigning to just \code{a[0]} and \code{a[2]} leaves a missing
-value at \code{a[1]}).
+but instead produce the \code{undefined} value if a prototype of the
+array does not have a matching property.
+Such holes can also be in the middle of an array;
+assigning to just \code{a[0]} and \code{a[2]} leaves a missing
+value at \code{a[1]}.
 
 \item Similarly, the read of \code{a[i].v} may be accessing a property
 which is not actually held by \code{a[i]} or a prototype, and may produce the
@@ -131,30 +134,34 @@ JIT compilation.
 
 We address this problem by combining static inference about types
 with targeted dynamic type checks.
-All behaviors which are not accounted for statically must be caught
-by dynamic checks.
-When triggered, these checks will modify the inferred types
-for the program to reflect those new behaviors.
+Behaviors which are not accounted for statically must be caught dynamically,
+which will trigger modification of the inferred types to reflect
+those new behaviors.
 If \code{a[i]} accesses a hole, the inferred types for the result must be
 updated with the value read out of the array.
 If \code{res + v} overflows, the inferred types for the result must be
 marked as possibly a double.
-The cost of these runtime checks is much less than the overhead induced
-by not statically knowing the types of values, and in many cases these
-checks can be eliminated entirely (see Section~\ref{XXX}).
 
-These runtime checks illustrate the key invariant our analysis
+These are {\it semantic checks}, in that the generated code requires
+them regardless in order to correctly model the semantics of the language.
+With or without analysis, code needs to test whether it is reading a
+hole from an array or whether an integer addition overflowed.
+The analysis thus incurs no additional runtime cost by requiring
+these checks, and a tiny runtime cost in the very rare cases when the
+check is actually triggered.
+
+The presence of these runtime checks illustrates the key invariant our analysis
 preserves: inferred types must conservatively model all types for
 variables and object properties which currently exist, but not those
 which could exist in the future.
-This has a few important implications:
+This has important implications:
 
 \begin{itemize}
 
 \item The program can be analyzed incrementally, as code starts to execute.
 Code which has never executed does not need to be analyzed.
-This is necessary for Javascript due to dynamic code generation
-and loading through
+This is necessary for Javascript due to dynamic code loading
+and generation through
 \code{eval()} and similar mechanisms, and is also important for reducing
 analysis time on websites, which often load several megabytes of
 code and only execute a fraction of it.
@@ -193,7 +200,7 @@ if a program is by and large monomorphic the precision of analysis results on
 it can easily be poisoned by a small amount of polymorphic code.
 
 We deal with uses of polymorphic structures and functions using runtime checks.
-At all array and other property accesses, we keep track of both the set of
+At all element and property accesses, we keep track of both the set of
 types which {\bf could} be observed for the access and the set of types
 which {\bf has} been observed.
 The former will be a superset of the latter, and if the two are different then
@@ -202,6 +209,21 @@ between whatever value is read out and the observed type set.
 Mismatches lead to updates of the observed type set, and because our
 invariant only requires inferred types to reflect observed types, it is
 safe to only solve analysis constraints with respect to the observed types.
+
+For the example program, a type barrier is required on the \code{a[i].f} access
+on line 8, and nowhere else. The barrier will test that the value being read
+is an integer, and if a string shows up sometime due to a call to \code{use}
+outside of \code{main} then the possible types of the \code{a[i].f} access
+will be updated and \code{res} and \code{v} will be marked as possibly
+strings by resolving the analysis constraints.
+
+Type barriers differ from the semantic checks described earlier in that
+they are not required by the semantics of the language and do not need to
+be performed if our analysis is not being used.
+These checks are cheap, though, and we are effectively betting that the
+cost incurred by performing them will be more than made up for by
+the better code generated using more precise type information.
+We have found this to be the case (Section~\ref{XXX}).
 
 %%% Local Variables: 
 %%% mode: latex

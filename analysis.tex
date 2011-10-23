@@ -150,9 +150,9 @@ T_x \supseteq T_e
 
 Section~\ref{sec:object-types} describes object types in more detail,
 Section~\ref{sec:constraints} describes generation of the type constraints
-which forms the static portion of the analysis, and Section~\ref{sec:barriers}
-describes type barriers and the other runtime checks which form the dynamic
-portion of the analysis.
+which forms the static portion of the analysis and the semantic checks
+these require at runtime, and Section~\ref{sec:barriers}
+describes the use of type barriers to improve analysis precision.
 
 \subsection{Object Types}
 \label{sec:object-types}
@@ -168,7 +168,7 @@ all JavaScript objects with the same type have the same prototype.
 Additionally, objects with the same prototype have the same type,
 except for plain \code{Object}, \code{Array} and \code{Function} objects.
 \code{Object} and \code{Array} objects have the same type if they were
-allocated at the same location in a script,
+allocated at the same scripted location,
 and \code{Function} objects have the same type if they are closures
 for the same script.
 
@@ -179,7 +179,7 @@ literals via the \code{\{\}} syntax.
 The type of an object is nominal: it is independent from the properties it
 has. Objects which are structurally identical may have different types, and
 objects with the same type may have different structures. This is crucial for
-efficient analysis. Properties can be added or deleted to JavaScript objects
+efficient analysis. Properties on Javascript objects can be added or deleted
 at any time, and using structural typing would make an object's type a
 flow-sensitive property.
 
@@ -190,6 +190,11 @@ $\mathit{index}(o)$. The set $\mathit{prop}(o,p)$ captures the possible types
 of a non-integer property $p$ for objects with type $o$, while
 $\mathit{index}(o)$ captures the possible types of all integer properties of
 all objects with type $o$.
+These sets cover the types of both `own' properties --- those directly held
+by the object --- as well as properties inherited from the object's prototype.
+We do not show how types are propagated from a prototype's type information
+to the instances; since all objects of a type share the same prototype,
+this transfer is straightforward.
 
 \subsection{Type Constraints}
 \label{sec:constraints}
@@ -198,17 +203,17 @@ The static portion of our analysis generates constraints on the flow of types
 through the program. We model the semantics of JavaScript by assigning to each
 expression a \emph{type set} which denotes the set of types that it may
 have. It is important to note that these statically-generated constraints do
-not model the entirety of JavaScript semantics. Not every type that the
-expression may have is in the statically determined set.
+not model the entirety of JavaScript semantics. Each constraint is augmented
+with semantic checks to fill in the remaining possible behaviors of the
+operation; we informally describe the required semantic checks for each rule.
 
 The syntax of constraints are shown in Figure~\ref{fig:js-core}. We have the
 standard subset constraint, $\supseteq$, and a \emph{barrier subset
   constraint}, styled $\barrier$. For two type sets $X$ and $Y$, $X \supseteq
 Y$ means that all types in $Y$ are propagated to $X$. On the other hand, $X
-\barrier Y$ means that only types in $Y$ which have been \emph{observed at
-runtime} should be propagated to $X$. Expressions which generate barrier
-subset constraints must be monitored at runtime with type barriers, whence the
-name. Type barriers are described in detail in Section~\ref{sec:barriers}.
+\barrier Y$ means that if $Y$ contains types that are not in $X$, then a
+runtime type barrier is required which can dynamically update the types in $X$.
+Type barriers are described in detail in Section~\ref{sec:barriers}.
 
 Rules for the constraint generation functions, $\mathcal{C}_e(e)$ for
 expressions and $\mathcal{C}_s(s)$ for statements, are shown in
@@ -226,23 +231,21 @@ string concatenation, or even function calls if either of its operands is an
 object (calling their \code{valueOf} or \code{toString} members, producing a
 number or string).
 
-Using incomplete modeling lets us cut through this complexity. The vast
-majority of dynamic additions in JavaScript programs (NUMBERS) are adding two
-numbers or concatenating two strings. We statically model exactly these cases,
-and use runtime checks to monitor the results produced by adding other
+Using incomplete modeling lets us cut through this complexity.
+Additions in Javascript programs are typically used to add two numbers
+or concatenate a string with something else.
+We statically model exactly these cases,
+and use semantic checks to monitor the results produced by adding other
 combinations of values, at little runtime cost.
 
 Note that even the integer addition rule we have given is incomplete: the
 result will be marked as an integer, ignoring the possibility of
 overflow. When addition of two integers overflows, the result is not
-expressible in 32 bits, and has type \code{number}. Overflow is extremely
-rare, and accounting for it statically would require us to mark the result of
-all additions as arbitrary numbers, except in the limited cases where we can
-prove no overflow is possible.
-
-Ignoring overflow statically forces us to use runtime checks when overflows
-occur. There is no extra runtime cost associated with these checks, as the
-code generated for integer additions requires an overflow check regardless.
+expressible in 32 bits, and has type \code{number}.
+Integer overflows are very rare, and as described in Section~\ref{XXX}
+we avoid pessimistically marking all possibly-overflowing additions as producing
+a double, by detecting overflowing additions dynamically
+and using a semantic check to mark the addition's result accordingly.
 
 \textsc{Prop} accesses a named property $p$ from the possible objects referred
 to by $x$, with the result the union of $\mathit{prop}(o,p)$ for all such
@@ -251,26 +254,27 @@ $x$ (or its prototype) actually has the $p$ property.  Accesses on properties
 which are not actually part of an object simply produce the \code{undefined}
 value of type \code{undefined}.
 
-As with integer overflow, accesses on missing properties are rare (NUMBERS),
+As with integer overflow, accesses on missing properties are rare,
 and yet in most cases it is impractical or impossible to prove that an object
 \emph{definitely} has some property. In such cases we should not dilute the
-resulting type sets with \code{undefined}. We should instead use runtime
-checks to add the \code{undefined} type to accesses which are dynamically
-found to be on missing properties. Indeed, all property accesses are coupled
-with runtime checks.
+resulting type sets with \code{undefined}. We instead use a semantic check
+on execution paths producing the \code{undefined} value to update the
+result type of the access.
 
 \textsc{Index} is similar to \textsc{Prop}, with the added problem that any
 property of the object could be accessed.  In JavaScript, \code{x["p"]} is
 equivalent to \code{x.p}. If $x$ has the object type $o$, an index operation
-can access a potentially infinite number of type sets $\mathit{prop}(o,p)$. We
-do not model this case in our core language, as the vast majority of index
-operations are on integers, (NUMBERS) which we collapse into a single type set
+can access a potentially infinite number of type sets $\mathit{prop}(o,p)$.
+Figuring out exactly which such properties are possible is generally
+intractable. We do not model such arbitrary accesses at all, and treat
+all index operations as operating on an integer,
+ which we collapse into a single type set
 $\mathit{index}(o)$.  In full JavaScript, any indexed access which is on a
 non-integer property, or is on an integer property which is missing from an
-object, must be accounted for with runtime checks in the same manner as
+object, must be accounted for with semantic checks in the same manner as
 \textsc{Prop}.
 
-Our analysis is path-insensitive, so the \textsc{If} rule is simply the union
+Our analysis is flow-insensitive, so the \textsc{If} rule is simply the union
 of the constraints generated by the branches.
 
 \textsc{AssignVar}, \textsc{AssignProp} and \textsc{AssignIndex} invert the
@@ -292,55 +296,48 @@ must be accounted for with runtime checks.
 \subsection{Type Barriers}
 \label{sec:barriers}
 
-As described in Section~\ref{sec:constraints}, type barriers are a form of
-runtime check designed to retain precision and enforce soundness when a
-program contains polymorphic code. Type barriers perform two duties: to
-propagate previously unobserved types, and to ensure correctness of JIT code
-by bailing out of JIT code. When a type barrier is tripped, we recompile the
-function it belonged to with the new type information.
+As described in Section~\ref{XXX}, type barriers are dynamic type checks
+inserted to improve analysis precision in the presence
+of polymorphic code.
+Propagation along an assignment $X = Y$ can be modeled
+statically as a subset
+constraint $X \supseteq Y$ or dynamically as a barrier constraint
+$X \barrier Y$.
+It is always safe to use one in place of the other; in Section~\ref{XXX}
+we show the effect of always using subset constraints in lieu of
+barrier constraints.
 
-In our hybrid system we may propagate types through the constraint graph both
-statically and at runtime. Viewed as an attempt to retain precision, type
-barriers essentially \emph{defer} static propagation in favor of runtime
-propagation. That is, instead of soundly approximating all possible types of
-an expression statically, such as a property access or integer addition, we
-wait until execution and monitor the types dynamically. If we observe a
-previously unobserved type, then we propagate it. This nets us extra
-precision, since at runtime we know the exact type an expression has, and many
-scenarios which demand sound overapproximation are rare in practice.
+For a barrier constraint $X \barrier Y$, a type barrier is required whenever
+$X \not\supseteq Y$. The barrier dynamically checks that all values
+flowing across the assignment are actually in $X$, and updates $X$ whenever
+values of a new type are encountered.
+$X$ will contain only the types of values which
+have ever actually been observed at the assignment, and a barrier will be
+required if there are additional types in $Y$ which could be observed.
 
-Viewed as enforcers of soundness, type barriers are much like dynamic type
-casts in Java or C++. In our case, these type casts only succeed on type
-identity. For example, in the \textsc{Add} constraint in
-Figure~\ref{fig:constraint-rules}, we propagate the \code{int} type
-statically, but we still have to ensure that at runtime no overflow occurred.
-
-Let us make this concrete by returning to the example in
-Figure~\ref{fig:motivating-example}. The analysis statically determines that
-the index access \code{a[i]} in the function \code{use} has the type of
-\code{Box}. However, this is possibly unsound, as without doing more
-sophisticated interval analysis, \code{a[i]} could be a hole, in which case
-its type will be \code{undefined}. This is expressed in constraints as
-$T_{\code{a[i]}} \barrier \{\code{Box}\}$, i.e. we have already observed
-\code{Box} objects for the index property of \code{a}, but we need to check
-that this is indeed the type returned during runtime, and if not, propagate
-the new type and mark the function for recompilation.
-
-In the constraint generation rules in Figure~\ref{fig:constraint-rules} we
-present three rules which employ type barrers: \textsc{Add},
-\textsc{Prop}, and \textsc{Index}. In \textsc{Add}, the barrier is to check
-for overflow. The only new type propagated, if any, would be \code{number}. In
-\textsc{Prop} and \textsc{Index}, the barrier is primarily intended to retain
-precision of generated code for property accesses. We do not want to emit code
-for all possible types that a property could have, but only those we have
-observed. After all, in the presence of frequently used dynamic constructs
-like \code{eval}, any property on any object could be \code{undefined}!
+Type barriers are much like dynamic type casts in Java: assignments from a
+more general type to a more specific type are possible as long as a
+dynamic test occurs for conformance.
+However, rather than throw an exception (as in Java) a tripped type barrier will
+despecialize the target of the assignment.
 
 The presence or absence of type barriers for a given subset constraint is not
 monotonic with respect to the contents of the type sets in the program.  As
 new types are discovered, new type barriers may be required, but existing ones
 may become unnecessary.  However, it is always safe to perform the runtime
 check for a given barrier, albeit less efficient.
+
+In the constraint generation rules in Figure~\ref{fig:constraint-rules} we
+present two rules which employ type barrers:
+\textsc{Prop}, and \textsc{Index}. In practice, we also use type barriers for
+call argument bindings, to precisely model polymorphic call sites where
+only certain combinations of argument types and callee functions are possible.
+Barriers could be used for other types of assignments, but we do not do so.
+Allowing barriers in new places is unlikely to significantly change the total
+number of required barriers --- improving precision by adding barriers in one
+place can make barriers in another place unnecessary.
+The main cost is the extra compiler complexity required to support
+barriers for different assignments, and we may take such steps in the future.
 
 \subsection{Interpreter Warmup}
 
