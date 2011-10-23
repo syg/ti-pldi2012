@@ -2,10 +2,10 @@
 \section{Evaluation}
 
 We evaluate the effectiveness of our analysis in two ways.
-Section~\ref{XXX} compares the performance on major Javascript benchmarks
+Section~\ref{XXX} compares the performance on major JavaScript benchmarks
 of a single compiler which does or doesn't use analyzed type information.
 Section~\ref{XXX} examines the behavior of the analysis on a selection of
-websites which heavily use Javascript, to gauge the effectiveness of the
+websites which heavily use JavaScript, to gauge the effectiveness of the
 analysis in practice.
 
 \subsection{Benchmark Performance}
@@ -18,7 +18,7 @@ JM+TI adds several major optimizations to JM (Section~\ref{XXX}),
 and requires additional compilations due to dynamic type changes
 (Section~\ref{XXX}).
 Figure~\ref{XXX} shows the effect of these changes on the popular
-SunSpider Javascript benchmark \cite{XXX}.
+SunSpider JavaScript benchmark \cite{XXX}.
 
 The JM and JM+TI sections of Figure~\ref{XXX} show the total amount of time
 spent compiling and the total number of compilations for both versions of
@@ -39,7 +39,7 @@ respectively.
 In the single run case JM+TI is a 6.3\% improvement over JM.
 One run of SunSpider completes in less than 250ms, which makes it
 difficult to get an optimization to pay for itself on this benchmark.
-Javascript heavy webpages are typically viewed for longer than
+JavaScript heavy webpages are typically viewed for longer than
 $\frac{1}{4}$ of a second, and longer execution times better show the effect
 of type based optimizations.
 When run twenty times, the speedup given by JM+TI increases to 27.1\%.
@@ -230,19 +230,19 @@ youtube        & 83 & 11 & 6 & 38 & 50 & 27 & 19 & 4 & 33 & 0 & 38 & 29 \\
 ztype          & 91 & 1 & 9 & 52 & 43 & 41 & 8 & 8 & 79 & 9 & 12 & 0 \\
 280slides      & 79 & 3 & 19 & 64 & 48 & 51 & 1 & 0 & 6 & 0 & 91 & 2 \\
 membench50     & 76 & 11 & 13 & 49 & 65 & 7  & 18 & 10 & 44 & 0 & 47 & 10 \\
-\hline
+\midrule
 sunspider      & 99 & 0  & 1  & 7  & 72 & 21 & 7  & 0  & 95 & 0 & 4  & 1  \\
 v8bench        & 86 & 7  & 7  & 26 & 98 & 1  & 0  & 0  & 100 & 0 & 0 & 0  \\
 kraken         & 100 & 0 & 0  & 3  & 61 & 37 & 2  & 0  & 100 & 0 & 0 & 0  \\
-\hline
+\midrule
 angrybirds     & 97 & 2 & 1 & 93 & 22 & 78 & 0 & 0 & 88 & 8 & 0 & 5 \\
 gameboy        & 88 & 0 & 12 & 16 & 54 & 36 & 3 & 7 & 88 & 0 & 0 & 12 \\
 bullet         & 84 & 0 & 16 & 92 & 54 & 38 & 0 & 7 & 79 & 20 & 0 & 1 \\
 lights         & 97 & 1 & 2 & 15 & 34 & 66 & 0 & 1 & 95 & 0 & 4 & 1 \\
 FOTN           & 98 & 1 & 1 & 20 & 39 & 61 & 0 & 0 & 96 & 0 & 3 & 0 \\
 monalisa       & 99 & 1 & 0 & 4 & 94 & 3 & 2 & 0 & 100 & 0 & 0 & 0 \\
-\hline
-overall        & 84.7 & 5.7 & 9.8 & 41.4 & & & & 6.2 \\
+\midrule
+Overall        & 84.7 & 5.7 & 9.8 & 41.4 & & & & 6.2 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -271,11 +271,11 @@ youtube        & 100 & 0 & 0 & 32 & 49 & 19 \\
 ztype          & 100 & 0 & 0 & 23 & 76 & 0 \\
 280slides      & 88 & 12 & 0 & 23 & 56 & 21 \\
 membench50     & 80 & 4 & 16 & 35 & 58 & 6 \\
-\hline
+\midrule
 sunspider      & 93 & 6 & 1 & 81 & 19 & 0 \\
 v8bench        & 7 & 93 & 0 & 64 & 36 & 0 \\
 kraken         & 99 & 0 & 0 & 96 & 4 & 0 \\
-\hline
+\midrule
 angrybirds     & 90 & 0 & 10 & 22 & 76 & 2 \\
 gameboy        & 98 & 0 & 2 & 6 & 94 & 0 \\
 bullet         & 4 & 96 & 0 & 32 & 65 & 3 \\
@@ -309,11 +309,11 @@ reddit         & 59 & 3 & 37 & 13 & 45 & 17 & 4 \\
 youtube        & 57 & 3 & 40 & 28 & 33 & 0 & 19 \\
 ztype          & 46 & 0 & 54 & 63 & 47 & 95 & 5 \\
 membench50     & 49 & 5 & 47 & 29 & 24 & 29 & 6 \\
-\hline
+\midrule
 sunspider      & 94 & 1 & 5 & 6 & 1 & 9 & 0 \\
 v8bench        & 78 & 4 & 18 & 1 & 1 & 6 & 0 \\
 kraken         & 98 & 0 & 2 & 2 & 1 & 2 & 0 \\
-\hline
+\midrule
 angrybirds     & 9 & 0 & 90 & 93 & 23 & 24 & 2 \\
 gameboy        & 81 & 4 & 15 & 7 & 12 & 12 & 0 \\
 bullet         & 38 & 0 & 62 & 79 & 59 & 0 & 3 \\

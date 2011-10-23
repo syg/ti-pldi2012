@@ -28,19 +28,19 @@ function main() {
 \label{fig:motivating-example}
 \end{figure}
 
-Consider the example Javascript program in Figure~\ref{fig:motivating-example}.
+Consider the example JavaScript program in Figure~\ref{fig:motivating-example}.
 This program constructs an array of \code{Box} objects wrapping integer
 values, and calls a \code{use} method which adds up the contents of all
 those \code{Box} objects.
 No types are specified for any of the variables or other values used
-in this program, in keeping with Javascript's dynamically typed nature.
+in this program, in keeping with JavaScript's dynamically typed nature.
 However, most operations in this program interact with type information,
 and knowledge of the involved types is needed for the code to
 be efficiently compiled.
 
 In particular, we are interested in the addition
 \code{res + v} on line 9.
-In Javascript, it is legal to add any two values together, with the
+In JavaScript, it is legal to add any two values together, with the
 operands coerced if necessary into strings or numbers and a string
 concatenation or numeric addition performed.
 
@@ -102,7 +102,7 @@ A few such behaviors are described below.
 \begin{itemize}
 
 \item The read of \code{a[i]} may access a {\it hole} in the array.
-Out of bounds array accesses in Javascript do not throw an exception,
+Out of bounds array accesses in JavaScript do not throw an exception,
 but instead produce the \code{undefined} value if the array's prototype
 does not have a matching property.
 Such holes can also be in the middle of an array;
@@ -114,9 +114,9 @@ which is not actually held by \code{a[i]} or a prototype, and may produce the
 \code{undefined} value.
 
 \item The addition \code{res + v} may overflow.
-Javascript has a single number type which does not distinguish between
+JavaScript has a single number type which does not distinguish between
 integers and doubles.
-However, it is extremely important for performance that Javascript compilers
+However, it is extremely important for performance that JavaScript compilers
 distinguish integer and double values, and try to represent numbers as
 integers wherever possible.
 An addition of two integers may overflow and produce a number which can
@@ -159,7 +159,7 @@ This has important implications:
 
 \item The program can be analyzed incrementally, as code starts to execute.
 Code which has never executed does not need to be analyzed.
-This is necessary for Javascript due to dynamic code loading
+This is necessary for JavaScript due to dynamic code loading
 and generation through
 \code{eval()} and similar mechanisms, and is also important for reducing
 analysis time on websites, which often load several megabytes of

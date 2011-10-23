@@ -174,7 +174,7 @@ for the same script.
 \code{Object} and \code{Function} objects which represent builtin objects
 such as class prototypes, the \code{Math} object and native functions
 are given singleton types --- object types which correspond to only a single
-Javascript object.
+JavaScript object.
 
 For the sake of brevity and ease of exposition, our simplified JavaScript core
 only contains the ability to construct \code{Object}-prototyped object
@@ -183,7 +183,7 @@ literals via the \code{\{\}} syntax.
 The type of an object is nominal: it is independent from the properties it
 has. Objects which are structurally identical may have different types, and
 objects with the same type may have different structures. This is crucial for
-efficient analysis. Properties on Javascript objects can be added or deleted
+efficient analysis. Properties on JavaScript objects can be added or deleted
 at any time, and using structural typing would make an object's type a
 flow-sensitive property.
 
@@ -236,7 +236,7 @@ object (calling their \code{valueOf} or \code{toString} members, producing a
 number or string).
 
 Using incomplete modeling lets us cut through this complexity.
-Additions in Javascript programs are typically used to add two numbers
+Additions in JavaScript programs are typically used to add two numbers
 or concatenate a string with something else.
 We statically model exactly these cases,
 and use semantic triggers to monitor the results produced by adding other
@@ -365,7 +365,7 @@ We do several other supplemental analyses, but these are the most important.
 
 \subsubsection{Integer Overflow}
 
-In the execution of a Javascript program, the overall cost of doing integer
+In the execution of a JavaScript program, the overall cost of doing integer
 overflow checks is very small.
 On kernels which do many additions, however, the cost can become significant,
 and we have measured overflow check overhead at 10-20\% of total execution
@@ -376,7 +376,7 @@ added, and use two techniques to remove overflow checks.
 First, for simple additions in a loop (mainly loop counters) we try to use
 the loop termination condition to compute a range
 check which can be hoisted from the loop, a standard technique \cite{XXX}
-which can only be performed for Javascript with type information available.
+which can only be performed for JavaScript with type information available.
 Second, integer additions which are used as inputs to bitwise operators
 do not need overflow checks, as bitwise operators truncate their inputs to 32
 bit integers.
@@ -408,7 +408,7 @@ triggers and type barriers being tripped.
 
 \subsubsection{Definite Properties}
 
-Javascript lacks structural typing, and objects are conceptually maps
+JavaScript lacks structural typing, and objects are conceptually maps
 from property names to values, where properties can be freely added,
 deleted or reconfigured by scripts.
 Internally, objects are laid out as an array of values with the map associating
@@ -421,7 +421,7 @@ field accesses in a language with structural typing, such as Java or C++.
 
 We identify definite property accesses in three ways.
 First, if the property access is on an object type which is a singleton,
-we know the exact Javascript object being accessed and can use the slot
+we know the exact JavaScript object being accessed and can use the slot
 in its property map.
 Second, object literals allocated in the same place have the same type,
 and definite properties can be picked up from the order the literal

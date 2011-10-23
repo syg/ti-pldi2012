@@ -1,7 +1,7 @@
 
 \section{Implementation}
 
-We have implemented this analysis for SpiderMonkey, the Javascript engine
+We have implemented this analysis for SpiderMonkey, the JavaScript engine
 in Firefox.
 We have also modified the engine's JIT compiler, JaegerMonkey, to use
 inferred type information when generating code.
@@ -66,7 +66,7 @@ The JIT code for the script is discarded, and the script is not
 immediately recompiled.
 After control returns to the trampolines, they use metadata added to
 the calling frame to assemble
-a valid state for the Javascript engine's bytecode interpreter,
+a valid state for the JavaScript engine's bytecode interpreter,
 and resume execution in the interpreter.
 Once the script warms back up by being called or taking loop back edges
 (Section~\ref{XXX}), it is recompiled in the same manner as its
@@ -94,7 +94,7 @@ JIT code can consume a large amount of memory, and the type sets and constraints
 computed by our analysis consume even more (NUMBERS).
 We reconcile these by observing how browsers are used in practice:
 to surf the web.
-The web page being viewed, content being generated and Javascript code which
+The web page being viewed, content being generated and JavaScript code which
 is running are constantly changing.
 The compiler and analysis need to not just quickly adapt to new scripts that are
 running, but also to quickly discard regenerable data allocated for
