@@ -7,12 +7,41 @@ We have also modified the engine's JIT compiler, JaegerMonkey, to use
 inferred type information when generating code.
 Without type information, JaegerMonkey generates code in a fairly mechanical
 translation from the original SpiderMonkey bytecode for a script.
-By using types, we were able to improve the quality of this
-baseline generated code, as well as add several optimizations that
-are impractical without types: linear scan register allocation, loop invariant
-code motion, and function call inlining.
+Using type information, we were able to improve on this in several ways:
 
-TODO
+\begin{itemize}
+
+\item Values with statically known types can be tracked in jitcode
+using an untyped representation.
+Encoding the type in a value requires significant memory traffic
+if the type is stored separately from the actual data in a value
+(as it is in SpiderMonkey),
+or marshaling overhead if a single word is used to encode values.
+
+An untyped representation stores just the data component of a value ---
+a raw pointer for objects and strings, and raw bits for other value types ---
+without explicitly encoding the type.
+Additionally, knowing the type of a value statically eliminates many
+dynamic type tests which the code would otherwise require.
+
+\item Several classical compiler optimizations were added,
+including linear scan register allocation, loop invariant code motion
+and function call inlining.
+
+These optimizations could be applied without
+having static type information.
+Doing so is, however, far more difficult and far less effective than in
+the case where types are known.
+For example, loop invariant code motion depends on knowing whether operations
+are idempotent, while in general Javascript operations are not,
+and register allocation requires types to determine whether values should
+be stored in general purpose or floating point registers.
+
+\end{itemize}
+
+In Section~\ref{XXX} we describe how we handle dynamic recompilation in
+response to type changes, and in Section~\ref{XXX} we describe the techniques
+used to manage analysis memory usage.
 
 \subsection{Recompilation}
 
@@ -91,7 +120,7 @@ Two major goals of JIT compilation in a web browser stand in stark contrast
 to one another: generate code that is as fast as possible, and use as little
 memory as possible.
 JIT code can consume a large amount of memory, and the type sets and constraints
-computed by our analysis consume even more (NUMBERS).
+computed by our analysis consume even more.
 We reconcile these by observing how browsers are used in practice:
 to surf the web.
 The web page being viewed, content being generated and JavaScript code which
@@ -110,8 +139,7 @@ as if no scripts had ever been analyzed and all
 execution happened in the warmup phase.
 All type constraints are discarded, as well as all type sets for
 intermediate expressions in scripts.
-This constitutes the great majority of the memory allocated for analysis
-(NUMBERS).
+This constitutes the great majority of the memory allocated for analysis.
 As described in Section~\ref{XXX}, the retained types are sufficient to
 recover type information for all intermediate expressions in each script,
 should they be reanalyzed and recompiled.
@@ -124,4 +152,4 @@ recompiled and reanalyzed, but the timeframe between collections keeps this
 as a small portion of overall runtime.
 When many tabs are open (the case where memory usage is most important
 for the browser), analysis information typically accounts
-for less than 2\% of the browser's overall memory usage (more NUMBERS).
+for less than 2\% of the browser's overall memory usage.
