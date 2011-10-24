@@ -290,13 +290,6 @@ must be accounted for with runtime checks.
 
 %TODO --- lose \textsc{App}?
 
-%The reader may wonder where function types come from, as our simplified
-%JavaScript core does not contain function declarations. Recall that the
-%analysis is run function-at-a-time. At the end of analysis, the type sets of
-%the formal parameters and the return value are gathered and a function type is
-%constructed for the current function. We omit this detail from the
-%formalization.
-
 \subsection{Type Barriers}
 \label{sec:barriers}
 
@@ -327,14 +320,14 @@ despecialize the target of the assignment.
 
 The presence or absence of type barriers for a given barrier constraint is not
 monotonic with respect to the contents of the type sets in the program.  As
-new types are discovered, new type barriers may be required, but existing ones
+new types are discovered, new type barriers may be required, and existing ones
 may become unnecessary.  However, it is always safe to perform the runtime
 tests for a given barrier, albeit less efficient.
 
 In the constraint generation rules in Figure~\ref{fig:constraint-rules} we
 present two rules which employ type barrers:
 \textsc{Prop}, and \textsc{Index}. In practice, we also use type barriers for
-call argument binding, to precisely model polymorphic call sites where
+call argument binding to precisely model polymorphic call sites where
 only certain combinations of argument types and callee functions are possible.
 Barriers could be used for other types of assignments, but we do not do so.
 Allowing barriers in new places is unlikely to significantly change the total
@@ -345,20 +338,20 @@ kinds of barriers, and we may take such steps in the future.
 
 \subsection{Supplemental Analysis}
 
-In many cases type information is insufficient by itself to generate code
-for an operation which runs at a speed comparable to a statically typed
+In many cases type information itself is insufficient to generate code
+which performs comparably to a statically typed
 language such as Java.
 Integer addition requires checks for overflow,
 index operations on arrays require checks for holes in the middle of the array,
 and property accesses require determining whether the object has the property
 and the physical location where the property is stored.
-To reach a speed closer to a statically typed language, these checks must
-be eliminated in as many cases as possible,
-and doing so requires more detailed analysis information.
+To reach a speed closer to that of a statically typed language, these checks must
+be eliminated in as many cases as possible.
 
+Eliminating such checks requires more detailed analysis information.
 Rather than build additional complexity into the type analysis itself,
 we use supplemental analyses which leverage type information but do not
-modify inferred types at all.
+modify the set of inferred types.
 The remainder of this section briefly describes our handling of the above
 situations.
 We do several other supplemental analyses, but these are the most important.
@@ -367,12 +360,12 @@ We do several other supplemental analyses, but these are the most important.
 
 In the execution of a JavaScript program, the overall cost of doing integer
 overflow checks is very small.
-On kernels which do many additions, however, the cost can become significant,
-and we have measured overflow check overhead at 10-20\% of total execution
+On kernels which do many additions, however, the cost can become significant.
+We have measured overflow check overhead at 10-20\% of total execution
 time on microbenchmarks.
 
 Using type information, we normally know statically where integers are being
-added, and use two techniques to remove overflow checks.
+added. We use two techniques on those sites to remove overflow checks.
 First, for simple additions in a loop (mainly loop counters) we try to use
 the loop termination condition to compute a range
 check which can be hoisted from the loop, a standard technique \cite{XXX}
@@ -388,8 +381,8 @@ Arrays are usually constructed by writing to their elements in ascending
 order, with no gaps; we call these arrays {\it packed}.
 There are a large number of ways packed arrays can be constructed, however,
 which makes it difficult to statically prove an array is packed.
-Instead, we dynamically detect out of order writes on an array,
-and mark the type of the array as possibly not packed.
+Instead, we dynamically detect out-of-order writes on an array,
+and mark the type of the array object as possibly not packed.
 If an object type has never been marked as not packed, then all objects
 with that type are packed arrays.
 
@@ -397,27 +390,28 @@ When compiling an index operation, if the type set of the accessed object
 contains no object types marked as possibly not packed, then the operation
 must be on a packed array.
 In such cases, the generated code does not need to check for a hole in the
-middle of the array, and only needs to perform a bounds check (which can
-often be hoisted from loop bodies, in the same manner as integer overflow
-checks).
+middle of the array, and only needs to perform a bounds check. In turn, the bounds check can
+often be hoisted from loop bodies in the same manner as integer overflow
+checks.
 
-The packed status of an object type can change dynamically due to out of
-order writes, possibly invalidating JIT code.
+The packed status of an object type can change dynamically due to out-of-order
+writes, possibly invalidating JIT code.
 This forces recompilation in the same way as type changes due to semantic
-triggers and type barriers being tripped.
+triggers and tripped type barriers do.
 
 \subsubsection{Definite Properties}
 
 JavaScript lacks structural typing, and objects are conceptually maps
 from property names to values, where properties can be freely added,
 deleted or reconfigured by scripts.
-Internally, objects are laid out as an array of values with the map associating
-each property name to a slot in that array.
+Internally, objects are laid out as an array of values with a mapping from
+property names to slots in that array.
 
 If a property access can be resolved statically to a particular slot in the
 array, then the access is on a {\it definite} property and can be compiled
-as a direct lookup comparable to
-field accesses in a language with structural typing, such as Java or C++.
+as a direct lookup. This is comparable to
+field accesses on monomorphic receivers in a language with static object layouts,
+such as Java or C++.
 
 We identify definite property accesses in three ways.
 First, if the property access is on an object type which is a singleton,
@@ -426,14 +420,14 @@ in its property map.
 Second, object literals allocated in the same place have the same type,
 and definite properties can be picked up from the order the literal
 adds properties.
-Third, objects created by calling 'new' on the same function will have the
+Third, objects created by calling \code{new} on the same function will have the
 same prototype (unless the function's \code{prototype} property is overwritten),
-and we analyze the function's script to identify properties it definitely
+and we analyze the function's body to identify properties it definitely
 adds before letting the new object escape.
 
 These techniques are sensitive to properties being deleted or
 reconfigured, and if such events happen then JIT code will be invalidated
-in the same way as packed array or type set changes.
+in the same way as by packed array or type set changes.
 
 %%% Local Variables: 
 %%% mode: latex
