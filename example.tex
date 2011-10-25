@@ -219,9 +219,32 @@ strings by resolving the analysis constraints.
 Type barriers differ from the semantic triggers described earlier in that
 they are not required by the semantics of the language and do not need to
 be performed if our analysis is not being used.
-These checks are cheap, though, and we are effectively betting that they
+These checks are cheap, though: if the set of observed types is monomorphic,
+as is generally the case (Section~\ref{XXX}), only a single test is required
+by the barrier.
+We are effectively betting that the barriers
 pay for themselves by enabling generation of better code using more precise type information.
 We have found this to be the case (Section~\ref{XXX}).
+
+Our contributions are:
+
+\begin{itemize}
+
+\item We describe the use of inclusion constraints to incompletely infer
+possible types in JavaScript programs, and the runtime extension with semantic
+triggers to generate sound type information.
+
+\item We describe the use of type barriers to efficiently and precisely handle
+polymorphic code, with a minimum of runtime overhead.
+
+\item We showcase an implementation integrated with the JIT compiler used in
+Firefox, and describe the issues encountered and fixed while preparing
+the analysis for release.
+
+\item We evaluate a variety of metrics showing the effectiveness of the analysis
+and modified compiler on both benchmarks and a selection of popular websites.
+
+\end{itemize}
 
 %%% Local Variables: 
 %%% mode: latex
