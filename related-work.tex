@@ -78,14 +78,15 @@ variables and the static portion of our analysis need not be sound.
 %unification is required to arrive a solution --- a solution always exists by
 %simple propagation.
 
-Other hybrid approaches to typing, such as Cartwright and Fagan's soft typing
-and Taha and Siek's gradual typing, have been largely for the purposes of
-correctness and early error detection \cite{Cartwright91,
-  Siek07}. Soft typing inserts run-time checks, and gradual typing focuses on
+Other hybrid approaches to typing exist, such as Cartwright and Fagan's soft
+typing and Taha and Siek's gradual typing \cite{Cartwright91, Siek07}. They
+have been largely for the purposes of correctness and early error
+detection. Soft typing inserts run-time checks, and gradual typing focuses on
 the interaction of code with type annotation and code without
-annotation. These works are \emph{prescriptive}, in that they helps enforce a
-typing discipline, while ours is \emph{subscriptive}, in that we are inferring
-types to help JIT compilation.
+annotation. While these approaches may also be used to improve performance of
+compiled code, they are at least partially \emph{prescriptive}, in that they
+help enforce a typing discipline, while ours is entirely \emph{subscriptive}, in that
+we are inferring types only to help JIT compilation.
 
 % Notes on other things to cite:
 % We take efficiency of analyses to be used in JIT compilers as the ability to pay for themselves, reference chez scheme.

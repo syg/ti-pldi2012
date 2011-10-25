@@ -168,7 +168,7 @@ JM+TI adds several major optimizations to JM,
 and requires additional compilations due to dynamic type changes
 (\Section\ref{sec:recompilation}).
 Figure~\ref{fig:sunspider} shows the effect of these changes on the popular
-SunSpider JavaScript benchmark \cite{SunSpider}.
+SunSpider JavaScript benchmark\footnote{\url{http://www.webkit.org/perf/sunspider/sunspider.html}}.
 
 The JM and JM+TI sections of Figure~\ref{fig:sunspider} show the total amount of time
 spent compiling and the total number of compilations for both versions of
@@ -195,10 +195,11 @@ of type based optimizations.
 When run twenty times, the speedup given by JM+TI increases to 27.1\%.
 
 Figures~\ref{fig:v8bench} and~\ref{fig:kraken} compare the performance of JM and JM+TI
-on two other popular benchmarks, the V8 \cite{V8} and Kraken \cite{Kraken} suites.
+on two other popular benchmarks, the V8\footnote{\url{http://v8.googlecode.com/svn/data/benchmarks/v6/run.html}}
+and Kraken\footnote{\url{http://krakenbenchmark.mozilla.org}} suites.
 These suites run for several seconds each, far longer than SunSpider,
 and show a larger speedup.
-V8 scores (which are given as a rate, rather than a raw time) improve by 50\%,
+V8 scores (which are given as a rate, rather than a raw time; larger is better) improve by 50\%,
 and Kraken scores improve by a factor of 2.69.
 
 Across the benchmarks, not all tests improved equally, and some regressed over
@@ -283,8 +284,9 @@ is available in the appendix of the full version of the paper.
 \item Ten popular websites which use JavaScript extensively.
 Each site was used for several minutes, exercising various features.
 
-\item The membench50 suite, a memory testing framework
-which loads the front pages of 50 popular websites \cite{MemBench}.
+\item The membench50 suite\footnote{\url{http://krakenbenchmark.mozilla.org}},
+a memory testing framework
+which loads the front pages of 50 popular websites.
 
 \item The three benchmark suites described in \Section\ref{sec:benchmarks}.
 
