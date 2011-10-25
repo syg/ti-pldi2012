@@ -251,7 +251,7 @@ lights         & 97 & 1 & 2 & 15 & 34 & 66 & 0 & 1 & 95 & 0 & 4 & 1 \\
 FOTN           & 98 & 1 & 1 & 20 & 39 & 61 & 0 & 0 & 96 & 0 & 3 & 0 \\
 monalisa       & 99 & 1 & 0 & 4 & 94 & 3 & 2 & 0 & 100 & 0 & 0 & 0 \\
 \midrule
-Overall        & 84.7 & 5.7 & 9.8 & 41.4 & & & & 6.2 \\
+Overall        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7 & 27.0 & 7.7 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -262,12 +262,12 @@ Overall        & 84.7 & 5.7 & 9.8 & 41.4 & & & & 6.2 \\
 \begin{center}
 \begin{tabular}{lrrrrrr}
 \toprule
-     & \multicolumn{3}{c}{Element Accesses (\%)}
+     & \multicolumn{3}{c}{Indexed Accesses (\%)}
      & \multicolumn{3}{c}{Property Accesses (\%)} \\
 \cmidrule(r){2-4}
 \cmidrule{5-7}
-Test & Packed & Dense & Uk
-     & Static & PIC & Uk \\
+Test & Packed & Array & Uk
+     & Definite & PIC & Uk \\
 \midrule
 gmail          & 90 & 4 & 5 & 31 & 57 & 12 \\
 googlemaps     & 92 & 1 & 7 & 18 & 77 & 5 \\
@@ -291,71 +291,96 @@ bullet         & 4 & 96 & 0 & 32 & 65 & 3 \\
 lights         & 97 & 3 & 1 & 21 & 78 & 1 \\
 FOTN           & 91 & 6 & 3 & 46 & 54 & 0 \\
 monalisa       & 87 & 0 & 13 & 78 & 22 & 0 \\
+\midrule
+Overall        & 75.2 & 14.8 & 10.1 & 39.4 & 55.1 & 5.5 \\
 \bottomrule
 \end{tabular}
 \end{center}
-\nocaptionrule \caption{Element/Property Access Precision}
+\nocaptionrule \caption{Indexed/Property Access Precision}
 \end{figure}
 
 \begin{figure}
 \begin{center}
-\begin{tabular}{lrrrrrrr}
+\begin{tabular}{lrrrr}
 \toprule
-     & \multicolumn{3}{c}{Inferred Precision (\%)}
-     & \multicolumn{4}{c}{Unknown Ops (\%)} \\
-\cmidrule(r){2-4}
-\cmidrule{5-8}
-Test & Mono & Di & Poly & A & I & E & P \\
+     & \multicolumn{2}{c}{Precision}
+     & \multicolumn{2}{c}{Arithmetic} \\
+\cmidrule(r){2-3}
+\cmidrule{4-5}
+Test & Poly (\%) & Ratio & Unknown (\%) & Ratio \\
 \midrule
-280slides      & 23 & 1 & 76 & 93 & 7 & 9 & 27 \\
-gmail          & 52 & 2 & 46 & 32 & 39 & 47 & 12 \\
-googlemaps     & 60 & 2 & 38 & 23 & 33 & 25 & 5 \\
-facebook       & 49 & 2 & 48 & 20 & 24 & 30 & 6 \\
-flickr         & 36 & 2 & 61 & 39 & 15 & 74 & 18 \\
-grooveshark    & 38 & 4 & 58 & 30 & 23 & 19 & 15 \\
-meebo          & 56 & 8 & 36 & 28 & 58 & 39 & 3 \\
-reddit         & 59 & 3 & 37 & 13 & 45 & 17 & 4 \\
-youtube        & 57 & 3 & 40 & 28 & 33 & 0 & 19 \\
-ztype          & 46 & 0 & 54 & 63 & 47 & 95 & 5 \\
-membench50     & 49 & 5 & 47 & 29 & 24 & 29 & 6 \\
+gmail          & 46 & 2.7 & 32 & 1.5 \\
+googlemaps     & 38 & 3.2 & 23 & 4.6 \\
+facebook       & 48 & 3.0 & 20 & 1.3 \\
+flickr         & 61 & 6.1 & 39 & 4.9 \\
+grooveshark    & 58 & 2.8 & 30 & 1.4 \\
+meebo          & 36 & 3.6 & 28 & 3.5 \\
+reddit         & 37 & 1.7 & 13 & 1.9 \\
+youtube        & 40 & 6.7 & 28 & 7.0 \\
+ztype          & 54 & 6.0 & 63 & 7.9 \\
+280slides      & 76 & 4.0 & 93 & n/a \\
+membench50     & 47 & 3.6 & 29 & 2.9 \\
 \midrule
-sunspider      & 94 & 1 & 5 & 6 & 1 & 9 & 0 \\
-v8bench        & 78 & 4 & 18 & 1 & 1 & 6 & 0 \\
-kraken         & 98 & 0 & 2 & 2 & 1 & 2 & 0 \\
+sunspider      & 5 & n/a & 6 & n/a \\
+v8bench        & 18 & 2.6 & 1 & n/a \\
+kraken         & 2 & n/a & 2 & n/a \\
 \midrule
-angrybirds     & 9 & 0 & 90 & 93 & 23 & 24 & 2 \\
-gameboy        & 81 & 4 & 15 & 7 & 12 & 12 & 0 \\
-bullet         & 38 & 0 & 62 & 79 & 59 & 0 & 3 \\
-lights         & 51 & 12 & 37 & 63 & 9 & 14 & 0 \\
-FOTN           & 70 & 2 & 28 & 57 & 3 & 30 & 0 \\
-monalisa       & 56 & 1 & 44 & 41 & 0 & 16 & 0 \\
+angrybirds     & 90 & n/a & 93 & n/a \\
+gameboy        & 15 & 1.3 & 7 & 1.0 \\
+bullet         & 62 & 3.9 & 79 & 11.3 \\
+lights         & 37 & n/a & 63 & n/a \\
+FOTN           & 28 & n/a & 57 & n/a \\
+monalisa       & 44 & n/a & 41 & n/a \\
+\midrule
+Overall        & 42.1 & 4.3 & 37.4 & 6.0 \\
 \bottomrule
 \end{tabular}
 \end{center}
-\nocaptionrule \caption{Precision Without Barriers}
+\nocaptionrule \caption{Type Profiles Without Barriers}
 \end{figure}
 
 \subsection{Website Performance}
 
+In this section we measure the precision of the analysis
+on a variety of websites.
+The impact of compiler optimizations is difficult to accurately
+measure on websites due to confounding issues like differences
+in network latency and other browser effects.
+Since analysis precision directly ties into the quality of
+generated code, it makes a good surrogate for optimization effectiveness.
+
+We modified Firefox to track several precision metrics while running,
+which operate at the granularity of individual operations.
+These metrics are generally useful for debugging performance faults,
+and will be released with a future version of Firefox.
+A brief description of the websites used is below.
+A full description of the tested websites and methodology used for each
+is available at \cite{XXX}.
+
 \begin{itemize}
 
 \item Ten popular websites which use Javascript extensively.
-Measurements for each of these websites are on a workload where
-the site was used for several minutes, exercising various features.
+Each site was used for several minutes, exercising various features.
 
 \item The membench50 suite \cite{XXX}, a memory testing framework
 which loads the front pages of 50 popular websites.
 
-\item The three benchmark suites covered in Section~\ref{XXX}.
+\item The three benchmark suites described in Section~\ref{XXX}.
 
 \item Six games and demos which are bound on Javascript performance.
-These were used for several minutes or, in the case of non-interactive
+Each was used for several minutes or, in the case of non-interactive
 demos, viewed to completion.
 
 \end{itemize}
 
+When developing the analysis and compiler we tuned behavior for the three
+covered benchmark suites, as well as various websites.
+Besides the benchmarks, no tuning work has been done for any of the
+websites described here.
 
-INTRO % describe sample pages, contrast websites and games/demos
+We address several questions related to analysis precision,
+listed below. The answers to these sometimes differ significantly
+across the different categories of websites.
 
 \begin{enumerate}
 
@@ -379,8 +404,6 @@ The analysis is sound and will always compute a lower bound on the possible
 types that can appear at the various points in a program,
 so the precision of the generated type information is limited for
 access sites and operations which are polymorphic in practice.
-
-INTRODUCE THIS EARLIER?
 
 \begin{itemize}
 
@@ -408,9 +431,9 @@ the value's kind.
 \end{itemize}
 
 The inferred precision section of Figure~\ref{XXX} shows the fractions
-of dynamic element and property reads which were at a site inferred
+of dynamic indexed element and property reads which were at a site inferred
 as producing
-either monomorphic, dimorphic, or polymorphic sets of values.
+monomorphic, dimorphic, or polymorphic sets of values.
 All these sites have type barriers on them, so the set of inferred types
 is equivalent to the set of observed types.
 
@@ -433,7 +456,7 @@ gives insight to the precision of the model of the heap constructed by
 the analysis.
 
 The barrier section of Figure~\ref{XXX} shows the frequencies of
-element and property accesses on sampled pages which required a barrier.
+indexed and property accesses on sampled pages which required a barrier.
 Averaged across pages, barriers were required on 41.4\% of such accesses.
 There is a large disparity between websites and other pages.
 Websites were fairly homogenous, requiring barriers on between 35\%
@@ -455,7 +478,7 @@ DISCUSS OUTLIERS
 
 The arithmetic and index sections of Figure~\ref{XXX} show the frequency
 of inferred types for arithmetic operations and the index operand of
-element accesses, respectively.
+indexed accesses, respectively.
 These are operations for which precise type information is crucial
 for efficient compilation, and give a sense of the precision of type
 information for operations which do not have associated type barriers.
@@ -474,8 +497,73 @@ and considerably less arithmetic on doubles --- 14.8\% vs. 37.9\%.
 
 \subsubsection{Access Site Precision}
 
+Efficiently compiling indexed element and property accesses requires
+knowledge of the kind of object being accessed.
+This information is more specific than the monomorphic/polymorphic
+distinction drawn in Section~\ref{XXX}.
+Figure~\ref{XXX} shows the fractions of indexed accesses on arrays
+and of all property accesses which were optimized based on static knowledge.
+
+In the indexed access section, the packed column shows the fraction
+of operations known to be on packed arrays (Section~\ref{XXX}),
+while the array column shows the fraction known to be on arrays not
+known to be packed.
+Indexed operations behave differently on arrays vs. other objects,
+and avoiding dynamic array checks achieves some speedup.
+The `Uk' column is the fraction of dynamic accesses on arrays which
+are not statically known to be on arrays.
+
+Static detection of array operations is very good on all kinds of sites,
+with an average of 75.2\% of accesses on known packed arrays and
+an additional 14.8\% on known but possibly not packed arrays.
+A few outlier websites are responsible for the great majority of
+accesses in the latter category.
+For example, the V8 Crypto benchmark contains almost all of the benchmark's
+array accesses, and the arrays used are not known to be packed
+due to the top down order they are initialized.
+Still, speed improvements on this benchmark are very large.
+
+In the property access section of Figure~\ref{XXX},
+the definite column shows the fraction
+of operations which were statically resolved as definite properties
+(Section~\ref{XXX}), while the PIC column shows the fraction which
+were not resolved statically but were matched using a fallback mechanism,
+polymorphic inline caches \cite{XXX}.
+The `Uk' column is the fraction of operations which were not resolved
+either statically or with a PIC and required a call into the VM;
+this includes accesses where objects
+with many different layouts are used, and accesses on rare kinds of
+properties such as those with scripted getters or setters.
+
+An average of 39.4\% of property accesses were resolved as definite properties,
+with a much higher average proportion on benchmarks of 80.3\%.
+The remainder were by and large handled by PICs, with only 5.5\% of
+accesses requiring a VM call.
+Together, these suggest that objects on websites are by and large
+constructed in a consistent fashion, but that
+our detection of definite properties needs
+to be more robust on object construction patterns seen on websites but
+not on benchmarks.
+
 \subsubsection{Precision Without Barriers}
 
+To test the practical effect of using type barriers to improve precision,
+we repeated the above website tests using a build of Firefox where
+subset constraints were used in place of barrier constraints,
+and type barriers were not used at all (semantic triggers were still used).
+Some of the numbers from these runs are shown in Figure~\ref{XXX}.
+
+The precision section shows the fraction of indexed and property accesses which
+were inferred as polymorphic, and the arithmetic section shows the fraction
+of arithmetic operations where at least one operand type was unknown.
+Both sections show the ratio of the given fraction to the comparable fraction
+with type barriers enabled.
+Overall, with type barriers disabled 42.1\% of accesses are polymorphic and 37.4\%
+of arithmetic operations have operands of unknown type; precision is far worse
+than with type barriers.
+Benchmarks are affected much less than other kinds of sites;
+these benchmarks use polymorphic structures much less
+than the web at large.
 
 %%% Local Variables: 
 %%% mode: latex
