@@ -1,5 +1,5 @@
 \begin{figure*}[ht]
-\begin{center}
+\centering
 \begin{tabular}{lr@{.}lrr@{.}lrr@{.}lr@{.}lr@{.}lr@{.}lr@{.}lr@{.}lr@{.}l}
 
 \toprule
@@ -88,13 +88,12 @@ Total                  & 21&06 & 146 & 53&13 & 224 & 2&52
 \bottomrule
 
 \end{tabular}
-\end{center}
 \nocaptionrule \caption{SunSpider-0.9.1 Benchmark Results}
 \label{fig:sunspider}
 \end{figure*}
 
 \begin{figure}
-\begin{center}
+\centering
 \begin{tabular}{lrrr@{.}l}
 \toprule
 Test & JM & JM+TI & \multicolumn{2}{c}{Ratio} \\
@@ -110,13 +109,12 @@ Splay & 4775 & 7049 & 1&48 \\
 Total & 3702 & 5555 & 1&50 \\
 \bottomrule
 \end{tabular}
-\end{center}
 \nocaptionrule \caption{V8 (version 6) Benchmark Results}
 \label{fig:v8bench}
 \end{figure}
 
 \begin{figure}
-\begin{center}
+\centering
 \begin{tabular}{lr@{.}lr@{.}lr@{.}l}
 
 \toprule
@@ -145,7 +143,6 @@ crypto-sha256-iterative & 153&2 & 106&2 & 0&69 \\
 Total & 10176&4 & 3778&2 & 0&37 \\
 \bottomrule
 \end{tabular}
-\end{center}
 \nocaptionrule \caption{Kraken-1.1 Benchmark Results}
 \label{fig:kraken}
 \end{figure}
@@ -171,7 +168,7 @@ JM+TI adds several major optimizations to JM,
 and requires additional compilations due to dynamic type changes
 (\Section\ref{sec:recompilation}).
 Figure~\ref{fig:sunspider} shows the effect of these changes on the popular
-SunSpider JavaScript benchmark \cite{XXX}.
+SunSpider JavaScript benchmark \cite{SunSpider}.
 
 The JM and JM+TI sections of Figure~\ref{fig:sunspider} show the total amount of time
 spent compiling and the total number of compilations for both versions of
@@ -198,7 +195,7 @@ of type based optimizations.
 When run twenty times, the speedup given by JM+TI increases to 27.1\%.
 
 Figures~\ref{fig:v8bench} and~\ref{fig:kraken} compare the performance of JM and JM+TI
-on two other popular benchmarks, the V8 \cite{XXX} and Kraken \cite{XXX} suites.
+on two other popular benchmarks, the V8 \cite{V8} and Kraken \cite{Kraken} suites.
 These suites run for several seconds each, far longer than SunSpider,
 and show a larger speedup.
 V8 scores (which are given as a rate, rather than a raw time) improve by 50\%,
@@ -215,10 +212,8 @@ builtin functions must be tracked to ensure the correctness of type
 information for the heap.
 We are working to reduce the overhead incurred by such side effects.
 
-
-
 \begin{figure*}
-\begin{center}
+\centering
 \begin{tabular}{lrrrrrrrrrrrrrrr}
 \toprule
 & \multicolumn{3}{c}{Inferred Precision (\%)} &
@@ -244,7 +239,7 @@ reddit         & 71 & 7 & 22 & 51 & 64 & 0 & 29 & 7 & 22 & 0 & 71 & 7 \\
 youtube        & 83 & 11 & 6 & 38 & 50 & 27 & 19 & 4 & 33 & 0 & 38 & 29 \\
 ztype          & 91 & 1 & 9 & 52 & 43 & 41 & 8 & 8 & 79 & 9 & 12 & 0 \\
 280slides      & 79 & 3 & 19 & 64 & 48 & 51 & 1 & 0 & 6 & 0 & 91 & 2 \\
-membench50     & 76 & 11 & 13 & 49 & 65 & 7  & 18 & 10 & 44 & 0 & 47 & 10 \\
+membench150    & 76 & 11 & 13 & 49 & 65 & 7  & 18 & 10 & 44 & 0 & 47 & 10 \\
 \midrule
 sunspider      & 99 & 0  & 1  & 7  & 72 & 21 & 7  & 0  & 95 & 0 & 4  & 1  \\
 v8bench        & 86 & 7  & 7  & 26 & 98 & 1  & 0  & 0  & 100 & 0 & 0 & 0  \\
@@ -260,7 +255,6 @@ monalisa       & 99 & 1 & 0 & 4 & 94 & 3 & 2 & 0 & 100 & 0 & 0 & 0 \\
 Overall        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7 & 27.0 & 7.7 \\
 \bottomrule
 \end{tabular}
-\end{center}
 \nocaptionrule \caption{Website Type Profiling Results}
 \label{fig:polymorphism}
 \end{figure*}
@@ -282,15 +276,15 @@ all of which operate at the granularity of individual operations.
 %and will be released with a future version of Firefox.
 A brief description of the websites used is below.
 A full description of the tested websites and methodology used for each
-is available at \cite{XXX}.
+is available in the appendix of the full version of the paper.
 
 \begin{itemize}
 
 \item Ten popular websites which use JavaScript extensively.
 Each site was used for several minutes, exercising various features.
 
-\item The membench50 suite \cite{XXX}, a memory testing framework
-which loads the front pages of 50 popular websites.
+\item The membench150 suite, a memory testing framework
+which loads the front pages of 150 popular websites \cite{MemBench}.
 
 \item The three benchmark suites described in \Section\ref{sec:benchmarks}.
 
@@ -428,7 +422,7 @@ arithmetic on non-numeric values --- 16.8\% vs. 1.6\% ---
 and considerably less arithmetic on doubles --- 14.8\% vs. 37.9\%.
 
 \begin{figure}[ht]
-\begin{center}
+\centering
 \begin{tabular}{lrrrrrr}
 \toprule
      & \multicolumn{3}{c}{Indexed Acc. (\%)}
@@ -448,7 +442,7 @@ reddit         & 97 & 0 & 3 & 45 & 51 & 4 \\
 youtube        & 100 & 0 & 0 & 32 & 49 & 19 \\
 ztype          & 100 & 0 & 0 & 23 & 76 & 0 \\
 280slides      & 88 & 12 & 0 & 23 & 56 & 21 \\
-membench50     & 80 & 4 & 16 & 35 & 58 & 6 \\
+membench150    & 80 & 4 & 16 & 35 & 58 & 6 \\
 \midrule
 sunspider      & 93 & 6 & 1 & 81 & 19 & 0 \\
 v8bench        & 7 & 93 & 0 & 64 & 36 & 0 \\
@@ -464,13 +458,12 @@ monalisa       & 87 & 0 & 13 & 78 & 22 & 0 \\
 Overall        & 75.2 & 14.8 & 10.1 & 39.4 & 55.1 & 5.5 \\
 \bottomrule
 \end{tabular}
-\end{center}
 \nocaptionrule \caption{Indexed/Property Access Precision}
 \label{fig:access_objects}
 \end{figure}
 
 \begin{figure}[ht]
-\begin{center}
+\centering
 \begin{tabular}{lrrrr}
 \toprule
      & \multicolumn{2}{c}{Precision}
@@ -489,7 +482,7 @@ reddit         & 37 & 1.7 & 13 & 1.9 \\
 youtube        & 40 & 6.7 & 28 & 7.0 \\
 ztype          & 54 & 6.0 & 63 & 7.9 \\
 280slides      & 76 & 4.0 & 93 & n/a \\
-membench50     & 47 & 3.6 & 29 & 2.9 \\
+membench150    & 47 & 3.6 & 29 & 2.9 \\
 \midrule
 sunspider      & 5 & n/a & 6 & n/a \\
 v8bench        & 18 & 2.6 & 1 & n/a \\
@@ -505,7 +498,6 @@ monalisa       & 44 & n/a & 41 & n/a \\
 Overall        & 42.1 & 4.3 & 37.4 & 6.0 \\
 \bottomrule
 \end{tabular}
-\end{center}
 \nocaptionrule \caption{Type Profiles Without Barriers}
 \label{fig:without_barriers}
 \end{figure}
@@ -544,7 +536,7 @@ the ``Def'' column shows the fraction
 of operations which were statically resolved as definite properties
 (\Section\ref{sec:supplemental-analyses}), while the ``PIC'' column shows the fraction which
 were not resolved statically but were matched using a fallback mechanism,
-polymorphic inline caches \cite{XXX}.
+polymorphic inline caches \cite{Holzle91}.
 The ``Uk'' column is the fraction of operations which were not resolved
 either statically or with a PIC and required a call into the VM;
 this includes accesses where objects

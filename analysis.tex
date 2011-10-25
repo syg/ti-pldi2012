@@ -162,7 +162,10 @@ We associate every object with an {\it object type} $o$.
 When $o \in T_e$ for some expression $e$, then the possible values
 for $e$ when it is executed include all objects with type $o$.
 
-Types are assigned to objects according to their prototype:
+For the sake of brevity and ease of exposition, our simplified JavaScript core
+only contains the ability to construct \code{Object}-prototyped object
+literals via the \code{\{\}} syntax. In practice, prototypes figure into object types more prominently.\footnote{
+In full JavaScript, types are assigned to objects according to their prototype:
 all objects with the same type have the same prototype.
 Additionally, objects with the same prototype have the same type,
 except for plain \code{Object}, \code{Array} and \code{Function} objects.
@@ -173,11 +176,7 @@ for the same script.
 \code{Object} and \code{Function} objects which represent builtin objects
 such as class prototypes, the \code{Math} object and native functions
 are given singleton types --- object types which correspond to only a single
-JavaScript object.
-
-For the sake of brevity and ease of exposition, our simplified JavaScript core
-only contains the ability to construct \code{Object}-prototyped object
-literals via the \code{\{\}} syntax.
+JavaScript object.}
 
 The type of an object is nominal: it is independent from the properties it
 has. Objects which are structurally identical may have different types, and
@@ -195,9 +194,9 @@ $\mathit{index}(o)$ captures the possible types of all integer properties of
 all objects with type $o$.
 These sets cover the types of both ``own'' properties --- those directly held
 by the object --- as well as properties inherited from the object's prototype.
-We do not show how types are propagated from a prototype's type information
-to the instances; since all objects of a type share the same prototype,
-this transfer is straightforward.
+%We do not show how types are propagated from a prototype's type information
+%to the instances; since all objects of a type share the same prototype,
+%this transfer is straightforward.
 
 \subsection{Type Constraints}
 \label{sec:constraints}
@@ -331,28 +330,28 @@ Barriers could be used for other types of assignments, but we do not do so.
 Allowing barriers in new places is unlikely to significantly change the total
 number of required barriers --- improving precision by adding barriers in one
 place can make barriers in another place unnecessary.
-The main cost is the extra compiler complexity required to support new
-kinds of barriers, and we may take such steps in the future.
+%The main cost is the extra compiler complexity required to support new
+%kinds of barriers, and we may take such steps in the future.
 
 \subsection{Supplemental Analyses}
 \label{sec:supplemental-analyses}
 
 In many cases type information itself is insufficient to generate code
 which performs comparably to a statically-typed language such as Java.
-Integer addition requires checks for overflow,
-index operations on arrays require checks for holes in the middle of the array,
-and property accesses require determining whether the object has the property
-and the physical location where the property is stored.
-To reach a speed closer to that of a statically typed language, these checks must
-be eliminated in as many cases as possible.
+Semantic triggers are generally cheap, but they nevertheless incur a cost.
+%Integer addition requires checks for overflow,
+%index operations on arrays require checks for holes in the middle of the array,
+%and property accesses require determining whether the object has the property
+%and the physical location where the property is stored.
+These checks should be eliminated in as many cases as possible.
 
 Eliminating such checks requires more detailed analysis information.
 Rather than build additional complexity into the type analysis itself,
 we use supplemental analyses which leverage type information but do not
 modify the set of inferred types.
-The remainder of this section briefly describes our handling of the above
-situations.
-We do several other supplemental analyses, but these are the most important.
+%The remainder of this section briefly describes our handling of the above
+%situations.
+We do several other supplemental analyses, but those describe below are the most important.
 
 \paragraph{Integer Overflow}
 
@@ -366,7 +365,7 @@ Using type information, we normally know statically where integers are being
 added. We use two techniques on those sites to remove overflow checks.
 First, for simple additions in a loop (mainly loop counters) we try to use
 the loop termination condition to compute a range
-check which can be hoisted from the loop, a standard technique \cite{XXX}
+check which can be hoisted from the loop, a standard technique
 which can only be performed for JavaScript with type information available.
 Second, integer additions which are used as inputs to bitwise operators
 do not need overflow checks, as bitwise operators truncate their inputs to 32

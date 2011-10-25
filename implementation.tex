@@ -14,16 +14,18 @@ Using type information, we were able to improve on this in several ways:
 
 \item Values with statically known types can be tracked in JIT-compiled code
 using an untyped representation.
-Encoding the type in a value requires significant memory traffic
-if the type is stored separately from the actual data in a value
-(as it is in SpiderMonkey),
-or marshaling overhead if a single word is used to encode values.
-
-An untyped representation stores just the data component of a value ---
-a raw pointer for objects and strings, and raw bits for other value types ---
-without explicitly encoding the type.
+Encoding the type in a value requires significant memory traffic or
+marshaling overhead.
+%Encoding the type in a value requires significant memory traffic
+%if the type is stored separately from the actual data in a value
+%(as it is in SpiderMonkey),
+%or marshaling overhead if a single word is used to encode values.
+An untyped representation stores just the data component of a value.
+%a raw pointer for objects and strings, and raw bits for other value types ---
+%without explicitly encoding the type.
 Additionally, knowing the type of a value statically eliminates many
-dynamic type tests which the code would otherwise require.
+dynamic type tests.
+%which the code would otherwise require.
 
 \item Several classical compiler optimizations were added,
 including linear scan register allocation, loop invariant code motion

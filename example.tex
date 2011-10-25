@@ -121,7 +121,7 @@ only be represented as a double.
 
 \end{itemize}
 
-In some cases these behaviors can be proved statically to not occur,
+In some cases these behaviors can be proven statically to not occur,
 but usually they cannot be ruled out.
 If we try to capture these behaviors statically, many element or property
 accesses will be marked as possibly undefined, and many integer operations
@@ -160,8 +160,7 @@ This has important implications:
 \item The program can be analyzed incrementally, as code starts to execute.
 Code which does not execute need not be analyzed.
 This is necessary for JavaScript due to dynamic code loading
-and generation through
-\code{eval} and similar mechanisms. It is also important for reducing
+and generation. It is also important for reducing
 analysis time on websites, which often load several megabytes of
 code and only execute a fraction of it.
 
