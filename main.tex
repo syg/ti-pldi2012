@@ -65,15 +65,34 @@ its performance on major benchmarks and JavaScript-heavy websites by up to 30\%.
 This is scheduled to become the default compilation mode in Firefox 9.
 \end{abstract}
 
-%\input{intro.tex}
 \input{example.tex}
 \input{analysis.tex}
 \input{implementation.tex}
 \input{evaluation.tex}
 \input{related-work.tex}
-%\input{conclusion.tex}
 
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+We have described a hybrid type inference algorithm that is both fast and
+precise using constraint-based static analysis and runtime checks.  We have
+also demonstrated its effectiveness in generating faster code and viability in
+paying for itself in practice by showcasing an implementation integrated with
+the JavaScript JIT compiler inside Firefox.
+
+We hope to look more closely at type barriers in the future with the aim to
+reduce their complexity and support new kinds of barriers. We also hope to
+look at formalizing properties the static analysis needs to satisfy to be
+usable in a our hybrid framework, so that the static analysis may be
+modularized.
+\\
+\\
+{\noindent
+\textbf{Acknowledgements.}
+We thank the Mozilla JavaScript team for draft reading and helpful
+discussion. We also thank other people, just don't know who yet.
+
+\bibliographystyle{abbrvnat}
 \bibliography{citations}{}
-\bibliographystyle{plain}
 
 \end{document}
