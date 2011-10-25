@@ -246,10 +246,10 @@ Note that even the integer addition rule we have given is incomplete: the
 result will be marked as an integer, ignoring the possibility of
 overflow. When addition of two integers overflows, the result is not
 expressible in 32 bits, and has type \code{number}.
-Integer overflows are very rare, and as described in Section~\ref{XXX}
-we avoid pessimistically marking all possibly-overflowing additions as producing
-a double, by detecting overflowing additions dynamically
-and using a trigger to mark the addition's result as a double.
+Integer overflows are very rare, and as described in Section~\ref{sec:example}
+we treat integer additions as producing integers
+and use a semantic trigger to dynamically update the result of
+overflowing additions.
 
 \textsc{Prop} accesses a named property $p$ from the possible objects referred
 to by $x$, with the result the union of $\mathit{prop}(o,p)$ for all such
@@ -293,14 +293,14 @@ must be accounted for with runtime checks.
 \subsection{Type Barriers}
 \label{sec:barriers}
 
-As described in Section~\ref{XXX}, type barriers are dynamic type checks
+As described in Section~\ref{sec:example}, type barriers are dynamic type checks
 inserted to improve analysis precision in the presence
 of polymorphic code.
 Propagation along an assignment $X = Y$ can be modeled
 statically as a subset
 constraint $X \supseteq Y$ or dynamically as a barrier constraint
 $X \barrier Y$.
-It is always safe to use one in place of the other; in Section~\ref{XXX}
+It is always safe to use one in place of the other; in Section~\ref{sec:without_barriers}
 we show the effect of always using subset constraints in lieu of
 barrier constraints.
 
@@ -375,6 +375,7 @@ do not need overflow checks, as bitwise operators truncate their inputs to 32
 bit integers.
 
 \subsubsection{Packed Arrays}
+\label{sec:packed_arrays}
 
 Holes in the middle of an array are rare.
 Arrays are usually constructed by writing to their elements in ascending
@@ -400,6 +401,7 @@ This forces recompilation in the same way as type changes due to semantic
 triggers and tripped type barriers do.
 
 \subsubsection{Definite Properties}
+\label{sec:definite_properties}
 
 JavaScript lacks structural typing, and objects are conceptually maps
 from property names to values, where properties can be freely added,

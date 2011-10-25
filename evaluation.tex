@@ -2,25 +2,26 @@
 \section{Evaluation}
 
 We evaluate the effectiveness of our analysis in two ways.
-Section~\ref{XXX} compares the performance on major JavaScript benchmarks
+Section~\ref{sec:benchmarks} compares the performance on major JavaScript benchmarks
 of a single compiler which does or doesn't use analyzed type information.
-Section~\ref{XXX} examines the behavior of the analysis on a selection of
+Section~\ref{sec:websites} examines the behavior of the analysis on a selection of
 websites which heavily use JavaScript, to gauge the effectiveness of the
 analysis in practice.
 
 \subsection{Benchmark Performance}
+\label{sec:benchmarks}
 
-As described in Section~\ref{XXX}, we have integrated our analysis into
+As described in Section~\ref{sec:implementation}, we have integrated our analysis into
 the Jaegermonkey JIT compiler used in Firefox.
 We compare performance of the compiler used both without the analysis (JM)
 and with the analysis (JM+TI).
-JM+TI adds several major optimizations to JM (Section~\ref{XXX}),
+JM+TI adds several major optimizations to JM,
 and requires additional compilations due to dynamic type changes
-(Section~\ref{XXX}).
-Figure~\ref{XXX} shows the effect of these changes on the popular
+(Section~\ref{sec:recompilation}).
+Figure~\ref{fig:sunspider} shows the effect of these changes on the popular
 SunSpider JavaScript benchmark \cite{XXX}.
 
-The JM and JM+TI sections of Figure~\ref{XXX} show the total amount of time
+The JM and JM+TI sections of Figure~\ref{fig:sunspider} show the total amount of time
 spent compiling and the total number of compilations for both versions of
 the compiler.
 For JM+TI, compilation time also includes time spent generating and solving
@@ -33,7 +34,7 @@ complexity of the added optimizations.
 Despite the significant extra compilation cost, the type-based optimizations
 performed by JM+TI quickly pay for themselves. The $\times$1 and
 $\times$20 sections
-of Figure~\ref{XXX} show the running times of the two versions of the
+of Figure~\ref{fig:sunspider} show the running times of the two versions of the
 compiler on the benchmark run once and modified to run twenty times,
 respectively.
 In the single run case JM+TI is a 6.3\% improvement over JM.
@@ -44,7 +45,7 @@ $\frac{1}{4}$ of a second, and longer execution times better show the effect
 of type based optimizations.
 When run twenty times, the speedup given by JM+TI increases to 27.1\%.
 
-Figures~\ref{XXX} and~\ref{XXX} compare the performance of JM and JM+TI
+Figures~\ref{fig:v8bench} and~\ref{fig:kraken} compare the performance of JM and JM+TI
 on two other popular benchmarks, the V8 \cite{XXX} and Kraken \cite{XXX} suites.
 These suites run for several seconds each, far longer than SunSpider,
 and show a larger speedup.
@@ -154,7 +155,30 @@ Total                  & 21&06 & 146 & 53&13 & 224 & 2&52
 \end{tabular}
 \end{center}
 \nocaptionrule \caption{SunSpider-0.9.1 Benchmark Results}
+\label{fig:sunspider}
 \end{figure*}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{lrrr@{.}l}
+\toprule
+Test & JM & JM+TI & \multicolumn{2}{c}{Ratio} \\
+\midrule
+Richards & 4497 & 7152 & 1&59 \\
+DeltaBlue & 3250 & 9087 & 2&80 \\
+Crypto & 5205 & 13376 & 2&57 \\
+RayTrace & 3733 & 3217 & 0&86 \\
+EarleyBoyer & 4546 & 6291 & 1&38 \\
+RegExp & 1547 & 1316 & 0&85 \\
+Splay & 4775 & 7049 & 1&48 \\
+\midrule
+Total & 3702 & 5555 & 1&50 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\nocaptionrule \caption{V8 (version 6) Benchmark Results}
+\label{fig:v8bench}
+\end{figure}
 
 \begin{figure}
 \begin{center}
@@ -188,27 +212,7 @@ Total & 10176&4 & 3778&2 & 0&37 \\
 \end{tabular}
 \end{center}
 \nocaptionrule \caption{Kraken-1.1 Benchmark Results}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{lrrr@{.}l}
-\toprule
-Test & JM & JM+TI & \multicolumn{2}{c}{Ratio} \\
-\midrule
-Richards & 4497 & 7152 & 1&59 \\
-DeltaBlue & 3250 & 9087 & 2&80 \\
-Crypto & 5205 & 13376 & 2&57 \\
-RayTrace & 3733 & 3217 & 0&86 \\
-EarleyBoyer & 4546 & 6291 & 1&38 \\
-RegExp & 1547 & 1316 & 0&85 \\
-Splay & 4775 & 7049 & 1&48 \\
-\midrule
-Total & 3702 & 5555 & 1&50 \\
-\bottomrule
-\end{tabular}
-\end{center}
-\nocaptionrule \caption{V8 (version 6) Benchmark Results}
+\label{fig:kraken}
 \end{figure}
 
 \begin{figure*}
@@ -256,6 +260,7 @@ Overall        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7
 \end{tabular}
 \end{center}
 \nocaptionrule \caption{Website Type Profiling Results}
+\label{fig:polymorphism}
 \end{figure*}
 
 \begin{figure}
@@ -297,6 +302,7 @@ Overall        & 75.2 & 14.8 & 10.1 & 39.4 & 55.1 & 5.5 \\
 \end{tabular}
 \end{center}
 \nocaptionrule \caption{Indexed/Property Access Precision}
+\label{fig:access_objects}
 \end{figure}
 
 \begin{figure}
@@ -337,9 +343,11 @@ Overall        & 42.1 & 4.3 & 37.4 & 6.0 \\
 \end{tabular}
 \end{center}
 \nocaptionrule \caption{Type Profiles Without Barriers}
+\label{fig:without_barriers}
 \end{figure}
 
 \subsection{Website Performance}
+\label{sec:websites}
 
 In this section we measure the precision of the analysis
 on a variety of websites.
@@ -365,7 +373,7 @@ Each site was used for several minutes, exercising various features.
 \item The membench50 suite \cite{XXX}, a memory testing framework
 which loads the front pages of 50 popular websites.
 
-\item The three benchmark suites described in Section~\ref{XXX}.
+\item The three benchmark suites described in Section~\ref{sec:benchmarks}.
 
 \item Six games and demos which are bound on Javascript performance.
 Each was used for several minutes or, in the case of non-interactive
@@ -384,19 +392,20 @@ across the different categories of websites.
 
 \begin{enumerate}
 
-\item How polymorphic are values read at access sites?  (\ref{XXX})
+\item How polymorphic are values read at access sites?  (\ref{sec:access_polymorphism})
 
-\item How polymorphic are heap objects?  (\ref{XXX})
+\item How often are type barriers required?  (\ref{sec:barriers})
 
-\item How polymorphic are performed operations?  (\ref{XXX})
+\item How polymorphic are performed operations?  (\ref{sec:operations})
 
-\item How polymorphic are the objects used at access sites?  (\ref{XXX})
+\item How polymorphic are the objects used at access sites?  (\ref{sec:access_objects})
 
-\item How important are type barriers?  (\ref{XXX})
+\item How important are type barriers?  (\ref{sec:without_barriers})
 
 \end{enumerate}
 
 \subsubsection{Access Site Polymorphism}
+\label{sec:access_polymorphism}
 
 The degree of polymorphism used in practice is of utmost importance
 for our analysis.
@@ -409,12 +418,11 @@ access sites and operations which are polymorphic in practice.
 
 \item Monomorphic sites have only ever produced a single kind of value.
 Two values are of the same kind if either they are primitives of the same
-type (Figure~\ref{XXX}) or if they are both objects with possibly different
+type or if they are both objects with possibly different
 object types.
 Access sites containing objects of multiple types can often be optimized
 just as well as sites containing objects of a single type, as long as
-all the observed object types share common attributes. See Section~\ref{XXX}.
-Values read at such sites use an untyped representation (Section~\ref{XXX}).
+all the observed object types share common attributes (Section~\ref{sec:access_objects}).
 
 \item Dimorphic sites have produced either strings or objects (but not both),
 and also at most one of the \code{undefined}, \code{null} or a boolean value.
@@ -430,7 +438,7 @@ the value's kind.
 
 \end{itemize}
 
-The inferred precision section of Figure~\ref{XXX} shows the fractions
+The inferred precision section of Figure~\ref{fig:polymorphism} shows the fractions
 of dynamic indexed element and property reads which were at a site inferred
 as producing
 monomorphic, dimorphic, or polymorphic sets of values.
@@ -450,12 +458,13 @@ and 94.7\% for games and demos; websites are more polymorphic than games
 and demos, but by and large behave in a monomorphic fashion.
 
 \subsubsection{Barrier Frequency}
+\label{sec:barriers}
 
 Examining the frequency with which type barriers are required
 gives insight to the precision of the model of the heap constructed by
 the analysis.
 
-The barrier section of Figure~\ref{XXX} shows the frequencies of
+The barrier section of Figure~\ref{fig:polymorphism} shows the frequencies of
 indexed and property accesses on sampled pages which required a barrier.
 Averaged across pages, barriers were required on 41.4\% of such accesses.
 There is a large disparity between websites and other pages.
@@ -475,8 +484,9 @@ more complicated heaps.
 DISCUSS OUTLIERS
 
 \subsubsection{Operation Precision}
+\label{sec:operations}
 
-The arithmetic and index sections of Figure~\ref{XXX} show the frequency
+The arithmetic and index sections of Figure~\ref{fig:polymorphism} show the frequency
 of inferred types for arithmetic operations and the index operand of
 indexed accesses, respectively.
 These are operations for which precise type information is crucial
@@ -496,16 +506,17 @@ arithmetic on non-numeric values --- 16.8\% vs. 1.6\% ---
 and considerably less arithmetic on doubles --- 14.8\% vs. 37.9\%.
 
 \subsubsection{Access Site Precision}
+\label{sec:access_objects}
 
 Efficiently compiling indexed element and property accesses requires
 knowledge of the kind of object being accessed.
 This information is more specific than the monomorphic/polymorphic
-distinction drawn in Section~\ref{XXX}.
-Figure~\ref{XXX} shows the fractions of indexed accesses on arrays
+distinction drawn in Section~\ref{sec:access_polymorphism}.
+Figure~\ref{fig:access_objects} shows the fractions of indexed accesses on arrays
 and of all property accesses which were optimized based on static knowledge.
 
 In the indexed access section, the packed column shows the fraction
-of operations known to be on packed arrays (Section~\ref{XXX}),
+of operations known to be on packed arrays (Section~\ref{sec:packed_arrays}),
 while the array column shows the fraction known to be on arrays not
 known to be packed.
 Indexed operations behave differently on arrays vs. other objects,
@@ -523,10 +534,10 @@ array accesses, and the arrays used are not known to be packed
 due to the top down order they are initialized.
 Still, speed improvements on this benchmark are very large.
 
-In the property access section of Figure~\ref{XXX},
+In the property access section of Figure~\ref{fig:access_objects},
 the definite column shows the fraction
 of operations which were statically resolved as definite properties
-(Section~\ref{XXX}), while the PIC column shows the fraction which
+(Section~\ref{sec:definite_properties}), while the PIC column shows the fraction which
 were not resolved statically but were matched using a fallback mechanism,
 polymorphic inline caches \cite{XXX}.
 The `Uk' column is the fraction of operations which were not resolved
@@ -546,12 +557,13 @@ to be more robust on object construction patterns seen on websites but
 not on benchmarks.
 
 \subsubsection{Precision Without Barriers}
+\label{sec:without_barriers}
 
 To test the practical effect of using type barriers to improve precision,
 we repeated the above website tests using a build of Firefox where
 subset constraints were used in place of barrier constraints,
 and type barriers were not used at all (semantic triggers were still used).
-Some of the numbers from these runs are shown in Figure~\ref{XXX}.
+Some of the numbers from these runs are shown in Figure~\ref{fig:without_barriers}.
 
 The precision section shows the fraction of indexed and property accesses which
 were inferred as polymorphic, and the arithmetic section shows the fraction

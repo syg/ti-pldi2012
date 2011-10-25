@@ -169,7 +169,7 @@ at almost any time.
 This affects the correctness of the JIT-compiled code, and the virtual machine
 must be able to support recompiling or discarding that code at any time,
 including (and especially) when that code is on the stack.
-We discuss our handling of this in Section~\ref{XXX}.
+We discuss our handling of this in Section~\ref{sec:recompilation}.
 
 \end{itemize}
 
@@ -220,11 +220,11 @@ Type barriers differ from the semantic triggers described earlier in that
 they are not required by the semantics of the language and do not need to
 be performed if our analysis is not being used.
 These checks are cheap, though: if the set of observed types is monomorphic,
-as is generally the case (Section~\ref{XXX}), only a single test is required
-by the barrier.
+as is generally the case (Section~\ref{sec:access_polymorphism}),
+only a single test is required by the barrier.
 We are effectively betting that the barriers
 pay for themselves by enabling generation of better code using more precise type information.
-We have found this to be the case (Section~\ref{XXX}).
+We have found this to be the case (Section~\ref{sec:without_barriers}).
 
 Our contributions are:
 
@@ -242,7 +242,7 @@ Firefox, and describe the issues encountered and fixed while preparing
 the analysis for release.
 
 \item We evaluate a variety of metrics showing the effectiveness of the analysis
-and modified compiler on both benchmarks and a selection of popular websites.
+and modified compiler on benchmarks and a selection of popular websites.
 
 \end{itemize}
 

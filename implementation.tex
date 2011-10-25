@@ -1,5 +1,6 @@
 
 \section{Implementation}
+\label{sec:implementation}
 
 We have implemented this analysis for SpiderMonkey, the JavaScript engine
 in Firefox.
@@ -39,13 +40,14 @@ be stored in general purpose or floating point registers.
 
 \end{itemize}
 
-In Section~\ref{XXX} we describe how we handle dynamic recompilation in
-response to type changes, and in Section~\ref{XXX} we describe the techniques
+In Section~\ref{sec:recompilation} we describe how we handle dynamic recompilation in
+response to type changes, and in Section~\ref{sec:memory} we describe the techniques
 used to manage analysis memory usage.
 
 \subsection{Recompilation}
+\label{sec:recompilation}
 
-As described in Section~\ref{XXX}, computed type information can change as
+As described in Section~\ref{sec:example}, computed type information can change as
 a result of runtime checks, newly analyzed code or other dynamic behavior.
 For compiled code to rely on this type information, we must be able
 to recompile the code in response to changes in types while that code is
@@ -63,8 +65,8 @@ Afterwards, the dependencies are encoded as recompilation constraints,
 in the same manner as the type constraints generated during analysis itself.
 When new types are possible for the type sets associated with a recompilation
 constraint, the compiled script is marked for recompilation.
-Since we represent the contents of type sets explicitly and eagerly resolve
-constraints (Section~\ref{XXX}), new types immediately
+We represent the contents of type sets explicitly and eagerly resolve
+constraints, so that new types immediately
 trigger recompilation with little overhead.
 
 When starting this project, the best strategy for recompilation
@@ -97,9 +99,12 @@ After control returns to the trampolines, they use metadata added to
 the calling frame to assemble
 a valid state for the JavaScript engine's bytecode interpreter,
 and resume execution in the interpreter.
-Once the script warms back up by being called or taking loop back edges
-(Section~\ref{XXX}), it is recompiled in the same manner as its
-initial compilation.
+
+We do not compile scripts until after a certain number of calls or loop back
+edges are taken, and these counters are reset whenever discarding JIT code
+for the script.
+Once the script warms back up, it will be recompiled using the new type information
+in the same manner as its initial compilation.
 
 Since the initial compilation and recompilations occur independently
 from one another, the compiler is free to implement any optimization it
@@ -115,34 +120,36 @@ increase the amount of time spent interpreting if thrashing is detected
 dynamically.
 
 \subsection{Memory Management}
+\label{sec:memory}
 
 Two major goals of JIT compilation in a web browser stand in stark contrast
 to one another: generate code that is as fast as possible, and use as little
 memory as possible.
 JIT code can consume a large amount of memory, and the type sets and constraints
 computed by our analysis consume even more.
-We reconcile these by observing how browsers are used in practice:
+We reconcile this conflict by observing how browsers are used in practice:
 to surf the web.
 The web page being viewed, content being generated and JavaScript code which
 is running are constantly changing.
 The compiler and analysis need to not just quickly adapt to new scripts that are
-running, but also to quickly discard regenerable data allocated for
+running, but also to quickly discard regenerable data associated with
 old scripts that are no longer running much, even if the old scripts are still
 reachable and not subject to garbage collection.
 
 We do this with a simple trick:
 on every garbage collection, we throw away all JIT code and as much analysis
 information as possible.
-Only the input information which is computed by interpreting
-a script is retained (Section~\ref{XXX}),
-as if no scripts had ever been analyzed and all
-execution happened in the warmup phase.
-All type constraints are discarded, as well as all type sets for
-intermediate expressions in scripts.
+All inferred types are functionally determined from a small core of type
+information:
+type sets for the properties of objects, function arguments, the observed
+type sets associated with barrier constraints and the semantic triggers which
+have been tripped.
+All type constraints and all other type sets are discarded, notably the type sets
+describing the intermediate expressions in a script without barriers on them.
 This constitutes the great majority of the memory allocated for analysis.
-As described in Section~\ref{XXX}, the retained types are sufficient to
-recover type information for all intermediate expressions in each script,
-should they be reanalyzed and recompiled.
+Should the involved scripts warm back up and require recompilation,
+they will be reanalyzed and in combination with the retained type information
+the complete analysis state for the script is recovered.
 
 In Firefox, garbage collections typically happen every several seconds.
 If the user is quickly changing pages or tabs, unused JIT code and analysis
