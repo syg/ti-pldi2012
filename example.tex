@@ -1,17 +1,17 @@
 
-\section{Example and Motivation}
+\section{The Need for Hybridity}
 \label{sec:example}
 
 \begin{figure}
 \begin{lstlisting}[xleftmargin=18pt]
 function Box(v) {
-  this.f = v;
+  this.p = v;
 }
 
 function use(a) {
   var res = 0;
   for (var i = 0; i < 1000; i++) {
-    var v = a[i].f;
+    var v = a[i].p;
     res = res + v;
   }
   return res;
@@ -33,16 +33,14 @@ This program constructs an array of \code{Box} objects wrapping integer
 values, then calls a \code{use} function which adds up the contents of all
 those \code{Box} objects.
 No types are specified for any of the variables or other values used
-in this program, in keeping with JavaScript's dynamically typed nature.
-However, most operations in this program interact with type information,
-and knowledge of the involved types is needed for the code to
-be efficiently compiled.
+in this program, in keeping with JavaScript's dynamically-typed nature.
+Nevertheless, most operations in this program interact with type information,
+and knowledge of the involved types is needed to efficiently compile the code.
 
-In particular, we are interested in the addition
-\code{res + v} on line 9.
-In JavaScript, it is legal to add any two values together, with the
-operands coerced into strings or numbers if necessary. String
-concatenation is performed for the former, and numeric addition for the latter.
+In particular, we are interested in the addition \code{res + v} on line 9.  In
+JavaScript, addition coerces the operands into strings or numbers if
+necessary. String concatenation is performed for the former, and numeric
+addition for the latter.
 
 Without static information about the types of \code{res} and \code{v},
 a JIT compiler must emit code to handle all possible combinations of
@@ -55,24 +53,24 @@ greatly increases the complexity of the compiler,
 and makes effective implementation of important optimizations like
 register allocation and loop invariant code motion much harder.
 
-If we know the types of \code{res} and \code{v}, we can compile
-code which performs an integer addition without type checks and the need
+If we knew the types of \code{res} and \code{v}, we can compile
+code which performs an integer addition without the need to check or
 to track the types of \code{res} and \code{v}.
 With static knowledge of all types involved in the program, the compiler can
-in many cases generate code similar to that produced for a statically
-typed language such as Java, with similar optimizations.
+in many cases generate code similar to that produced for a statically-typed
+ language such as Java, with similar optimizations.
 
 We can infer possible types for \code{res} and \code{v} statically
 by reasoning about the effect the program's assignments
 and operations have on values produced later.
-This is illustrated below (for brevity, this reasoning does not consider
-the possibility of functions \code{Box} and \code{use} being overwritten).
+This is illustrated below (for brevity, we do not consider
+the possibility of \code{Box} and \code{use} being overwritten).
 
 \begin{enumerate}
 \item On line 17, \code{main} passes an integer when constructing \code{Box}
       objects. On line 2, \code{Box} assigns its parameter to the result's
-      \code{f} property. Thus, \code{Box} objects can have an
-      integer property \code{f}.
+      \code{p} property. Thus, \code{Box} objects can have an
+      integer property \code{p}.
 \item Also on line 17, \code{main} assigns a \code{Box} object to an element
       of \code{a}. On line 15, \code{a} is assigned an array literal,
       so the elements of that literal could be \code{Box} objects.
@@ -80,9 +78,9 @@ the possibility of functions \code{Box} and \code{use} being overwritten).
       within \code{use} can refer to the array created line 15.
       When \code{use} accesses an element of \code{a} on line 8,
       per \#2 the result can be a \code{Box} object.
-\item On line 8, property \code{f} of a value at \code{a[i]} is assigned to \code{v}.
+\item On line 8, property \code{p} of a value at \code{a[i]} is assigned to \code{v}.
       Per \#3 \code{a[i]} can be a \code{Box} object, and per \#1 the
-      \code{f} property can be an integer. Thus, \code{v} can be an integer.
+      \code{p} property can be an integer. Thus, \code{v} can be an integer.
 \item On line 6, \code{res} is assigned an integer. Since \code{v} can be
       an integer, \code{res + v} can be an integer.
       When that addition is assigned to \code{res} on line 9, the assigned
@@ -90,11 +88,11 @@ the possibility of functions \code{Box} and \code{use} being overwritten).
 \end{enumerate}
 
 This reasoning can be captured with inclusion constraints; we compute
-sets of possible types for each value and model the flow of values between
+sets of possible types for each expression and model the flow between
 these sets as subset relationships.
 To be useful for compilation, we need to know not just \emph{some}
 possible types for variables, but \emph{all} possible types.
-In this sense, the static inference above is unsound, and does not account
+In this sense, the static inference above is incomplete: it does not account
 for all possible behaviors of the program.
 A few such behaviors are described below.
 
@@ -108,8 +106,8 @@ Such holes can also be in the middle of an array;
 assigning to just \code{a[0]} and \code{a[2]} leaves a missing
 value at \code{a[1]}.
 
-\item Similarly, the read of \code{a[i].v} may be accessing a property
-which is not actually held by \code{a[i]} or a prototype, and may produce the
+\item Similarly, the read of \code{a[i].v} may be accessing a missing property
+and may produce the
 \code{undefined} value.
 
 \item The addition \code{res + v} may overflow.
@@ -126,7 +124,7 @@ only be represented as a double.
 In some cases these behaviors can be proved statically to not occur,
 but usually they cannot be ruled out.
 If we try to capture these behaviors statically, many element or property
-accesses will be marked as possibly undefined and many integer operations
+accesses will be marked as possibly undefined, and many integer operations
 will be marked as possibly overflowing.
 The resulting type information will be too imprecise to be useful for
 JIT compilation.
@@ -134,8 +132,8 @@ JIT compilation.
 We address this problem by combining static inference about types
 with targeted dynamic type updates.
 Behaviors which are not accounted for statically must be caught dynamically,
-which will trigger modification of the inferred types to reflect
-those new behaviors.
+modifying of the inferred types to reflect
+those new behaviors if caught.
 If \code{a[i]} accesses a hole, the inferred types for the result must be
 marked as possibly \code{undefined}.
 If \code{res + v} overflows, the inferred types for the result must be
@@ -149,18 +147,21 @@ and incur a cost to update the inferred types only the first time that
 execution path is taken for an operation.
 
 The presence of these triggers illustrates the key invariant our analysis
-preserves: inferred types must conservatively model all types for
+preserves:
+\begin{quote}
+Inferred types must conservatively model all types for
 variables and object properties which currently exist, but not those
 which could exist in the future.
+\end{quote}
 This has important implications:
 
 \begin{itemize}
 
 \item The program can be analyzed incrementally, as code starts to execute.
-Code which has never executed does not need to be analyzed.
+Code which does not execute need not be analyzed.
 This is necessary for JavaScript due to dynamic code loading
 and generation through
-\code{eval()} and similar mechanisms. It is also important for reducing
+\code{eval} and similar mechanisms. It is also important for reducing
 analysis time on websites, which often load several megabytes of
 code and only execute a fraction of it.
 
@@ -173,17 +174,10 @@ We discuss our handling of this in Section~\ref{sec:recompilation}.
 
 \end{itemize}
 
-This invariant is also critical to our handling of polymorphic code
-within a program.
-Consider the following extension to the example program:
-
-\begin{lstlisting}[numbers=none]
-function other() {
-  var v = new Box("hello!");
-}
-\end{lstlisting}
-
-Executing the \code{other} function will cause \code{Box} objects
+Dynamic checks and the key invariant are also critical to our handling of polymorphic code
+within a program. Suppose somewhere else in the program we have
+\lstinline{new Box("hello!")}.
+Doing so will cause \code{Box} objects
 to be created which hold strings,
 illustrating the use of \code{Box} as a polymorphic structure.
 Our analysis does not distinguish \code{Box} objects created in different
@@ -194,25 +188,25 @@ Naively, solving the constraints produced by the analysis will mark
 either an integer or a string, even if \code{use}'s runtime behavior is actually monomorphic
 and only works on \code{Box} objects containing integers.
 
-This problem of imprecision leaking across the program is serious, as even
+This problem of imprecision leaking across the program is serious. Even
 if a program is by and large monomorphic, the precision of analysis results on
 it can easily be poisoned by a small amount of polymorphic code.
 
 We deal with uses of polymorphic structures and functions using runtime checks.
 At all element and property accesses, we keep track of both the set of
 types which \emph{could} be observed for the access and the set of types
-which \emph{has} been observed.
+which \emph{has been} observed.
 The former will be a superset of the latter, and if the two are different then
 we insert a runtime check, a {\it type barrier}, to check for conformance
-between whatever value is read out and the observed type set.
+between the resultant value and the observed type set.
 Mismatches lead to updates of the observed type set, and because our
 invariant only requires inferred types to reflect observed types, it is
 safe to only solve analysis constraints with respect to the observed types.
 
-For the example program, a type barrier is required on the \code{a[i].f} access
+For the example program, a type barrier is required on the \code{a[i].p} access
 on line 8, and nowhere else. The barrier will test that the value being read
 is an integer. If a string shows up due to a call to \code{use}
-outside of \code{main}, then the possible types of the \code{a[i].f} access
+outside of \code{main}, then the possible types of the \code{a[i].p} access
 will be updated, and \code{res} and \code{v} will be marked as possibly
 strings by resolving the analysis constraints.
 
@@ -220,31 +214,44 @@ Type barriers differ from the semantic triggers described earlier in that
 they are not required by the semantics of the language and do not need to
 be performed if our analysis is not being used.
 These checks are cheap, though: if the set of observed types is monomorphic,
-as is generally the case (Section~\ref{sec:access_polymorphism}),
+as is generally the case (\Section\ref{sec:access_polymorphism}),
 only a single test is required by the barrier.
 We are effectively betting that the barriers
 pay for themselves by enabling generation of better code using more precise type information.
-We have found this to be the case (Section~\ref{sec:without_barriers}).
+We have found this to be the case in practice (\Section\ref{sec:without_barriers}).
 
-Our contributions are:
+Our contributions are as follows:
 
 \begin{itemize}
 
-\item We describe the use of inclusion constraints to incompletely infer
-possible types in JavaScript programs, and the runtime extension with semantic
-triggers to generate sound type information.
+%\item We describe the use of inclusion constraints to incompletely infer
+%possible types in JavaScript programs, and the runtime extension with semantic
+%triggers to generate sound type information.
 
-\item We describe the use of type barriers to efficiently and precisely handle
-polymorphic code, with a minimum of runtime overhead.
+\item A hybrid inference algorithm for the entirety of JavaScript, using inclusion
+constraints to incompletely infer types extended with runtime semantic triggers
+to generate sound type information.
 
-\item We showcase an implementation integrated with the JIT compiler used in
-Firefox, and describe the issues encountered and fixed while preparing
-the analysis for release.
+\item The use of type barriers to efficiently and precisely handle
+polymorphic code.
 
-\item We evaluate a variety of metrics showing the effectiveness of the analysis
-and modified compiler on benchmarks and a selection of popular websites.
+\item A production implementation integrated with the JIT compiler used in
+Firefox.
+%, and describe the issues encountered and fixed while preparing
+%the analysis for release.
+
+\item A realistic evaluation with various metrics showing the effectiveness of the analysis
+and modified compiler on benchmarks as well as popular websites.
 
 \end{itemize}
+
+The remainder of the paper is organized as follows. In \Section\ref{sec:analysis}
+we describe the static and dynamic aspects of our
+analysis. In \Section\ref{sec:implementation} we outline implementation of the
+analysis as well as integration with the JavaScript JIT compiler inside
+Firefox. In \Section\ref{sec:evaluation} we present empirical
+results. In \Section\ref{sec:related-work} we discuss related work, and in
+\Section\ref{sec:conclusion} we conclude.
 
 %%% Local Variables: 
 %%% mode: latex

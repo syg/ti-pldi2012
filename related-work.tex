@@ -1,7 +1,8 @@
 \section{Related Work}
+\label{sec:related-work}
 
 There is an enormous literature on points-to analysis, JIT compilation, and
-type inference, and we must skip many of them in interest of space.
+type inference. We only compare against a few here.
 
 The most relevant work on type inference for JavaScript to the current work is
 Logozzo and Venter's work on rapid atomic type analysis \cite{Logozzo10}.
@@ -14,8 +15,7 @@ even a much simpler static analysis, when coupled with dynamic checks, perform
 very well ``in the wild''. While their results show impressive speed ups,
 their results on the SunSpider benchmarks were on the scale of hundreds of
 milliseconds while ours are in the tens of milliseconds. Our analysis is more
-practical in that it handles the \emph{entirety} of JavaScript. In particular,
-we have improved handling of what Logozzo and Venter termed ``havoc''
+practical: we have improved handling of what Logozzo and Venter termed ``havoc''
 statements, such as \code{eval}, which make static analysis results
 imprecise. As Richards et al. argued in their surveys, real-world use of
 \code{eval} is pervasive, between 50\% and 82\% for popular websites
@@ -44,7 +44,7 @@ sweet spot by using an iterative algorithm \cite{Plevyak93}, we chose to do so
 by supplementing the static analysis by runtime checks. Our experience with
 the tracing just-in-time compilation technique \cite{GalVEE09, GalPLDI09} have
 demonstrated that solely using type feedback limits the optimizations that we
-can perform. The compiled code is also frequently overspecialized, resulting
+can perform. The compiled code is frequently overspecialized, resulting
 in frequent compilation and lower efficiency.
 
 Agesen and H\"olzle compared the static approach of type inference with the
@@ -53,29 +53,34 @@ of both \cite{Agesen95}. Our system tries to achieve the best of both
 worlds. The greatest difficulty in static type inference for polymorphic
 dynamic languages, whether functional or object-oriented, is the need to
 compute both data and control flow during type inference. We solve this by
-using run-time information (type barriers) where static analyses do poorly,
+using runtime information where static analyses do poorly,
 e.g. determining the particular field of a polymorphic receiver or the
 particular function bound to a variable. Our type barriers may be seen as a
-type cast that only succeeds on type identity, a special case of of Glew and
-Palsberg's use of type casts in their work on method inlining \cite{Glew02}.
+type cast in context of Glew and
+Palsberg's work on method inlining \cite{Glew02}.
 
 Framing the type inference problem as a flow problem is a well-known approach
 \cite{Oxhoj92, Palsberg91}; practical examples include Self's inferencer
-\cite{Agesen93TI}.  Generalizing Hindley/Milner-style type inference to type
-set inclusion from type set equality has been approached at least as early as
-Mitchell's work on type inference and Thatte's work on partial types
-\cite{Mitchell84, Thatte88}. Aiken and Wimmers presented general results on
-type inference using subset constraints \cite{Aiken93}, and Wand showed how to
-frame inference of principal types in function languages as a constraint
-problem \cite{Wand87}. Our work, formally, is much simpler than many such
+\cite{Agesen93TI}.
+%Generalizing Hindley/Milner-style type inference to type
+%set inclusion from type set equality has been approached at least as early as
+%Mitchell's work on type inference and Thatte's work on partial types
+%\cite{Mitchell84, Thatte88}.
+Aiken and Wimmers presented general results on
+type inference using subset constraints \cite{Aiken93}.
+%, and Wand showed how to
+%frame inference of principal types in function languages as a constraint
+%problem \cite{Wand87}.
+Our work, formally, is much simpler than many such
 proposed solutions to solving type constraints as we do not employ type
-variables and the static portion of our analysis need not be sound. No
-unification is required to arrive a solution --- a solution always exists by
-simple propagation.
+variables and the static portion of our analysis need not be sound.
+% No
+%unification is required to arrive a solution --- a solution always exists by
+%simple propagation.
 
 Other hybrid approaches to typing, such as Cartwright and Fagan's soft typing
 and Taha and Siek's gradual typing, have been largely for the purposes of
-correctness and early error detection \cite{Cartwright91, Siek06,
+correctness and early error detection \cite{Cartwright91,
   Siek07}. Soft typing inserts run-time checks, and gradual typing focuses on
 the interaction of code with type annotation and code without
 annotation. These works are \emph{prescriptive}, in that they helps enforce a

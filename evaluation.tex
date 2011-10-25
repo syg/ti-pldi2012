@@ -1,69 +1,4 @@
-
-\section{Evaluation}
-
-We evaluate the effectiveness of our analysis in two ways.
-Section~\ref{sec:benchmarks} compares the performance on major JavaScript benchmarks
-of a single compiler which does or doesn't use analyzed type information.
-Section~\ref{sec:websites} examines the behavior of the analysis on a selection of
-websites which heavily use JavaScript, to gauge the effectiveness of the
-analysis in practice.
-
-\subsection{Benchmark Performance}
-\label{sec:benchmarks}
-
-As described in Section~\ref{sec:implementation}, we have integrated our analysis into
-the Jaegermonkey JIT compiler used in Firefox.
-We compare performance of the compiler used both without the analysis (JM)
-and with the analysis (JM+TI).
-JM+TI adds several major optimizations to JM,
-and requires additional compilations due to dynamic type changes
-(Section~\ref{sec:recompilation}).
-Figure~\ref{fig:sunspider} shows the effect of these changes on the popular
-SunSpider JavaScript benchmark \cite{XXX}.
-
-The JM and JM+TI sections of Figure~\ref{fig:sunspider} show the total amount of time
-spent compiling and the total number of compilations for both versions of
-the compiler.
-For JM+TI, compilation time also includes time spent generating and solving
-type constraints, which is small: 4ms for the entire benchmark.
-JM performs 146 compilations, while JM+TI performs 224, an increase of 78.
-The total compilation time for JM+TI is 2.52 times that of JM, an increase
-of 32ms, due a combination of recompilations, type analysis and the extra
-complexity of the added optimizations.
-
-Despite the significant extra compilation cost, the type-based optimizations
-performed by JM+TI quickly pay for themselves. The $\times$1 and
-$\times$20 sections
-of Figure~\ref{fig:sunspider} show the running times of the two versions of the
-compiler on the benchmark run once and modified to run twenty times,
-respectively.
-In the single run case JM+TI is a 6.3\% improvement over JM.
-One run of SunSpider completes in less than 250ms, which makes it
-difficult to get an optimization to pay for itself on this benchmark.
-JavaScript heavy webpages are typically viewed for longer than
-$\frac{1}{4}$ of a second, and longer execution times better show the effect
-of type based optimizations.
-When run twenty times, the speedup given by JM+TI increases to 27.1\%.
-
-Figures~\ref{fig:v8bench} and~\ref{fig:kraken} compare the performance of JM and JM+TI
-on two other popular benchmarks, the V8 \cite{XXX} and Kraken \cite{XXX} suites.
-These suites run for several seconds each, far longer than SunSpider,
-and show a larger speedup.
-V8 scores (which are given as a rate, rather than a raw time) improve by 50\%,
-and Kraken scores improve by a factor of 2.69.
-
-Across the benchmarks, not all tests improved equally, and some regressed over
-the engine's performance without the analysis.
-These include the date-format-xparb and string-tagcloud tests in SunSpider,
-and the RayTrace and RegExp tests in the V8 benchmarks.
-These are tests which spend little time in JIT code, and perform many side
-effects in VM code itself.
-Changes to objects which happen in the VM due to, e.g. the behavior of
-builtin functions must be tracked to ensure the correctness of type
-information for the heap.
-We are working to reduce the overhead incurred by such side effects.
-
-\begin{figure*}
+\begin{figure*}[ht]
 \begin{center}
 \begin{tabular}{lr@{.}lrr@{.}lrr@{.}lr@{.}lr@{.}lr@{.}lr@{.}lr@{.}lr@{.}l}
 
@@ -215,6 +150,73 @@ Total & 10176&4 & 3778&2 & 0&37 \\
 \label{fig:kraken}
 \end{figure}
 
+
+\section{Evaluation}
+\label{sec:evaluation}
+
+We evaluate the effectiveness of our analysis in two ways.
+In \Section\ref{sec:benchmarks} we compare the performance on major JavaScript benchmarks
+of a single compiler with and without use of analyzed type information.
+In \Section\ref{sec:websites} we examine the behavior of the analysis on a selection of
+websites which heavily use JavaScript to gauge analysis effectiveness in practice.
+
+\subsection{Benchmark Performance}
+\label{sec:benchmarks}
+
+As described in \Section\ref{sec:implementation}, we have integrated our analysis into
+the Jaegermonkey JIT compiler used in Firefox.
+We compare performance of the compiler used both without the analysis (JM)
+and with the analysis (JM+TI).
+JM+TI adds several major optimizations to JM,
+and requires additional compilations due to dynamic type changes
+(\Section\ref{sec:recompilation}).
+Figure~\ref{fig:sunspider} shows the effect of these changes on the popular
+SunSpider JavaScript benchmark \cite{XXX}.
+
+The JM and JM+TI sections of Figure~\ref{fig:sunspider} show the total amount of time
+spent compiling and the total number of compilations for both versions of
+the compiler.
+For JM+TI, compilation time also includes time spent generating and solving
+type constraints, which is small: 4ms for the entire benchmark.
+JM performs 146 compilations, while JM+TI performs 224, an increase of 78.
+The total compilation time for JM+TI is 2.52 times that of JM, an increase
+of 32ms, due a combination of recompilations, type analysis and the extra
+complexity of the added optimizations.
+
+Despite the significant extra compilation cost, the type-based optimizations
+performed by JM+TI quickly pay for themselves. The $\times$1 and
+$\times$20 sections
+of Figure~\ref{fig:sunspider} show the running times of the two versions of the
+compiler on the benchmark run once and modified to run twenty times,
+respectively.
+In the single run case JM+TI is a 6.3\% improvement over JM.
+One run of SunSpider completes in less than 250ms, which makes it
+difficult to get an optimization to pay for itself on this benchmark.
+JavaScript heavy webpages are typically viewed for longer than
+$1/4$ of a second, and longer execution times better show the effect
+of type based optimizations.
+When run twenty times, the speedup given by JM+TI increases to 27.1\%.
+
+Figures~\ref{fig:v8bench} and~\ref{fig:kraken} compare the performance of JM and JM+TI
+on two other popular benchmarks, the V8 \cite{XXX} and Kraken \cite{XXX} suites.
+These suites run for several seconds each, far longer than SunSpider,
+and show a larger speedup.
+V8 scores (which are given as a rate, rather than a raw time) improve by 50\%,
+and Kraken scores improve by a factor of 2.69.
+
+Across the benchmarks, not all tests improved equally, and some regressed over
+the engine's performance without the analysis.
+These include the date-format-xparb and string-tagcloud tests in SunSpider,
+and the RayTrace and RegExp tests in the V8.
+These are tests which spend little time in JIT code, and perform many side
+effects in VM code itself.
+Changes to objects which happen in the VM due to, e.g. the behavior of
+builtin functions must be tracked to ensure the correctness of type
+information for the heap.
+We are working to reduce the overhead incurred by such side effects.
+
+
+
 \begin{figure*}
 \begin{center}
 \begin{tabular}{lrrrrrrrrrrrrrrr}
@@ -263,89 +265,6 @@ Overall        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7
 \label{fig:polymorphism}
 \end{figure*}
 
-\begin{figure}
-\begin{center}
-\begin{tabular}{lrrrrrr}
-\toprule
-     & \multicolumn{3}{c}{Indexed Accesses (\%)}
-     & \multicolumn{3}{c}{Property Accesses (\%)} \\
-\cmidrule(r){2-4}
-\cmidrule{5-7}
-Test & Packed & Array & Uk
-     & Definite & PIC & Uk \\
-\midrule
-gmail          & 90 & 4 & 5 & 31 & 57 & 12 \\
-googlemaps     & 92 & 1 & 7 & 18 & 77 & 5 \\
-facebook       & 16 & 68 & 16 & 41 & 53 & 6 \\
-flickr         & 27 & 0 & 73 & 33 & 53 & 14 \\
-grooveshark    & 90 & 2 & 8 & 20 & 66 & 14 \\
-meebo          & 57 & 0 & 43 & 40 & 57 & 3 \\
-reddit         & 97 & 0 & 3 & 45 & 51 & 4 \\
-youtube        & 100 & 0 & 0 & 32 & 49 & 19 \\
-ztype          & 100 & 0 & 0 & 23 & 76 & 0 \\
-280slides      & 88 & 12 & 0 & 23 & 56 & 21 \\
-membench50     & 80 & 4 & 16 & 35 & 58 & 6 \\
-\midrule
-sunspider      & 93 & 6 & 1 & 81 & 19 & 0 \\
-v8bench        & 7 & 93 & 0 & 64 & 36 & 0 \\
-kraken         & 99 & 0 & 0 & 96 & 4 & 0 \\
-\midrule
-angrybirds     & 90 & 0 & 10 & 22 & 76 & 2 \\
-gameboy        & 98 & 0 & 2 & 6 & 94 & 0 \\
-bullet         & 4 & 96 & 0 & 32 & 65 & 3 \\
-lights         & 97 & 3 & 1 & 21 & 78 & 1 \\
-FOTN           & 91 & 6 & 3 & 46 & 54 & 0 \\
-monalisa       & 87 & 0 & 13 & 78 & 22 & 0 \\
-\midrule
-Overall        & 75.2 & 14.8 & 10.1 & 39.4 & 55.1 & 5.5 \\
-\bottomrule
-\end{tabular}
-\end{center}
-\nocaptionrule \caption{Indexed/Property Access Precision}
-\label{fig:access_objects}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{lrrrr}
-\toprule
-     & \multicolumn{2}{c}{Precision}
-     & \multicolumn{2}{c}{Arithmetic} \\
-\cmidrule(r){2-3}
-\cmidrule{4-5}
-Test & Poly (\%) & Ratio & Unknown (\%) & Ratio \\
-\midrule
-gmail          & 46 & 2.7 & 32 & 1.5 \\
-googlemaps     & 38 & 3.2 & 23 & 4.6 \\
-facebook       & 48 & 3.0 & 20 & 1.3 \\
-flickr         & 61 & 6.1 & 39 & 4.9 \\
-grooveshark    & 58 & 2.8 & 30 & 1.4 \\
-meebo          & 36 & 3.6 & 28 & 3.5 \\
-reddit         & 37 & 1.7 & 13 & 1.9 \\
-youtube        & 40 & 6.7 & 28 & 7.0 \\
-ztype          & 54 & 6.0 & 63 & 7.9 \\
-280slides      & 76 & 4.0 & 93 & n/a \\
-membench50     & 47 & 3.6 & 29 & 2.9 \\
-\midrule
-sunspider      & 5 & n/a & 6 & n/a \\
-v8bench        & 18 & 2.6 & 1 & n/a \\
-kraken         & 2 & n/a & 2 & n/a \\
-\midrule
-angrybirds     & 90 & n/a & 93 & n/a \\
-gameboy        & 15 & 1.3 & 7 & 1.0 \\
-bullet         & 62 & 3.9 & 79 & 11.3 \\
-lights         & 37 & n/a & 63 & n/a \\
-FOTN           & 28 & n/a & 57 & n/a \\
-monalisa       & 44 & n/a & 41 & n/a \\
-\midrule
-Overall        & 42.1 & 4.3 & 37.4 & 6.0 \\
-\bottomrule
-\end{tabular}
-\end{center}
-\nocaptionrule \caption{Type Profiles Without Barriers}
-\label{fig:without_barriers}
-\end{figure}
-
 \subsection{Website Performance}
 \label{sec:websites}
 
@@ -358,24 +277,24 @@ Since analysis precision directly ties into the quality of
 generated code, it makes a good surrogate for optimization effectiveness.
 
 We modified Firefox to track several precision metrics while running,
-which operate at the granularity of individual operations.
-These metrics are generally useful for debugging performance faults,
-and will be released with a future version of Firefox.
+all of which operate at the granularity of individual operations.
+%These metrics are generally useful for debugging performance faults,
+%and will be released with a future version of Firefox.
 A brief description of the websites used is below.
 A full description of the tested websites and methodology used for each
 is available at \cite{XXX}.
 
 \begin{itemize}
 
-\item Ten popular websites which use Javascript extensively.
+\item Ten popular websites which use JavaScript extensively.
 Each site was used for several minutes, exercising various features.
 
 \item The membench50 suite \cite{XXX}, a memory testing framework
 which loads the front pages of 50 popular websites.
 
-\item The three benchmark suites described in Section~\ref{sec:benchmarks}.
+\item The three benchmark suites described in \Section\ref{sec:benchmarks}.
 
-\item Six games and demos which are bound on Javascript performance.
+\item Six games and demos which are bound on JavaScript performance.
 Each was used for several minutes or, in the case of non-interactive
 demos, viewed to completion.
 
@@ -404,6 +323,8 @@ across the different categories of websites.
 
 \end{enumerate}
 
+
+
 \subsubsection{Access Site Polymorphism}
 \label{sec:access_polymorphism}
 
@@ -413,30 +334,31 @@ The analysis is sound and will always compute a lower bound on the possible
 types that can appear at the various points in a program,
 so the precision of the generated type information is limited for
 access sites and operations which are polymorphic in practice.
+We draw the following distinction:
 
-\begin{itemize}
+\begin{description}
 
-\item Monomorphic sites have only ever produced a single kind of value.
-Two values are of the same kind if either they are primitives of the same
-type or if they are both objects with possibly different
+\item[Monomorphic] Sites that have only ever produced a single kind of value.
+Two values are of the same kind if they are either primitives of the same
+type or both objects with possibly different
 object types.
 Access sites containing objects of multiple types can often be optimized
 just as well as sites containing objects of a single type, as long as
-all the observed object types share common attributes (Section~\ref{sec:access_objects}).
+all the observed object types share common attributes (\Section\ref{sec:access_objects}).
 
-\item Dimorphic sites have produced either strings or objects (but not both),
+\item[Dimorphic] Sites that have produced either strings or objects (but not both),
 and also at most one of the \code{undefined}, \code{null} or a boolean value.
 At such sites, even though multiple kinds are possible an untyped
 representation can still be used,
 as a single test on the unboxed form will determine the type.
 The untyped representation of objects and strings are pointers,
-whereas \code{undefined}, \code{null} and booleans are either zero or one.
+whereas \code{undefined}, \code{null} and booleans are either $0$ or $1$.
 
-\item Polymorphic sites have produced values of multiple kinds,
+\item[Polymorphic] Sites that have produced values of multiple kinds,
 and compiled code must use a typed representation which keeps track of
 the value's kind.
 
-\end{itemize}
+\end{description}
 
 The inferred precision section of Figure~\ref{fig:polymorphism} shows the fractions
 of dynamic indexed element and property reads which were at a site inferred
@@ -493,7 +415,7 @@ These are operations for which precise type information is crucial
 for efficient compilation, and give a sense of the precision of type
 information for operations which do not have associated type barriers.
 
-In the arithmetic section, the integer, double, other and unknown columns indicate,
+In the arithmetic section, the ``Integer'', ``Double'', ``Other'' and ``Unknown'' columns indicate,
 respectively,
 operations on known integers which give an integer result,
 operations on integers or doubles which give a double result,
@@ -505,23 +427,106 @@ Comparing websites with other pages, websites tend to do far more
 arithmetic on non-numeric values --- 16.8\% vs. 1.6\% ---
 and considerably less arithmetic on doubles --- 14.8\% vs. 37.9\%.
 
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{lrrrrrr}
+\toprule
+     & \multicolumn{3}{c}{Indexed Acc. (\%)}
+     & \multicolumn{3}{c}{Property Acc. (\%)} \\
+\cmidrule(r){2-4}
+\cmidrule{5-7}
+Test & Packed & Array & Uk
+     & Def & PIC & Uk \\
+\midrule
+gmail          & 90 & 4 & 5 & 31 & 57 & 12 \\
+googlemaps     & 92 & 1 & 7 & 18 & 77 & 5 \\
+facebook       & 16 & 68 & 16 & 41 & 53 & 6 \\
+flickr         & 27 & 0 & 73 & 33 & 53 & 14 \\
+grooveshark    & 90 & 2 & 8 & 20 & 66 & 14 \\
+meebo          & 57 & 0 & 43 & 40 & 57 & 3 \\
+reddit         & 97 & 0 & 3 & 45 & 51 & 4 \\
+youtube        & 100 & 0 & 0 & 32 & 49 & 19 \\
+ztype          & 100 & 0 & 0 & 23 & 76 & 0 \\
+280slides      & 88 & 12 & 0 & 23 & 56 & 21 \\
+membench50     & 80 & 4 & 16 & 35 & 58 & 6 \\
+\midrule
+sunspider      & 93 & 6 & 1 & 81 & 19 & 0 \\
+v8bench        & 7 & 93 & 0 & 64 & 36 & 0 \\
+kraken         & 99 & 0 & 0 & 96 & 4 & 0 \\
+\midrule
+angrybirds     & 90 & 0 & 10 & 22 & 76 & 2 \\
+gameboy        & 98 & 0 & 2 & 6 & 94 & 0 \\
+bullet         & 4 & 96 & 0 & 32 & 65 & 3 \\
+lights         & 97 & 3 & 1 & 21 & 78 & 1 \\
+FOTN           & 91 & 6 & 3 & 46 & 54 & 0 \\
+monalisa       & 87 & 0 & 13 & 78 & 22 & 0 \\
+\midrule
+Overall        & 75.2 & 14.8 & 10.1 & 39.4 & 55.1 & 5.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\nocaptionrule \caption{Indexed/Property Access Precision}
+\label{fig:access_objects}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+     & \multicolumn{2}{c}{Precision}
+     & \multicolumn{2}{c}{Arithmetic} \\
+\cmidrule(r){2-3}
+\cmidrule{4-5}
+Test & Poly (\%) & Ratio & Unknown (\%) & Ratio \\
+\midrule
+gmail          & 46 & 2.7 & 32 & 1.5 \\
+googlemaps     & 38 & 3.2 & 23 & 4.6 \\
+facebook       & 48 & 3.0 & 20 & 1.3 \\
+flickr         & 61 & 6.1 & 39 & 4.9 \\
+grooveshark    & 58 & 2.8 & 30 & 1.4 \\
+meebo          & 36 & 3.6 & 28 & 3.5 \\
+reddit         & 37 & 1.7 & 13 & 1.9 \\
+youtube        & 40 & 6.7 & 28 & 7.0 \\
+ztype          & 54 & 6.0 & 63 & 7.9 \\
+280slides      & 76 & 4.0 & 93 & n/a \\
+membench50     & 47 & 3.6 & 29 & 2.9 \\
+\midrule
+sunspider      & 5 & n/a & 6 & n/a \\
+v8bench        & 18 & 2.6 & 1 & n/a \\
+kraken         & 2 & n/a & 2 & n/a \\
+\midrule
+angrybirds     & 90 & n/a & 93 & n/a \\
+gameboy        & 15 & 1.3 & 7 & 1.0 \\
+bullet         & 62 & 3.9 & 79 & 11.3 \\
+lights         & 37 & n/a & 63 & n/a \\
+FOTN           & 28 & n/a & 57 & n/a \\
+monalisa       & 44 & n/a & 41 & n/a \\
+\midrule
+Overall        & 42.1 & 4.3 & 37.4 & 6.0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\nocaptionrule \caption{Type Profiles Without Barriers}
+\label{fig:without_barriers}
+\end{figure}
+
 \subsubsection{Access Site Precision}
 \label{sec:access_objects}
 
 Efficiently compiling indexed element and property accesses requires
 knowledge of the kind of object being accessed.
 This information is more specific than the monomorphic/polymorphic
-distinction drawn in Section~\ref{sec:access_polymorphism}.
+distinction drawn in \Section\ref{sec:access_polymorphism}.
 Figure~\ref{fig:access_objects} shows the fractions of indexed accesses on arrays
 and of all property accesses which were optimized based on static knowledge.
 
-In the indexed access section, the packed column shows the fraction
-of operations known to be on packed arrays (Section~\ref{sec:packed_arrays}),
-while the array column shows the fraction known to be on arrays not
+In the indexed access section, the ``Packed'' column shows the fraction
+of operations known to be on packed arrays (\Section\ref{sec:supplemental-analyses}),
+while the ``Array'' column shows the fraction known to be on arrays not
 known to be packed.
 Indexed operations behave differently on arrays vs. other objects,
 and avoiding dynamic array checks achieves some speedup.
-The `Uk' column is the fraction of dynamic accesses on arrays which
+The ``Uk'' column is the fraction of dynamic accesses on arrays which
 are not statically known to be on arrays.
 
 Static detection of array operations is very good on all kinds of sites,
@@ -535,12 +540,12 @@ due to the top down order they are initialized.
 Still, speed improvements on this benchmark are very large.
 
 In the property access section of Figure~\ref{fig:access_objects},
-the definite column shows the fraction
+the ``Def'' column shows the fraction
 of operations which were statically resolved as definite properties
-(Section~\ref{sec:definite_properties}), while the PIC column shows the fraction which
+(\Section\ref{sec:supplemental-analyses}), while the ``PIC'' column shows the fraction which
 were not resolved statically but were matched using a fallback mechanism,
 polymorphic inline caches \cite{XXX}.
-The `Uk' column is the fraction of operations which were not resolved
+The ``Uk'' column is the fraction of operations which were not resolved
 either statically or with a PIC and required a call into the VM;
 this includes accesses where objects
 with many different layouts are used, and accesses on rare kinds of

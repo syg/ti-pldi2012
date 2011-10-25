@@ -12,7 +12,7 @@ Using type information, we were able to improve on this in several ways:
 
 \begin{itemize}
 
-\item Values with statically known types can be tracked in jitcode
+\item Values with statically known types can be tracked in JIT-compiled code
 using an untyped representation.
 Encoding the type in a value requires significant memory traffic
 if the type is stored separately from the actual data in a value
@@ -32,78 +32,86 @@ and function call inlining.
 These optimizations could be applied without
 having static type information.
 Doing so is, however, far more difficult and far less effective than in
-the case where types are known.
-For example, loop invariant code motion depends on knowing whether operations
-are idempotent, while in general Javascript operations are not,
+the case where types are known.\footnote{For example, loop invariant code motion depends
+on knowing whether operations
+are idempotent, while in general JavaScript operations are not,
 and register allocation requires types to determine whether values should
-be stored in general purpose or floating point registers.
+be stored in general purpose or floating point registers.}
 
 \end{itemize}
 
-In Section~\ref{sec:recompilation} we describe how we handle dynamic recompilation in
-response to type changes, and in Section~\ref{sec:memory} we describe the techniques
+In \Section\ref{sec:recompilation} we describe how we handle dynamic recompilation in
+response to type changes, and in \Section\ref{sec:memory} we describe the techniques
 used to manage analysis memory usage.
 
 \subsection{Recompilation}
 \label{sec:recompilation}
 
-As described in Section~\ref{sec:example}, computed type information can change as
+As described in \Section\ref{sec:example}, computed type information can change as
 a result of runtime checks, newly analyzed code or other dynamic behavior.
 For compiled code to rely on this type information, we must be able
 to recompile the code in response to changes in types while that code is
 still running.
 
-Compiling a script will only query type information, and will not change it.
-The type sets queried can be for any expression or lvalue in the program,
-independent of the script being compiled,
-and the dependencies of a compiled script need to be encoded efficiently
+Compiling a function will only query type information, and will not change it.
+The type sets queried can be for any expression %or lvalue
+in the program,
+independent of the function being compiled,
+and the dependencies of a compiled function need to be encoded efficiently
 and precisely, to avoid unnecessary recompilation.
 
-As each script is compiled, we keep track of all type information queried
+As each function is compiled, we keep track of all type information queried
 by the compiler.
 Afterwards, the dependencies are encoded as recompilation constraints,
 in the same manner as the type constraints generated during analysis itself.
 When new types are possible for the type sets associated with a recompilation
-constraint, the compiled script is marked for recompilation.
+constraint, the compiled function is marked for recompilation.
 We represent the contents of type sets explicitly and eagerly resolve
 constraints, so that new types immediately
 trigger recompilation with little overhead.
 
-When starting this project, the best strategy for recompilation
-was not apparent.
-We originally tried to immediately generate new JIT code for a script,
-scan the stack for calls made from the script's old code and patch the
-associated return addresses with the corresponding addresses in the
-new code.
-This is a simple design and easy to implement, but had a few major problems:
+%When starting this project, the best strategy for recompilation
+%was not apparent.
+%We originally tried to immediately generate new JIT code for a script,
+%scan the stack for calls made from the script's old code and patch the
+%associated return addresses with the corresponding addresses in the
+%new code.
+%This is a simple design and easy to implement, but had a few major problems:
 
-\begin{itemize}
+%\begin{itemize}
 
-\item When recompiling a script, the compiler had to be sure to generate
-a superset of the calls which appeared in the original script.
-This places complicated constraints on the optimizations that
-can be done when compiling or recompiling.
+%\item When recompiling a script, the compiler had to be sure to generate
+%a superset of the calls which appeared in the original script.
+%This places complicated constraints on the optimizations that
+%can be done when compiling or recompiling.
 
-\item If many type sets change within a short time period (but not all at
-the same time), the recompiler could thrash and repeatedly recompile a
-method, incurring large overhead.
+%\item If many type sets change within a short time period (but not all at
+%the same time), the recompiler could thrash and repeatedly recompile a
+%method, incurring large overhead.
 
-\end{itemize}
+%\end{itemize}
 
-To address these, we changed the design so that return addresses of
-calls made by the old code were replaced with the addresses of
-a few specialized trampolines.
-The JIT code for the script is discarded, and the script is not
-immediately recompiled.
-After control returns to the trampolines, they use metadata added to
-the calling frame to assemble
-a valid state for the JavaScript engine's bytecode interpreter,
-and resume execution in the interpreter.
+%To address these, we changed the design so that return addresses of
+%calls made by the old code were replaced with the addresses of
+%a few specialized trampolines.
+%The JIT code for the script is discarded, and the script is not
+%immediately recompiled.
+%After control returns to the trampolines, they use metadata added to
+%the calling frame to assemble
+%a valid state for the JavaScript engine's bytecode interpreter,
+%and resume execution in the interpreter.
 
-We do not compile scripts until after a certain number of calls or loop back
+Immediate recompilation causes problems such as frequent recompilation
+(thrashing) and complex constraints on optimizations. The details of these
+problems are elided for brevity. When a function is marked for recompilation, we
+do not immediately recompile but instead discard the JIT code for the
+function. Functions which have had their JIT code discarded resume execution
+in the interpreter.
+
+We do not compile functions until after a certain number of calls or loop back
 edges are taken, and these counters are reset whenever discarding JIT code
-for the script.
-Once the script warms back up, it will be recompiled using the new type information
+for the function.
+Once the function warms back up, it will be recompiled using the new type information
 in the same manner as its initial compilation.
 
 Since the initial compilation and recompilations occur independently
@@ -114,7 +122,7 @@ can be discarded.
 In practice this restriction has not been a problem for
 implementing optimizations.
 
-Additionally, since the script will execute in the interpreter some before
+Additionally, since the function will execute in the interpreter some before
 being recompiled, thrashing is reduced, and thresholds can be adjusted to
 increase the amount of time spent interpreting if thrashing is detected
 dynamically.
@@ -129,9 +137,9 @@ JIT code can consume a large amount of memory, and the type sets and constraints
 computed by our analysis consume even more.
 We reconcile this conflict by observing how browsers are used in practice:
 to surf the web.
-The web page being viewed, content being generated and JavaScript code which
-is running are constantly changing.
-The compiler and analysis need to not just quickly adapt to new scripts that are
+The web page being viewed, content being generated, and JavaScript code being
+run are constantly changing.
+The compiler and analysis need to not only quickly adapt to new scripts that are
 running, but also to quickly discard regenerable data associated with
 old scripts that are no longer running much, even if the old scripts are still
 reachable and not subject to garbage collection.
@@ -145,11 +153,11 @@ type sets for the properties of objects, function arguments, the observed
 type sets associated with barrier constraints and the semantic triggers which
 have been tripped.
 All type constraints and all other type sets are discarded, notably the type sets
-describing the intermediate expressions in a script without barriers on them.
+describing the intermediate expressions in a function without barriers on them.
 This constitutes the great majority of the memory allocated for analysis.
-Should the involved scripts warm back up and require recompilation,
-they will be reanalyzed and in combination with the retained type information
-the complete analysis state for the script is recovered.
+Should the involved functions warm back up and require recompilation,
+they will be reanalyzed. In combination with the retained type information,
+the complete analysis state for the function is then recovered.
 
 In Firefox, garbage collections typically happen every several seconds.
 If the user is quickly changing pages or tabs, unused JIT code and analysis
@@ -160,3 +168,8 @@ as a small portion of overall runtime.
 When many tabs are open (the case where memory usage is most important
 for the browser), analysis information typically accounts
 for less than 2\% of the browser's overall memory usage.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End: 

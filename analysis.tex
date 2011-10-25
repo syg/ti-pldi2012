@@ -1,4 +1,5 @@
 \section{Analysis}
+\label{sec:analysis}
 
 We present our analysis in two parts, the static ``may-have-type'' analysis
 and the dynamic ``must-have-type'' analysis. The algorithm is based on
@@ -41,14 +42,12 @@ about functions and function calls in our simplified core; the reader may
 think of functions as objects with special domain and codomain properties.
 
 The types over which we are trying to infer is also shown in
-Figure~\ref{fig:js-core}. The types can be primitive, \code{undefined},
-\code{int}, \code{number}, \code{string}, an object type $o$, or a function
-type\footnote{In full JavaScript, we also have the primitive types \code{bool}
-  and \code{null}.}. The \code{int} type indicates a number expressible as a
-signed 32-bit integer, and is subsumed by \code{number} --- \code{int} is
+Figure~\ref{fig:js-core}. The types can be primitive or an object type
+$o$.\footnote{In full JavaScript, we also have the primitive types \code{bool}
+  and \code{null}.} The \code{int} type indicates a number expressible as a
+signed 32-bit integer and is subsumed by \code{number} --- \code{int} is
 added to all type sets containing \code{number}. Finally, we have sets of
-types which the static analysis computes. The domain and codomain of the
-function type are defined over type sets.
+types which the static analysis computes.
 
 \newcommand{\barrier}{\supseteq_\mathcal{B}}
 
@@ -148,27 +147,27 @@ T_x \supseteq T_e
 \label{fig:constraint-rules}
 \end{figure*}
 
-Section~\ref{sec:object-types} describes object types in more detail,
-Section~\ref{sec:constraints} describes generation of the type constraints
-which forms the static portion of the analysis and the semantic triggers
-these require at runtime, and Section~\ref{sec:barriers}
-describes the use of type barriers to improve analysis precision.
+%\Section\ref{sec:object-types} describes object types in more detail,
+%\Section\ref{sec:constraints} describes generation of the type constraints
+%which forms the static portion of the analysis and the semantic triggers
+%these require at runtime, and \Section\ref{sec:analysis-barriers}
+%describes the use of type barriers to improve analysis precision.
 
 \subsection{Object Types}
 \label{sec:object-types}
 
 To reason about the effects of property accesses, we need type information
 for JavaScript objects and their properties.
-We associate every JavaScript object with an {\it object type} $o$.
+We associate every object with an {\it object type} $o$.
 When $o \in T_e$ for some expression $e$, then the possible values
-for $e$ when it is executed include all JavaScript objects with type $o$.
+for $e$ when it is executed include all objects with type $o$.
 
-Types are assigned to JavaScript objects according to their prototype:
-all JavaScript objects with the same type have the same prototype.
+Types are assigned to objects according to their prototype:
+all objects with the same type have the same prototype.
 Additionally, objects with the same prototype have the same type,
 except for plain \code{Object}, \code{Array} and \code{Function} objects.
 \code{Object} and \code{Array} objects have the same type if they were
-allocated at the same scripted location,
+allocated at the same source location,
 and \code{Function} objects have the same type if they are closures
 for the same script.
 \code{Object} and \code{Function} objects which represent builtin objects
@@ -183,18 +182,18 @@ literals via the \code{\{\}} syntax.
 The type of an object is nominal: it is independent from the properties it
 has. Objects which are structurally identical may have different types, and
 objects with the same type may have different structures. This is crucial for
-efficient analysis. Properties on JavaScript objects can be added or deleted
-at any time, and using structural typing would make an object's type a
+efficient analysis. JavaScript allows adding or deletion of object properties
+at any time. Using structural typing would make an object's type a
 flow-sensitive property.
 
-Instead, for each object type we compute the {\it possible} properties which
-objects of that type can have, and the possible types of those properties.
-These are represented as type sets $\mathit{prop}(o,p)$ and
+Instead, for each object type we compute the \emph{possible} properties which
+objects of that type can have and the \emph{possible} types of those properties.
+These are denoted as type sets $\mathit{prop}(o,p)$ and
 $\mathit{index}(o)$. The set $\mathit{prop}(o,p)$ captures the possible types
 of a non-integer property $p$ for objects with type $o$, while
 $\mathit{index}(o)$ captures the possible types of all integer properties of
 all objects with type $o$.
-These sets cover the types of both `own' properties --- those directly held
+These sets cover the types of both ``own'' properties --- those directly held
 by the object --- as well as properties inherited from the object's prototype.
 We do not show how types are propagated from a prototype's type information
 to the instances; since all objects of a type share the same prototype,
@@ -204,10 +203,10 @@ this transfer is straightforward.
 \label{sec:constraints}
 
 The static portion of our analysis generates constraints on the flow of types
-through the program. We model the semantics of JavaScript by assigning to each
-expression a \emph{type set} which denotes the set of types that it may
-have. It is important to note that these statically-generated constraints do
-not model the entirety of JavaScript semantics. Each constraint is augmented
+through the program. We assign to each
+expression a type set which denotes the set of types that it may
+have. It is important to note that these statically-generated constraints are
+incomplete with respect JavaScript semantics. Each constraint is augmented
 with triggers to fill in the remaining possible behaviors of the
 operation; we informally describe the required triggers for each rule.
 
@@ -216,12 +215,12 @@ standard subset constraint, $\supseteq$, and a \emph{barrier subset
   constraint}, styled $\barrier$. For two type sets $X$ and $Y$, $X \supseteq
 Y$ means that all types in $Y$ are propagated to $X$. On the other hand, $X
 \barrier Y$ means that if $Y$ contains types that are not in $X$, then a
-runtime type barrier is required which can dynamically update the types in $X$.
-Type barriers are described in detail in Section~\ref{sec:barriers}.
+type barrier is required which can dynamically update the types in $X$.
 
 Rules for the constraint generation functions, $\mathcal{C}_e(e)$ for
-expressions and $\mathcal{C}_s(s)$ for statements, are shown in
-Figure~\ref{fig:constraint-rules}. Statically analyzing a method, then, is
+expressions (styled $\judge^e$) and $\mathcal{C}_s(s)$ for statements (styled $\judge^s$),
+are shown in
+Figure~\ref{fig:constraint-rules}. Statically analyzing a function, then, is
 taking the union of the results from applying $\mathcal{C}_s$ to every
 statement in the method.
 
@@ -229,24 +228,24 @@ The \textsc{Undefined}, \textsc{Int}, \textsc{String}, and \textsc{Object}
 rules for literals and the \textsc{Var} rule for variables are
 straightforward.
 
-The \textsc{Add} rule is complex, as addition in JavaScript is very complicated. It is
+The \textsc{Add} rule is complex, as addition in JavaScript is similarly complex. It is
 defined for any combination of values, can perform either a numeric addition,
 string concatenation, or even function calls if either of its operands is an
 object (calling their \code{valueOf} or \code{toString} members, producing a
 number or string).
 
 Using incomplete modeling lets us cut through this complexity.
-Additions in JavaScript programs are typically used to add two numbers
+Additions in actual programs are typically used to add two numbers
 or concatenate a string with something else.
-We statically model exactly these cases,
-and use semantic triggers to monitor the results produced by adding other
+We statically model exactly these cases
+and use semantic triggers to monitor the results produced by other
 combinations of values, at little runtime cost.
 
 Note that even the integer addition rule we have given is incomplete: the
 result will be marked as an integer, ignoring the possibility of
 overflow. When addition of two integers overflows, the result is not
 expressible in 32 bits, and has type \code{number}.
-Integer overflows are very rare, and as described in Section~\ref{sec:example}
+Integer overflows are very rare, and as described in \Section\ref{sec:example}
 we treat integer additions as producing integers
 and use a semantic trigger to dynamically update the result of
 overflowing additions.
@@ -254,10 +253,9 @@ overflowing additions.
 \textsc{Prop} accesses a named property $p$ from the possible objects referred
 to by $x$, with the result the union of $\mathit{prop}(o,p)$ for all such
 objects.  This rule is complete only in cases where the object referred to by
-$x$ (or its prototype) actually has the $p$ property.  Accesses on properties
-which are not actually part of an object simply produce the \code{undefined}
-value of type \code{undefined}.
-
+$x$ (or its prototype) actually has the $p$ property. Accesses on properties
+which are not actually part of an object produce the \code{undefined}
+value of type \code{undefined} during execution.
 As with integer overflow, accesses on missing properties are rare,
 and yet in most cases it is impractical or impossible to prove that an object
 \emph{definitely} has some property. In such cases we should not dilute the
@@ -291,16 +289,16 @@ must be accounted for with runtime checks.
 %TODO --- lose \textsc{App}?
 
 \subsection{Type Barriers}
-\label{sec:barriers}
+\label{sec:analysis-barriers}
 
-As described in Section~\ref{sec:example}, type barriers are dynamic type checks
+As described in \Section\ref{sec:example}, type barriers are dynamic type checks
 inserted to improve analysis precision in the presence
 of polymorphic code.
 Propagation along an assignment $X = Y$ can be modeled
 statically as a subset
 constraint $X \supseteq Y$ or dynamically as a barrier constraint
 $X \barrier Y$.
-It is always safe to use one in place of the other; in Section~\ref{sec:without_barriers}
+It is always safe to use one in place of the other; in \Section\ref{sec:without_barriers}
 we show the effect of always using subset constraints in lieu of
 barrier constraints.
 
@@ -336,11 +334,11 @@ place can make barriers in another place unnecessary.
 The main cost is the extra compiler complexity required to support new
 kinds of barriers, and we may take such steps in the future.
 
-\subsection{Supplemental Analysis}
+\subsection{Supplemental Analyses}
+\label{sec:supplemental-analyses}
 
 In many cases type information itself is insufficient to generate code
-which performs comparably to a statically typed
-language such as Java.
+which performs comparably to a statically-typed language such as Java.
 Integer addition requires checks for overflow,
 index operations on arrays require checks for holes in the middle of the array,
 and property accesses require determining whether the object has the property
@@ -356,7 +354,7 @@ The remainder of this section briefly describes our handling of the above
 situations.
 We do several other supplemental analyses, but these are the most important.
 
-\subsubsection{Integer Overflow}
+\paragraph{Integer Overflow}
 
 In the execution of a JavaScript program, the overall cost of doing integer
 overflow checks is very small.
@@ -374,12 +372,12 @@ Second, integer additions which are used as inputs to bitwise operators
 do not need overflow checks, as bitwise operators truncate their inputs to 32
 bit integers.
 
-\subsubsection{Packed Arrays}
-\label{sec:packed_arrays}
+\paragraph{Packed Arrays}
 
 Holes in the middle of an array are rare.
 Arrays are usually constructed by writing to their elements in ascending
 order, with no gaps; we call these arrays {\it packed}.
+Packed arrays do not need to be checked for holes.
 There are a large number of ways packed arrays can be constructed, however,
 which makes it difficult to statically prove an array is packed.
 Instead, we dynamically detect out-of-order writes on an array,
@@ -387,25 +385,24 @@ and mark the type of the array object as possibly not packed.
 If an object type has never been marked as not packed, then all objects
 with that type are packed arrays.
 
-When compiling an index operation, if the type set of the accessed object
-contains no object types marked as possibly not packed, then the operation
-must be on a packed array.
-In such cases, the generated code does not need to check for a hole in the
-middle of the array, and only needs to perform a bounds check. In turn, the bounds check can
-often be hoisted from loop bodies in the same manner as integer overflow
-checks.
+%When compiling an index operation, if the type set of the accessed object
+%contains no object types marked as possibly not packed, then the operation
+%must be on a packed array.
+%In such cases, the generated code does not need to check for a hole in the
+%middle of the array, and only needs to perform a bounds check. In turn, the bounds check can
+%often be hoisted from loop bodies in the same manner as integer overflow
+%checks.
 
 The packed status of an object type can change dynamically due to out-of-order
 writes, possibly invalidating JIT code.
 This forces recompilation in the same way as type changes due to semantic
 triggers and tripped type barriers do.
 
-\subsubsection{Definite Properties}
-\label{sec:definite_properties}
+\paragraph{Definite Properties}
 
 JavaScript lacks structural typing, and objects are conceptually maps
 from property names to values, where properties can be freely added,
-deleted or reconfigured by scripts.
+deleted or reconfigured.
 Internally, objects are laid out as an array of values with a mapping from
 property names to slots in that array.
 

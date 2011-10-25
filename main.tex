@@ -16,6 +16,7 @@
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\judge}{\vdash}
 \newcommand{\rulename}[1]{{[\textsc{#1}]\quad}}
+\newcommand{\Section}{\S}
 
 % Comment out lineno for final draft.
 \usepackage{lineno}
@@ -57,7 +58,7 @@ JavaScript based on points-to analysis. Our algorithm is \emph{fast}, in that
 it pays for itself in the optimizations it enables.  Our algorithm is also
 \emph{precise}, by augmenting static analysis with run-time type barriers.
 
-We also showcase an implementation for Mozilla Firefox's JavaScript engine,
+We showcase an implementation for Mozilla Firefox's JavaScript engine,
 demonstrating both performance gains and viability.
 Through integration with the just-in-time (JIT) compiler in Firefox, we have improved
 its performance on major benchmarks and JavaScript-heavy websites by up to 30\%.
