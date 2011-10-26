@@ -1,153 +1,3 @@
-\begin{figure*}[ht]
-\centering
-\begin{tabular}{lr@{.}lrr@{.}lrr@{.}lr@{.}lr@{.}lr@{.}lr@{.}lr@{.}lr@{.}l}
-
-\toprule
-
-           & \multicolumn{3}{c}{JM}
-           & \multicolumn{3}{c}{JM+TI}
-           & \multicolumn{2}{c}{}
-           & \multicolumn{6}{c}{$\times$1 Times (ms)}
-           & \multicolumn{6}{c}{$\times$20 Times (ms)} \\
-
-\cmidrule(r){2-4}
-\cmidrule{5-7}
-\cmidrule(r){10-15}
-\cmidrule{16-21}
-
-Test       & \multicolumn{2}{c}{Time (ms)} & \#
-           & \multicolumn{2}{c}{Time (ms)} & \#
-           & \multicolumn{2}{c}{Ratio}
-           & \multicolumn{2}{c}{JM}
-           & \multicolumn{2}{c}{JM+TI}
-           & \multicolumn{2}{c}{Ratio}
-           & \multicolumn{2}{c}{JM}
-           & \multicolumn{2}{c}{JM+TI}
-           & \multicolumn{2}{c}{Ratio} \\
-
-\midrule
-
-3d-cube                  & 2&68 & 15 & 8&21 & 24 & 3&06
-    & 14&1 & 16&6 & 1&18 & 226&9 & 138&8 & 0&61 \\
-3d-morph                 & 0&55 & 2   & 1&59 & 7  & 2&89 
-    & 9&8  & 10&3 & 1&05 & 184&7 & 174&6 & 0&95 \\
-3d-raytrace              & 2&25 & 19 & 6&04 & 22 & 2&68
-    & 14&7 & 15&6 & 1&06 & 268&6 & 152&2 & 0&57 \\
-access-binary-trees      & 0&63 & 4   & 1&03 & 7  & 1&63
-    & 6&1  & 5&2 & 0&85   & 101&4 & 70&8  & 0&70 \\
-access-fannkuch          & 0&65  & 1  & 2&43 & 4  & 3&76
-    & 15&3 & 10&1 & 0&66  & 289&9 & 113&7 & 0&39 \\
-access-nbody             & 1&01 & 5  & 1&49 & 5  & 1&47
-    & 9&9  & 5&3 & 0&54   & 175&6 & 73&2  & 0&42 \\
-access-nsieve            & 0&28 & 1   & 0&63 & 2   & 2&25
-    & 6&9  & 4&5 & 0&65   & 143&1 & 90&7  & 0&63 \\
-bitops-3bit-bits-in-byte & 0&28 & 2   & 0&58 & 3   & 2&07
-    & 1&7  & 0&8 & 0&47    & 29&9 & 10&0   & 0&33 \\
-bitops-bits-in-byte      & 0&29 & 2   & 0&54 & 3   & 1&86
-    & 7&0  & 4&8 & 0&69   & 139&4 & 85&4  & 0&61 \\
-bitops-bitwise-and       & 0&24 & 1   & 0&39 & 1   & 1&63
-    & 6&1  & 3&1 & 0&51   & 125&2 & 63&7  & 0&51 \\
-bitops-nsieve-bits       & 0&35 & 1   & 0&73 & 2   & 2&09
-    & 6&0  & 3&6 & 0&60    & 116&1 & 63&9  & 0&55 \\
-controlflow-recursive    & 0&38 & 3   & 0&65 & 6   & 1&71
-    & 2&6  & 2&7 & 1&04  & 49&4  & 42&3  & 0&86 \\
-crypto-aes               & 2&04 & 14 & 6&61 & 23 & 3&24
-    & 9&3  & 10&9 & 1&17 & 162&6 & 107&7 & 0&66 \\
-crypto-md5               & 1&81 & 9  & 3&42 & 13 & 1&89
-    & 6&1  & 6&0 & 0&98   & 62&0  & 27&1  & 0&44 \\
-crypto-sha1              & 0&88 & 7   & 2&46 & 11 & 2&80
-    & 3&1  & 4&0 & 1&29  & 44&2  & 19&4  & 0&44 \\
-date-format-tofte        & 0&93 & 21  & 2&27 & 24 & 2&44
-    & 16&4 & 18&3 & 1&12 & 316&6 & 321&8 & 1&02 \\
-date-format-xparb        & 0&88 & 7   & 1&26 & 6  & 1&43
-    & 11&6 & 14&8 & 1&28 & 219&4 & 285&1 & 1&30 \\
-math-cordic              & 0&45 & 3   & 0&94 & 5   & 2&09
-    & 7&4  & 3&4 & 0&46   & 141&0 & 50&3  & 0&36 \\
-math-partial-sums        & 0&47 & 1   & 1&03 & 3  & 2&19
-    & 14&1 & 12&4 & 0&88  & 278&4 & 232&6 & 0&84 \\
-math-spectral-norm       & 0&54 & 5   & 1&39 & 9  & 2&57
-    & 5&0  & 3&4 & 0&68   & 92&6  & 51&2  & 0&55 \\
-regexp-dna               & 0&00 & 0   & 0&00 & 0    & 0&00
-    & 16&3 & 16&1 & 0&99  & 254&5 & 268&8 & 1&06 \\
-string-base64            & 0&87 & 3   & 1&90 & 5   & 2&18
-    & 7&8  & 6&5 & 0&83   & 151&9 & 103&6 & 0&68 \\
-string-fasta             & 0&59 & 4   & 1&70 & 9   & 2&88
-    & 10&0 & 7&3 & 0&73   & 124&0 & 93&4  & 0&75 \\
-string-tagcloud          & 0&54 & 4   & 1&54 & 6  & 2&85
-    & 21&0 & 24&3 & 1&16 & 372&4 & 433&4 & 1&17 \\
-string-unpack-code       & 0&89 & 8   & 2&65 & 16 & 2&98
-    & 24&4 & 26&7 & 1&09 & 417&6 & 442&5 & 1&06 \\
-string-validate-input    & 0&58 & 4   & 1&65 & 8  & 2&84
-    & 10&2 & 9&5 & 0&93   & 216&6 & 184&1 & 0&85 \\
-
-\midrule
-
-Total                  & 21&06 & 146 & 53&13 & 224 & 2&52
-    & 261&9 & 246&4 & 0&94 & 4703&6 & 3700&3 & 0&79 \\
-
-\bottomrule
-
-\end{tabular}
-\nocaptionrule \caption{SunSpider-0.9.1 Benchmark Results}
-\label{fig:sunspider}
-\end{figure*}
-
-\begin{figure}
-\centering
-\begin{tabular}{lrrr@{.}l}
-\toprule
-Test & JM & JM+TI & \multicolumn{2}{c}{Ratio} \\
-\midrule
-Richards & 4497 & 7152 & 1&59 \\
-DeltaBlue & 3250 & 9087 & 2&80 \\
-Crypto & 5205 & 13376 & 2&57 \\
-RayTrace & 3733 & 3217 & 0&86 \\
-EarleyBoyer & 4546 & 6291 & 1&38 \\
-RegExp & 1547 & 1316 & 0&85 \\
-Splay & 4775 & 7049 & 1&48 \\
-\midrule
-Total & 3702 & 5555 & 1&50 \\
-\bottomrule
-\end{tabular}
-\nocaptionrule \caption{V8 (version 6) Benchmark Results}
-\label{fig:v8bench}
-\end{figure}
-
-\begin{figure}
-\centering
-\begin{tabular}{lr@{.}lr@{.}lr@{.}l}
-
-\toprule
-
-Test & \multicolumn{2}{c}{JM}
-     & \multicolumn{2}{c}{JM+TI}
-     & \multicolumn{2}{c}{Ratio} \\
-
-\midrule
-
-ai-astar & 889&4 & 137&8 & 0&15 \\
-audio-beat-detection & 641&0 & 374&8 & 0&58 \\
-audio-dft & 627&8 & 352&6 & 0&56 \\
-audio-fft & 494&0 & 229&8 & 0&47 \\
-audio-oscillator & 518&0 & 221&2 & 0&43 \\
-imaging-gaussian-blur & 4351&4 & 730&0 & 0&17 \\
-imaging-darkroom & 699&6 & 586&8 & 0&84 \\
-imaging-desaturate & 821&2 & 209&2 & 0&25 \\
-json-parse-financial & 116&6 & 119&2 & 1&02 \\
-json-stringify-tinderbox & 80&0 & 78&8 & 0&99 \\
-crypto-aes & 201&6 & 158&0 & 0&78 \\
-crypto-ccm & 127&8 & 133&6 & 1&05 \\
-crypto-pbkdf2 & 454&8 & 350&2 & 0&77 \\
-crypto-sha256-iterative & 153&2 & 106&2 & 0&69 \\
-\midrule
-Total & 10176&4 & 3778&2 & 0&37 \\
-\bottomrule
-\end{tabular}
-\nocaptionrule \caption{Kraken-1.1 Benchmark Results}
-\label{fig:kraken}
-\end{figure}
-
-
 \section{Evaluation}
 \label{sec:evaluation}
 
@@ -159,6 +9,7 @@ websites which heavily use JavaScript to gauge analysis effectiveness in practic
 
 \subsection{Benchmark Performance}
 \label{sec:benchmarks}
+
 
 As described in \Section\ref{sec:implementation}, we have integrated our analysis into
 the Jaegermonkey JIT compiler used in Firefox.
@@ -208,10 +59,61 @@ These include the date-format-xparb and string-tagcloud tests in SunSpider,
 and the RayTrace and RegExp tests in the V8.
 These are tests which spend little time in JIT code, and perform many side
 effects in VM code itself.
-Changes to objects which happen in the VM due to, e.g. the behavior of
+Changes to objects which happen in the VM due to, e.g., the behavior of
 builtin functions must be tracked to ensure the correctness of type
 information for the heap.
 We are working to reduce the overhead incurred by such side effects.
+
+\begin{figure}
+\centering
+\begin{tabular}{lrrr@{.}l}
+\toprule
+Test & JM & JM+TI & \multicolumn{2}{c}{Ratio} \\
+\midrule
+Richards & 4497 & 7152 & 1&59 \\
+DeltaBlue & 3250 & 9087 & 2&80 \\
+Crypto & 5205 & 13376 & 2&57 \\
+RayTrace & 3733 & 3217 & 0&86 \\
+EarleyBoyer & 4546 & 6291 & 1&38 \\
+RegExp & 1547 & 1316 & 0&85 \\
+Splay & 4775 & 7049 & 1&48 \\
+\midrule
+Total & 3702 & 5555 & 1&50 \\
+\bottomrule
+\end{tabular}
+\nocaptionrule \caption{V8 (version 6) Benchmark Results}
+\label{fig:v8bench}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{tabular}{lr@{.}lr@{.}lr@{.}l}
+\toprule
+Test & \multicolumn{2}{c}{JM}
+     & \multicolumn{2}{c}{JM+TI}
+     & \multicolumn{2}{c}{Ratio} \\
+\midrule
+ai-astar & 889&4 & 137&8 & 0&15 \\
+audio-beat-detection & 641&0 & 374&8 & 0&58 \\
+audio-dft & 627&8 & 352&6 & 0&56 \\
+audio-fft & 494&0 & 229&8 & 0&47 \\
+audio-oscillator & 518&0 & 221&2 & 0&43 \\
+imaging-gaussian-blur & 4351&4 & 730&0 & 0&17 \\
+imaging-darkroom & 699&6 & 586&8 & 0&84 \\
+imaging-desaturate & 821&2 & 209&2 & 0&25 \\
+json-parse-financial & 116&6 & 119&2 & 1&02 \\
+json-stringify-tinderbox & 80&0 & 78&8 & 0&99 \\
+crypto-aes & 201&6 & 158&0 & 0&78 \\
+crypto-ccm & 127&8 & 133&6 & 1&05 \\
+crypto-pbkdf2 & 454&8 & 350&2 & 0&77 \\
+crypto-sha256-iterative & 153&2 & 106&2 & 0&69 \\
+\midrule
+Total & 10176&4 & 3778&2 & 0&37 \\
+\bottomrule
+\end{tabular}
+\nocaptionrule \caption{Kraken-1.1 Benchmark Results}
+\label{fig:kraken}
+\end{figure}
 
 \begin{figure*}
 \centering
@@ -219,7 +121,7 @@ We are working to reduce the overhead incurred by such side effects.
 \toprule
 & \multicolumn{3}{c}{Inferred Precision (\%)} &
 & \multicolumn{4}{c}{Arithmetic (\%)}
-& \multicolumn{4}{c}{Indexes (\%)} \\
+& \multicolumn{4}{c}{Indices (\%)} \\
 
 \cmidrule(r){2-4}
 \cmidrule(r){6-9}
@@ -284,7 +186,7 @@ is available in the appendix of the full version of the paper.
 \item Ten popular websites which use JavaScript extensively.
 Each site was used for several minutes, exercising various features.
 
-\item The membench50 suite\footnote{\url{http://krakenbenchmark.mozilla.org}},
+\item The membench50 suite\footnote{\url{http://gregor-wagner.com/tmp/mem50}},
 a memory testing framework
 which loads the front pages of 50 popular websites.
 
@@ -404,14 +306,14 @@ DISCUSS OUTLIERS
 \subsubsection{Operation Precision}
 \label{sec:operations}
 
-The arithmetic and index sections of Figure~\ref{fig:polymorphism} show the frequency
+The arithmetic and indices sections of Figure~\ref{fig:polymorphism} show the frequency
 of inferred types for arithmetic operations and the index operand of
 indexed accesses, respectively.
 These are operations for which precise type information is crucial
 for efficient compilation, and give a sense of the precision of type
 information for operations which do not have associated type barriers.
 
-In the arithmetic section, the ``Integer'', ``Double'', ``Other'' and ``Unknown'' columns indicate,
+In the arithmetic section, the integer, double, other, and unknown columns indicate,
 respectively,
 operations on known integers which give an integer result,
 operations on integers or doubles which give a double result,
@@ -422,6 +324,12 @@ including 90.2\% of operations performed by websites.
 Comparing websites with other pages, websites tend to do far more
 arithmetic on non-numeric values --- 16.8\% vs. 1.6\% ---
 and considerably less arithmetic on doubles --- 14.8\% vs. 37.9\%.
+
+In the indices section, the integer, double, other, and
+Unknown columns indicate, respectively, that the type of the index, i.e.,
+the type of \code{i} in an expression such as \code{a[i]}, is statically known
+to be an integer, a double, any other known type, or unknown. Websites tend to
+have more unknown index types than both benchmarks and games.
 
 \begin{figure}[ht]
 \centering
@@ -514,9 +422,9 @@ distinction drawn in \Section\ref{sec:access_polymorphism}.
 Figure~\ref{fig:access_objects} shows the fractions of indexed accesses on arrays
 and of all property accesses which were optimized based on static knowledge.
 
-In the indexed access section, the ``Packed'' column shows the fraction
+In the indexed access section, the packed column shows the fraction
 of operations known to be on packed arrays (\Section\ref{sec:supplemental-analyses}),
-while the ``Array'' column shows the fraction known to be on arrays not
+while the array column shows the fraction known to be on arrays not
 known to be packed.
 Indexed operations behave differently on arrays vs. other objects,
 and avoiding dynamic array checks achieves some speedup.
@@ -536,7 +444,7 @@ Still, speed improvements on this benchmark are very large.
 In the property access section of Figure~\ref{fig:access_objects},
 the ``Def'' column shows the fraction
 of operations which were statically resolved as definite properties
-(\Section\ref{sec:supplemental-analyses}), while the ``PIC'' column shows the fraction which
+(\Section\ref{sec:supplemental-analyses}), while the PIC column shows the fraction which
 were not resolved statically but were matched using a fallback mechanism,
 polymorphic inline caches \cite{Holzle91}.
 The ``Uk'' column is the fraction of operations which were not resolved

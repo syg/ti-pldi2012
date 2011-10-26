@@ -22,7 +22,7 @@ imprecise. As Richards et al. argued in their surveys, real-world use of
 \cite{Richards11, Richards10}.
 
 Other works of type inference for JavaScript are more formal. The work of
-Anderson et al. describes a structual object type system with subtyping over
+Anderson et al. describes a structural object type system with subtyping over
 an idealized subset of JavaScript \cite{Anderson05}. As objects in JavaScript
 are extensible, structural object types is a flow-sensitive property. Thiemann
 and Jensen et al.'s typing frameworks approach this problem by using recency
@@ -32,7 +32,7 @@ algorithm is not suitable for online use in a JIT compiler. Again, these
 analyses do not perform well in the presence of statically uncomputable
 builtin functions such as \code{eval}.
 
-Performing static type inference on dynamic languages have been proposed at
+Performing static type inference on dynamic languages has been proposed at
 least as early as Aiken and Murphy \cite{Aiken91}. More related in spirit to
 the current work are the works of the the implementors of the Self language
 \cite{Ungar87}. In implementing type inference for JavaScript, we faced many
@@ -41,14 +41,14 @@ challenges similar to what they faced decades earlier \cite{Ungar92,
 along the dimensions of efficiency and precision. We, too, strived for an
 algorithm that is both fast and efficient; whereas Plevyak and Chien hit the
 sweet spot by using an iterative algorithm \cite{Plevyak93}, we chose to do so
-by supplementing the static analysis by runtime checks. Our experience with
+by supplementing the static analysis by runtime checks. Our experiences with
 the tracing just-in-time compilation technique \cite{GalVEE09, GalPLDI09} have
 demonstrated that solely using type feedback limits the optimizations that we
 can perform. The compiled code is frequently overspecialized, resulting
 in frequent compilation and lower efficiency.
 
 Agesen and H\"olzle compared the static approach of type inference with the
-dynamic approach of type feedback and describes the strengths and weaknesses
+dynamic approach of type feedback and described the strengths and weaknesses
 of both \cite{Agesen95}. Our system tries to achieve the best of both
 worlds. The greatest difficulty in static type inference for polymorphic
 dynamic languages, whether functional or object-oriented, is the need to

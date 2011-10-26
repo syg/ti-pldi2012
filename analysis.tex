@@ -41,7 +41,7 @@ the core language is \code{if}, which tests for definedness. We avoid talking
 about functions and function calls in our simplified core; the reader may
 think of functions as objects with special domain and codomain properties.
 
-The types over which we are trying to infer is also shown in
+The types over which we are trying to infer are also shown in
 Figure~\ref{fig:js-core}. The types can be primitive or an object type
 $o$.\footnote{In full JavaScript, we also have the primitive types \code{bool}
   and \code{null}.} The \code{int} type indicates a number expressible as a
@@ -121,7 +121,6 @@ T_{x[i]} \barrier \mathit{index}(o)\ |\ o \in T_x
 %T_{f(x)} \supseteq T_{\mathit{cod}(f)}\ |\ T_{\mathit{dom}(f)} \rightarrow T_{\mathit{cod}(f)} \in T_f
 %\end{array}
 %\right\}\\
-\\
 \rulename{If} & \inferrule{}{\judge^s \code{if}(x)\ s_1\ \code{else}\ s_2 : \text{\textbullet}} &&
 \mathcal{C}_s(s_1) \cup \mathcal{C}_s(s_2)\\
 \rulename{AssignVar} & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x = e : \text{\textbullet}} &&
@@ -205,7 +204,7 @@ The static portion of our analysis generates constraints on the flow of types
 through the program. We assign to each
 expression a type set which denotes the set of types that it may
 have. It is important to note that these statically-generated constraints are
-incomplete with respect JavaScript semantics. Each constraint is augmented
+incomplete with respect to JavaScript semantics. Each constraint is augmented
 with triggers to fill in the remaining possible behaviors of the
 operation; we informally describe the required triggers for each rule.
 

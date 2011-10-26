@@ -12,6 +12,10 @@
 \usepackage{mathpartir}
 \usepackage{booktabs}
 
+\addtolength{\floatsep}{-1mm}
+\addtolength{\textfloatsep}{-1mm}
+\addtolength{\dbltextfloatsep}{-1mm}
+
 %\newcommand{\code}[1]{{\scriptsize {\tt #1}}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\judge}{\vdash}
@@ -83,7 +87,7 @@ the JavaScript JIT compiler inside Firefox.
 We hope to look more closely at type barriers in the future with the aim to
 reduce their complexity and support new kinds of barriers. We also hope to
 look at formalizing properties the static analysis needs to satisfy to be
-usable in a our hybrid framework, so that the static analysis may be
+usable in our hybrid framework, so that the static analysis may be
 modularized.
 \\
 \\
