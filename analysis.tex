@@ -252,8 +252,7 @@ overflowing additions.
 to by $x$, with the result the union of $\mathit{prop}(o,p)$ for all such
 objects.  This rule is complete only in cases where the object referred to by
 $x$ (or its prototype) actually has the $p$ property. Accesses on properties
-which are not actually part of an object produce the \code{undefined}
-value of type \code{undefined} during execution.
+which are not actually part of an object produce \code{undefined}.
 As with integer overflow, accesses on missing properties are rare,
 and yet in most cases it is impractical or impossible to prove that an object
 \emph{definitely} has some property. In such cases we should not dilute the
@@ -393,17 +392,16 @@ with that type are packed arrays.
 
 The packed status of an object type can change dynamically due to out-of-order
 writes, possibly invalidating JIT code.
-This forces recompilation in the same way as type changes due to semantic
-triggers and tripped type barriers do.
+%This forces recompilation in the same way as type changes due to semantic
+%triggers and tripped type barriers do.
 
 \paragraph{Definite Properties}
 
-JavaScript lacks structural typing, and objects are conceptually maps
+JavaScript objects are conceptually maps
 from property names to values, where properties can be freely added,
-deleted or reconfigured.
+deleted, or reconfigured.
 Internally, objects are laid out as an array of values with a mapping from
 property names to slots in that array.
-
 If a property access can be resolved statically to a particular slot in the
 array, then the access is on a {\it definite} property and can be compiled
 as a direct lookup. This is comparable to

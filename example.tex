@@ -99,16 +99,15 @@ A few such behaviors are described below.
 \begin{itemize}
 
 \item The read of \code{a[i]} may access a {\it hole} in the array.
-Out of bounds array accesses in JavaScript do not throw an exception,
-but instead produce the \code{undefined} value if the array's prototype
+Out of bounds array accesses in JavaScript produce the
+\code{undefined} value if the array's prototype
 does not have a matching property.
 Such holes can also be in the middle of an array;
 assigning to just \code{a[0]} and \code{a[2]} leaves a missing
 value at \code{a[1]}.
 
 \item Similarly, the read of \code{a[i].v} may be accessing a missing property
-and may produce the
-\code{undefined} value.
+and may produce the \code{undefined} value.
 
 \item The addition \code{res + v} may overflow.
 JavaScript has a single number type which does not distinguish between
@@ -123,13 +122,15 @@ only be represented as a double.
 
 In some cases these behaviors can be proven statically to not occur,
 but usually they cannot be ruled out.
-If we try to capture these behaviors statically, many element or property
+A standard solution is to try to capture these behaviors statically, but this proves
+unfruitful. The static analysis must be sound, and to be sound in
+light of highly dynamic behaviors is to be conservative: many element or property
 accesses will be marked as possibly undefined, and many integer operations
 will be marked as possibly overflowing.
 The resulting type information will be too imprecise to be useful for
 JIT compilation.
 
-We address this problem by combining static inference about types
+Our solution, and our key technical novelty, is to combine static inference about types
 with targeted dynamic type updates.
 Behaviors which are not accounted for statically must be caught dynamically,
 modifying the inferred types to reflect
@@ -191,6 +192,20 @@ This problem of imprecision leaking across the program is serious. Even
 if a program is by and large monomorphic, the precision of analysis results on
 it can easily be poisoned by a small amount of polymorphic code.
 
+The reader may question, ``Why not use more sophisticated static analyses that
+produce more precise results?''
+Our choice for the static analysis to not distinguish \code{Box} objects
+created in different places is deliberate. The novelty of our analysis is not
+mere hybridity, but the particular division of what is analyzed statically and
+what is checked dynamically. To be useful in a JIT setting, the analysis must
+be fast: the constraints generated should be $O(n)$ in both time and space. We
+cannot maintain such guarantees given a context-sensitive, or perhaps a even
+more expensive, analysis. Interestingly, \emph{less sophisticated} static
+analyses do not fare well either. Unification-based analyses undermine the
+utility of dynamic checks; precision is unrecoverable despite dynamic
+monitoring. We believe that our particular partitioning of static and dynamic
+is a sweet spot for JIT compilation of a highly dynamic language.
+
 We deal with uses of polymorphic structures and functions using runtime checks.
 At all element and property accesses, we keep track of both the set of
 types which \emph{could} be observed for the access and the set of types
@@ -219,30 +234,38 @@ We are effectively betting that the barriers
 pay for themselves by enabling generation of better code using more precise type information.
 We have found this to be the case in practice (\Section\ref{sec:without_barriers}).
 
-Our contributions are as follows:
+Our main technical contribution is a hybrid inference algorithm for the
+entirety of JavaScript, using inclusion constraints to incompletely infer
+types extended with runtime semantic triggers to generate sound type
+information, as well as type barriers to efficiently and precisely handle
+polymorphic code. Our practical contributions include both an
+implementation of our algorithm and a realistic evaluation. The implementation
+is integrated with the JIT compiler used in Firefox and is of production
+quality. Our evaluation has various metrics showing the effectiveness of the
+analysis and modified compiler on benchmarks as well as popular websites and games.
 
-\begin{itemize}
+%\begin{itemize}
 
 %\item We describe the use of inclusion constraints to incompletely infer
 %possible types in JavaScript programs, and the runtime extension with semantic
 %triggers to generate sound type information.
 
-\item A hybrid inference algorithm for the entirety of JavaScript, using inclusion
-constraints to incompletely infer types extended with runtime semantic triggers
-to generate sound type information.
+%\item A hybrid inference algorithm for the entirety of JavaScript, using inclusion
+%constraints to incompletely infer types extended with runtime semantic triggers
+%to generate sound type information.
 
-\item The use of type barriers to efficiently and precisely handle
-polymorphic code.
+%\item The use of type barriers to efficiently and precisely handle
+%polymorphic code.
 
-\item A production implementation integrated with the JIT compiler used in
-Firefox.
+%\item A production implementation integrated with the JIT compiler used in
+%Firefox.
 %, and describe the issues encountered and fixed while preparing
 %the analysis for release.
 
-\item A realistic evaluation with various metrics showing the effectiveness of the analysis
-and modified compiler on benchmarks as well as popular websites.
+%\item A realistic evaluation with various metrics showing the effectiveness of the analysis
+%and modified compiler on benchmarks as well as popular websites.
 
-\end{itemize}
+%\end{itemize}
 
 The remainder of the paper is organized as follows. In \Section\ref{sec:analysis}
 we describe the static and dynamic aspects of our

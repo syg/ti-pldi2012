@@ -39,10 +39,9 @@ the current work are the works of the the implementors of the Self language
 challenges similar to what they faced decades earlier \cite{Ungar92,
   Agesen94}. Agesen outlines the design space for type inference algorithms
 along the dimensions of efficiency and precision. We, too, strived for an
-algorithm that is both fast and efficient; whereas Plevyak and Chien hit the
-sweet spot by using an iterative algorithm \cite{Plevyak93}, we chose to do so
-by supplementing the static analysis by runtime checks. Our experiences with
-the tracing just-in-time compilation technique \cite{GalVEE09, GalPLDI09} have
+algorithm that is both fast and efficient; whereas Plevyak and Chien's
+sweet spot was an iterative algorithm \cite{Plevyak93}, ours is a
+hybrid one. Our experiences tracing JIT compilers \cite{GalVEE09, GalPLDI09} have
 demonstrated that solely using type feedback limits the optimizations that we
 can perform. The compiled code is frequently overspecialized, resulting
 in frequent compilation and lower efficiency.
@@ -72,8 +71,8 @@ type inference using subset constraints \cite{Aiken93}.
 %frame inference of principal types in function languages as a constraint
 %problem \cite{Wand87}.
 Our work, formally, is much simpler than many such
-proposed solutions to solving type constraints as we do not employ type
-variables and the static portion of our analysis need not be sound.
+proposed solutions to solving type constraints by choice. As such, we do not employ type
+variables.
 % No
 %unification is required to arrive a solution --- a solution always exists by
 %simple propagation.
@@ -81,9 +80,11 @@ variables and the static portion of our analysis need not be sound.
 Other hybrid approaches to typing exist, such as Cartwright and Fagan's soft
 typing and Taha and Siek's gradual typing \cite{Cartwright91, Siek07}. They
 have been largely for the purposes of correctness and early error
-detection. Soft typing inserts run-time checks, and gradual typing focuses on
-the interaction of code with type annotation and code without
-annotation. While these approaches may also be used to improve performance of
+detection.
+%Soft typing inserts run-time checks, and gradual typing focuses on
+%the interaction of code with type annotation and code without
+%annotation.
+While these approaches may also be used to improve performance of
 compiled code, they are at least partially \emph{prescriptive}, in that they
 help enforce a typing discipline, while ours is entirely \emph{subscriptive}, in that
 we are inferring types only to help JIT compilation.
