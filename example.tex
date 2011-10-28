@@ -213,9 +213,10 @@ which \emph{has been} observed.
 The former will be a superset of the latter, and if the two are different then
 we insert a runtime check, a {\it type barrier}, to check for conformance
 between the resultant value and the observed type set.
-Mismatches lead to updates of the observed type set, and because our
-invariant only requires inferred types to reflect observed types, it is
-safe to only solve analysis constraints with respect to the observed types.
+Mismatches lead to updates of the observed type set.
+% and because our
+%invariant only requires inferred types to reflect observed types, it is
+%safe to only solve analysis constraints with respect to the observed types.
 
 For the example program, a type barrier is required on the \code{a[i].p} access
 on line 8, and nowhere else. The barrier will test that the value being read

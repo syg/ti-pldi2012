@@ -4,7 +4,7 @@
 We present our analysis in two parts, the static ``may-have-type'' analysis
 and the dynamic ``must-have-type'' analysis. The algorithm is based on
 Andersen-style constraint-based pointer analysis \cite{AndersenPhD}. The
-static analysis, unlike static type reconstruction algorithms, is
+static analysis is
 intentionally \textit{incomplete} with respect to the semantics of
 JavaScript. It does not account for all possible behaviors of expressions and
 statements and only generates constraints that model a ``may-have-type''
@@ -171,11 +171,11 @@ except for plain \code{Object}, \code{Array} and \code{Function} objects.
 \code{Object} and \code{Array} objects have the same type if they were
 allocated at the same source location,
 and \code{Function} objects have the same type if they are closures
-for the same script.
-\code{Object} and \code{Function} objects which represent builtin objects
-such as class prototypes, the \code{Math} object and native functions
-are given singleton types --- object types which correspond to only a single
-JavaScript object.}
+for the same script.}
+%\code{Object} and \code{Function} objects which represent builtin objects
+%such as class prototypes, the \code{Math} object and native functions
+%are given singleton types --- object types which correspond to only a single
+%JavaScript object.}
 
 The type of an object is nominal: it is independent from the properties it
 has. Objects which are structurally identical may have different types, and
@@ -238,15 +238,15 @@ or concatenate a string with something else.
 We statically model exactly these cases
 and use semantic triggers to monitor the results produced by other
 combinations of values, at little runtime cost.
-
 Note that even the integer addition rule we have given is incomplete: the
 result will be marked as an integer, ignoring the possibility of
-overflow. When addition of two integers overflows, the result is not
-expressible in 32 bits, and has type \code{number}.
-Integer overflows are very rare, and as described in \Section\ref{sec:example}
-we treat integer additions as producing integers
-and use a semantic trigger to dynamically update the result of
-overflowing additions.
+overflow.
+%When addition of two integers overflows, the result is not
+%expressible in 32 bits, and has type \code{number}.
+%Integer overflows are very rare, and as described in \Section\ref{sec:example}
+%we treat integer additions as producing integers
+%and use a semantic trigger to dynamically update the result of
+%overflowing additions.
 
 \textsc{Prop} accesses a named property $p$ from the possible objects referred
 to by $x$, with the result the union of $\mathit{prop}(o,p)$ for all such
@@ -306,6 +306,10 @@ values of a new type are encountered.
 $X$ will contain only the types of values which
 have ever actually been observed at the assignment, and a barrier will be
 required if there are additional types in $Y$ which could be observed.
+Thought of another way, the vanilla subset constraint propagates
+all types at analysis time. The barrier subset constraint does not propagate
+types at analysis time but defers with dynamic checks, propagating the types
+only if necessary during runtime.
 
 Type barriers are much like dynamic type casts in Java: assignments from a
 more general type to a more specific type are possible as long as a
@@ -318,6 +322,14 @@ monotonic with respect to the contents of the type sets in the program.  As
 new types are discovered, new type barriers may be required, and existing ones
 may become unnecessary.  However, it is always safe to perform the runtime
 tests for a given barrier, albeit less efficient.
+
+Recall our hypothetical situation from \Section\ref{sec:example} where \code{Box} is
+used as a polymorphic structure containing either an integer or a string in
+the example program from Figure~\ref{fig:motivating-example}. The subset
+barrier constraint on line 8 is $T_{\code{a[i]}} \barrier T_{\code{Box}}$,
+with $T_{\code{a[i]}} = \{\code{int}\}$ and $T_{\code{Box}} = \{\code{int},
+\code{string}\}$. Since $T_{\code{a[i]}} \not\supseteq T_{\code{Box}}$, a type
+barrier is required.
 
 In the constraint generation rules in Figure~\ref{fig:constraint-rules} we
 present two rules which employ type barrers:
