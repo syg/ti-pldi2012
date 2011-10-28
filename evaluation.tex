@@ -66,19 +66,19 @@ We are working to reduce the overhead incurred by such side effects.
 
 \begin{figure}
 \centering
-\begin{tabular}{lrrr@{.}l}
+\begin{tabular}{lrrrr}
 \toprule
-Test & JM & JM+TI & \multicolumn{2}{c}{Ratio} \\
+Test & JM & JM+TI & Ratio \\
 \midrule
-Richards & 4497 & 7152 & 1&59 \\
-DeltaBlue & 3250 & 9087 & 2&80 \\
-Crypto & 5205 & 13376 & 2&57 \\
-RayTrace & 3733 & 3217 & 0&86 \\
-EarleyBoyer & 4546 & 6291 & 1&38 \\
-RegExp & 1547 & 1316 & 0&85 \\
-Splay & 4775 & 7049 & 1&48 \\
+Richards & 4497 & 7152 & 1.59 \\
+DeltaBlue & 3250 & 9087 & 2.80 \\
+Crypto & 5205 & 13376 & 2.57 \\
+RayTrace & 3733 & 3217 & 0.86 \\
+EarleyBoyer & 4546 & 6291 & 1.38 \\
+RegExp & 1547 & 1316 & 0.85 \\
+Splay & 4775 & 7049 & 1.48 \\
 \midrule
-Total & 3702 & 5555 & 1&50 \\
+Total & 3702 & 5555 & 1.50 \\
 \bottomrule
 \end{tabular}
 \nocaptionrule \caption{V8 (version 6) Benchmark Results}
@@ -87,28 +87,26 @@ Total & 3702 & 5555 & 1&50 \\
 
 \begin{figure}
 \centering
-\begin{tabular}{lr@{.}lr@{.}lr@{.}l}
+\begin{tabular}{lrrr}
 \toprule
-Test & \multicolumn{2}{c}{JM}
-     & \multicolumn{2}{c}{JM+TI}
-     & \multicolumn{2}{c}{Ratio} \\
+Test & JM (ms) & JM+TI (ms) & Ratio \\
 \midrule
-ai-astar & 889&4 & 137&8 & 0&15 \\
-audio-beat-detection & 641&0 & 374&8 & 0&58 \\
-audio-dft & 627&8 & 352&6 & 0&56 \\
-audio-fft & 494&0 & 229&8 & 0&47 \\
-audio-oscillator & 518&0 & 221&2 & 0&43 \\
-imaging-gaussian-blur & 4351&4 & 730&0 & 0&17 \\
-imaging-darkroom & 699&6 & 586&8 & 0&84 \\
-imaging-desaturate & 821&2 & 209&2 & 0&25 \\
-json-parse-financial & 116&6 & 119&2 & 1&02 \\
-json-stringify-tinderbox & 80&0 & 78&8 & 0&99 \\
-crypto-aes & 201&6 & 158&0 & 0&78 \\
-crypto-ccm & 127&8 & 133&6 & 1&05 \\
-crypto-pbkdf2 & 454&8 & 350&2 & 0&77 \\
-crypto-sha256-iterative & 153&2 & 106&2 & 0&69 \\
+ai-astar & 889.4 & 137.8 & 0.15 \\
+audio-beat-detection & 641.0 & 374.8 & 0.58 \\
+audio-dft & 627.8 & 352.6 & 0.56 \\
+audio-fft & 494.0 & 229.8 & 0.47 \\
+audio-oscillator & 518.0 & 221.2 & 0.43 \\
+imaging-gaussian-blur & 4351.4 & 730.0 & 0.17 \\
+imaging-darkroom & 699.6 & 586.8 & 0.84 \\
+imaging-desaturate & 821.2 & 209.2 & 0.25 \\
+json-parse-financial & 116.6 & 119.2 & 1.02 \\
+json-stringify-tinderbox & 80.0 & 78.8 & 0.99 \\
+crypto-aes & 201.6 & 158.0 & 0.78 \\
+crypto-ccm & 127.8 & 133.6 & 1.05 \\
+crypto-pbkdf2 & 454.8 & 350.2 & 0.77 \\
+crypto-sha256-iterative & 153.2 & 106.2 & 0.69 \\
 \midrule
-Total & 10176&4 & 3778&2 & 0&37 \\
+Total & 10176.4 & 3778.2 & 0.37 \\
 \bottomrule
 \end{tabular}
 \nocaptionrule \caption{Kraken-1.1 Benchmark Results}
