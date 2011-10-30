@@ -64,6 +64,32 @@ builtin functions must be tracked to ensure the correctness of type
 information for the heap.
 We are working to reduce the overhead incurred by such side effects.
 
+\subsubsection{Performance Cost of Barriers}
+
+The cost of using type barriers is of crucial importance for two reasons.
+First, if barriers are very expensive then the effectiveness of the compiler
+on websites which require many barriers (\Section\ref{sec:barriers})
+is greatly reduced.
+Second, if barriers are very cheap then the time and memory spent
+tracking the types of heap values would be unnecessary.
+
+To estimate this cost, we modified the compiler to artificially introduce
+barriers at every indexed and property access, as if the types of all values
+in the heap were unknown.
+For benchmarks, this is a great increase above the baseline barrier
+frequency (\Section\ref{sec:barriers}).
+Figure~\ref{fig:benchmarks100} gives times for the modified compiler on the
+tracked benchmarks.
+On a single run of SunSpider, performance was even with the JM
+compiler.
+In all other cases, performance was significantly better than the JM
+compiler and significantly worse than the JM+TI compiler.
+
+This indicates that while the compiler will still be able to effectively
+optimize code in cases where types of heap values are not well known,
+accurately inferring such types and minimizing the barrier count is important
+for maximizing performance.
+
 \begin{figure}
 \centering
 \begin{tabular}{lrrrr}
@@ -81,7 +107,7 @@ Splay & 4775 & 7049 & 1.48 \\
 Total & 3702 & 5555 & 1.50 \\
 \bottomrule
 \end{tabular}
-\nocaptionrule \caption{V8 (version 6) Benchmark Results}
+\nocaptionrule \caption{V8 (version 6) Benchmark Scores (higher is better)}
 \label{fig:v8bench}
 \end{figure}
 
@@ -111,6 +137,22 @@ Total & 10176.4 & 3778.2 & 0.37 \\
 \end{tabular}
 \nocaptionrule \caption{Kraken-1.1 Benchmark Results}
 \label{fig:kraken}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{tabular}{lrrr}
+\toprule
+Suite & Time/Score & vs. JM & vs. JM+TI \\
+\midrule
+Sunspider-0.9.1 $\times$1  & 262.2  & 1.00 & 1.06 \\
+Sunspider-0.9.1 $\times$20 & 4044.3 & .86  & 1.09 \\
+Kraken-1.1          & 7948.6 & .78  & 2.10 \\
+V8 (version 6)      & 4317   & 1.17 & .78 \\
+\bottomrule
+\end{tabular}
+\nocaptionrule \caption{Benchmark Results with 100\% barriers}
+\label{fig:benchmarks100}
 \end{figure}
 
 \begin{figure*}
