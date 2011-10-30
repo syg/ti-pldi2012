@@ -231,12 +231,12 @@ they are not required by the semantics of the language and do not need to
 be performed if our analysis is not being used.
 We are effectively betting that the required barriers
 pay for themselves by enabling generation of better code using more precise type information.
-We have found this to be the case in practice (\Section\ref{sec:barrier_cost},\Section\ref{sec:without_barriers}).
+We have found this to be the case in practice (\Section\ref{sec:barrier_cost}, \Section\ref{sec:without_barriers}).
 
 Type barriers illustrate the key difference between our analysis and
 compilation strategies that generate type specialized code based on profiling
 information, without static knowledge of possible argument or heap types
-\cite{ChambersThesis, OtherStuff}.
+\cite{ChambersThesis, Chambers89}.
 Such techniques will generate type information for expressions with a
 similar precision to ours,
 but will always require type checks on function arguments or when reading
