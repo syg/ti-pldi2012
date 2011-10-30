@@ -41,7 +41,7 @@ challenges similar to what they faced decades earlier \cite{Ungar92,
 along the dimensions of efficiency and precision. We, too, strived for an
 algorithm that is both fast and efficient; whereas Plevyak and Chien's
 sweet spot was an iterative algorithm \cite{Plevyak93}, while ours is a
-hybrid one. Our experiences tracing JIT compilers \cite{GalVEE09, GalPLDI09} have
+hybrid one. Our experiences tracing JIT compilers \cite{GalPLDI09} have
 demonstrated that solely using type feedback limits the optimizations that we
 can perform. The compiled code is frequently overspecialized, resulting
 in frequent compilation and lower efficiency.
@@ -70,9 +70,9 @@ type inference using subset constraints \cite{Aiken93}.
 %, and Wand showed how to
 %frame inference of principal types in function languages as a constraint
 %problem \cite{Wand87}.
-Our work, formally, is much simpler than many such
-proposed solutions to solving type constraints by choice. As such, we do not employ type
-variables.
+%Our work, formally, is much simpler than many such
+%proposed solutions to solving type constraints by choice.
+
 % No
 %unification is required to arrive a solution --- a solution always exists by
 %simple propagation.

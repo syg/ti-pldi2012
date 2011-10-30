@@ -214,16 +214,14 @@ edges are taken, and these counters are reset whenever discarding JIT code
 for the function.
 Once the function warms back up, it will be recompiled using the new type information
 in the same manner as its initial compilation.
-
-Since the initial compilation and recompilations occur independently
-from one another, the compiler is free to implement any optimization it
-wants provided that a valid interpreter state can always be recovered ---
-only information which is provably dead (regardless of currently known types)
-can be discarded.
-In practice this restriction has not been a problem for
-implementing optimizations.
-
-Additionally, since the function will execute in the interpreter some before
+%Since the initial compilation and recompilations occur independently
+%from one another, the compiler is free to implement any optimization it
+%wants provided that a valid interpreter state can always be recovered ---
+%only information which is provably dead (regardless of currently known types)
+%can be discarded.
+%In practice this restriction has not been a problem for
+%implementing optimizations.
+Since the function will execute in the interpreter some before
 being recompiled, thrashing is reduced, and thresholds can be adjusted to
 increase the amount of time spent interpreting if thrashing is detected
 dynamically.

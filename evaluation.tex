@@ -41,7 +41,7 @@ In the single run case JM+TI is a 6.3\% improvement over JM.
 One run of SunSpider completes in less than 250ms, which makes it
 difficult to get an optimization to pay for itself on this benchmark.
 JavaScript heavy webpages are typically viewed for longer than
-$1/4$ of a second, and longer execution times better show the effect
+1/4 of a second, and longer execution times better show the effect
 of type based optimizations.
 When run twenty times, the speedup given by JM+TI increases to 27.1\%.
 
@@ -147,9 +147,9 @@ Total & 10176.4 & 3778.2 & 0.37 \\
 Suite & Time/Score & vs. JM & vs. JM+TI \\
 \midrule
 Sunspider-0.9.1 $\times$1  & 262.2  & 1.00 & 1.06 \\
-Sunspider-0.9.1 $\times$20 & 4044.3 & .86  & 1.09 \\
-Kraken-1.1          & 7948.6 & .78  & 2.10 \\
-V8 (version 6)      & 4317   & 1.17 & .78 \\
+Sunspider-0.9.1 $\times$20 & 4044.3 & 0.86  & 1.09 \\
+Kraken-1.1          & 7948.6 & 0.78  & 2.10 \\
+V8 (version 6)      & 4317   & 1.17 & 0.78 \\
 \bottomrule
 \end{tabular}
 \nocaptionrule \caption{Benchmark Results with 100\% barriers}
