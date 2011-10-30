@@ -1,5 +1,5 @@
 
-\section{The Need for Hybridity}
+\section{The Need for Hybrid Analysis}
 \label{sec:example}
 
 \begin{figure}
@@ -130,7 +130,8 @@ will be marked as possibly overflowing.
 The resulting type information will be too imprecise to be useful for
 JIT compilation.
 
-Our solution, and our key technical novelty, is to combine static inference about types
+Our solution, and our key technical novelty, is to combine static inference
+of the types of expressions and heap values
 with targeted dynamic type updates.
 Behaviors which are not accounted for statically must be caught dynamically,
 modifying the inferred types to reflect
@@ -228,12 +229,21 @@ strings by resolving the analysis constraints.
 Type barriers differ from the semantic triggers described earlier in that
 they are not required by the semantics of the language and do not need to
 be performed if our analysis is not being used.
-These checks are cheap, though: if the set of observed types is monomorphic,
-as is generally the case (\Section\ref{sec:access_polymorphism}),
-only a single test is required by the barrier.
-We are effectively betting that the barriers
+We are effectively betting that the required barriers
 pay for themselves by enabling generation of better code using more precise type information.
-We have found this to be the case in practice (\Section\ref{sec:without_barriers}).
+We have found this to be the case in practice (\Section\ref{sec:barrier_cost},\Section\ref{sec:without_barriers}).
+
+Type barriers illustrate the key difference between our analysis and
+compilation strategies that generate type specialized code based on profiling
+information, without static knowledge of possible argument or heap types
+\cite{ChambersThesis, OtherStuff}.
+Such techniques will generate type information for expressions with a
+similar precision to ours,
+but will always require type checks on function arguments or when reading
+heap values.
+With knowledge of all possible types, we only need type checks at accesses
+with type barriers, a difference which can significantly improve performance
+(\Section\ref{sec:barrier_cost}).
 
 Our main technical contribution is a hybrid inference algorithm for the
 entirety of JavaScript, using inclusion constraints to incompletely infer
