@@ -194,23 +194,6 @@ This problem of imprecision leaking across the program is serious: even
 if a program is mostly monomorphic, analysis precision can
 easily be poisoned by a small amount of polymorphic code.
 
-The reader may question, ``Why not use more sophisticated static analyses that
-produce more precise results?''
-Our choice for the static analysis to not distinguish \code{Box} objects
-created in different places is deliberate.
-To be useful in a JIT setting, the analysis must be fast, and the time
-and space used by the analysis quickly degrade as complexity increases.
-Moreover, there is a tremendous variety of polymorphic behavior seen in
-JavaScript code in the wild, and to retain precision even the
-most sophisticated static analysis would need to fall back to dynamic
-checks some of the time.
-
-Interestingly, \emph{less sophisticated} static
-analyses do not fare well either. Unification-based analyses undermine the
-utility of dynamic checks; precision is unrecoverable despite dynamic
-monitoring. We believe that our particular partitioning of static and dynamic
-is a sweet spot for JIT compilation of a highly dynamic language.
-
 We deal with uses of polymorphic structures and functions using runtime checks.
 At all element and property accesses, we keep track of both the set of
 types which \emph{could} be observed for the access and the set of types
@@ -238,18 +221,38 @@ We are effectively betting that the required barriers
 pay for themselves by enabling generation of better code using more precise type information.
 We have found this to be the case in practice (\Section\ref{sec:barrier_cost}, \Section\ref{sec:without_barriers}).
 
-Type barriers illustrate the key difference between our analysis and
-compilation strategies that generate type specialized code based on profiling
+\subsection{Comparison with other techniques}
+
+The reader may question, ``Why not use more sophisticated static analyses that
+produce more precise results?''
+Our choice for the static analysis to not distinguish \code{Box} objects
+created in different places is deliberate.
+To be useful in a JIT setting, the analysis must be fast, and the time
+and space used by the analysis quickly degrade as complexity increases.
+Moreover, there is a tremendous variety of polymorphic behavior seen in
+JavaScript code in the wild, and to retain precision even the
+most sophisticated static analysis would need to fall back to dynamic
+checks some of the time.
+
+Interestingly, \emph{less} sophisticated static
+analyses do not fare well either. Unification-based analyses undermine the
+utility of dynamic checks; precision is unrecoverable despite dynamic
+monitoring.
+
+More dynamic compilation strategies
+generate type specialized code based on profiling
 information, without static knowledge of possible argument or heap types
 \cite{ChambersThesis, Chambers89}.
-Such techniques will generate type information for expressions with a
-similar precision to ours,
+Such techniques will determine the types of expressions at similar
+precision to our analysis,
 but will always require type checks on function arguments or when reading
 heap values.
 With knowledge of all possible types, we only need type checks at accesses
-with type barriers, a difference significantly improves performance
+with type barriers, a difference which significantly improves performance
 (\Section\ref{sec:barrier_cost}).
 
+We believe that our partitioning of static and dynamic analysis
+is a sweet spot for JIT compilation of a highly dynamic language.
 Our main technical contribution is a hybrid inference algorithm for the
 entirety of JavaScript, using inclusion constraints to unsoundly infer
 types extended with runtime semantic triggers to generate sound type

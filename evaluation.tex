@@ -345,13 +345,12 @@ more complicated heaps.
 The two outliers requiring a very high proportion of barriers do most of
 their accesses at a small number of sites; the involved objects have
 multiple types assigned to their properties, which leads to barriers being
-added to the sites.
+required.
 Per \Section\ref{sec:barrier_cost}, such sites will still see significant
 performance improvements but will perform worse than if the barriers were
 not in place.
-We are continually working on tweaks to improve analysis behavior,
-and are building tools to help developers optimize their code
-and more easily hit peak performance.
+We are building tools to identify hot spots and performance
+faults in order to help developers more easily optimize their code.
 
 \subsubsection{Operation Precision}
 \label{sec:operations}
