@@ -239,13 +239,13 @@ string concatenation, or even function calls if either of its operands is an
 object (calling their \code{valueOf} or \code{toString} members, producing a
 number or string).
 
-Using incomplete modeling lets us cut through this complexity.
+Using unsound modeling lets us cut through this complexity.
 Additions in actual programs are typically used to add two numbers
 or concatenate a string with something else.
 We statically model exactly these cases
 and use semantic triggers to monitor the results produced by other
 combinations of values, at little runtime cost.
-Note that even the integer addition rule we have given is incomplete: the
+Note that even the integer addition rule we have given is unsound: the
 result will be marked as an integer, ignoring the possibility of
 overflow.
 %When addition of two integers overflows, the result is not

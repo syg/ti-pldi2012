@@ -92,7 +92,7 @@ sets of possible types for each expression and model the flow between
 these sets as subset relationships.
 To compile correct code, we need to know not just \emph{some}
 possible types for variables, but \emph{all} possible types.
-In this sense, the static inference above is incomplete: it does not account
+In this sense, the static inference above is unsound: it does not account
 for all possible behaviors of the program.
 A few such behaviors are described below.
 
@@ -262,7 +262,7 @@ implementation of our algorithm and a realistic evaluation. The implementation
 is integrated with the JIT compiler used in Firefox and is of production
 quality. Our evaluation has various metrics showing the effectiveness of the
 analysis and modified compiler on benchmarks as well as popular websites,
-games and demos.
+games, and demos.
 
 %\begin{itemize}
 
