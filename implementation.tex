@@ -57,8 +57,8 @@ used to manage analysis memory usage.
 
 \toprule
 
-           & \multicolumn{2}{c}{JM}
-           & \multicolumn{2}{c}{JM+TI}
+           & \multicolumn{2}{c}{JM Compilation}
+           & \multicolumn{2}{c}{JM+TI Compilation}
            & %\multicolumn{2}{c}{}
            & \multicolumn{3}{c}{$\times$1 Times (ms)}
            & \multicolumn{3}{c}{$\times$20 Times (ms)} \\
@@ -154,19 +154,19 @@ For compiled code to rely on this type information, we must be able
 to recompile the code in response to changes in types while that code is
 still running.
 
-Compiling a function will only query type information, and will not change it.
-The type sets queried can be for any expression %or lvalue
-in the program,
-independent of the function being compiled,
-and the dependencies of a compiled function need to be encoded efficiently
-and precisely, to avoid unnecessary recompilation.
+%Compiling a function will only query type information, and will not change it.
+%The type sets queried can be for any expression %or lvalue
+%in the program,
+%independent of the function being compiled,
+%and the dependencies of a compiled function need to be encoded efficiently
+%and precisely, to avoid unnecessary recompilation.
 
-As each function is compiled, we keep track of all type information queried
+As each script is compiled, we keep track of all type information queried
 by the compiler.
-Afterwards, the dependencies are encoded as recompilation constraints,
-in the same manner as the type constraints generated during analysis itself.
-When new types are possible for the type sets associated with a recompilation
-constraint, the compiled function is marked for recompilation.
+Afterwards, the dependencies are encoded and attached
+to the relevant type sets,
+and if those type sets change in the future the script is
+marked for recompilation.
 We represent the contents of type sets explicitly and eagerly resolve
 constraints, so that new types immediately
 trigger recompilation with little overhead.
@@ -202,17 +202,15 @@ trigger recompilation with little overhead.
 %a valid state for the JavaScript engine's bytecode interpreter,
 %and resume execution in the interpreter.
 
-Immediate recompilation causes problems such as frequent recompilation
-(thrashing) and complex constraints on optimizations. The details of these
-problems are elided for brevity. When a function is marked for recompilation, we
-do not immediately recompile but instead discard the JIT code for the
-function. Functions which have had their JIT code discarded resume execution
-in the interpreter.
-
-We do not compile functions until after a certain number of calls or loop back
-edges are taken, and these counters are reset whenever discarding JIT code
-for the function.
-Once the function warms back up, it will be recompiled using the new type information
+%Immediate recompilation causes problems such as frequent recompilation
+%(thrashing) and complex constraints on optimizations. The details of these
+%problems are elided for brevity.
+When a script is marked for recompilation, we
+discard the JIT code for the script, and resume execution in the
+interpreter.
+We do not compile scripts until after a certain number of calls or loop back
+edges are taken, and these counters are reset whenever discarding JIT code.
+Once the script warms back up, it will be recompiled using the new type information
 in the same manner as its initial compilation.
 %Since the initial compilation and recompilations occur independently
 %from one another, the compiler is free to implement any optimization it
@@ -221,10 +219,10 @@ in the same manner as its initial compilation.
 %can be discarded.
 %In practice this restriction has not been a problem for
 %implementing optimizations.
-Since the function will execute in the interpreter some before
-being recompiled, thrashing is reduced, and thresholds can be adjusted to
-increase the amount of time spent interpreting if thrashing is detected
-dynamically.
+%Since the function will execute in the interpreter some before
+%being recompiled, thrashing is reduced, and thresholds can be adjusted to
+%increase the amount of time spent interpreting if thrashing is detected
+%dynamically.
 
 \subsection{Memory Management}
 \label{sec:memory}

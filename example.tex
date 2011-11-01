@@ -35,7 +35,7 @@ those \code{Box} objects.
 No types are specified for any of the variables or other values used
 in this program, in keeping with JavaScript's dynamically-typed nature.
 Nevertheless, most operations in this program interact with type information,
-and knowledge of the involved types is needed to efficiently compile the code.
+and knowledge of the involved types is needed to compile efficient code.
 
 In particular, we are interested in the addition \code{res + v} on line 9.  In
 JavaScript, addition coerces the operands into strings or numbers if
@@ -90,7 +90,7 @@ the possibility of \code{Box} and \code{use} being overwritten).
 This reasoning can be captured with inclusion constraints; we compute
 sets of possible types for each expression and model the flow between
 these sets as subset relationships.
-To be useful for compilation, we need to know not just \emph{some}
+To compile correct code, we need to know not just \emph{some}
 possible types for variables, but \emph{all} possible types.
 In this sense, the static inference above is incomplete: it does not account
 for all possible behaviors of the program.
@@ -120,21 +120,22 @@ only be represented as a double.
 
 \end{itemize}
 
-In some cases these behaviors can be proven statically to not occur,
+In some cases these behaviors can be proven not to occur,
 but usually they cannot be ruled out.
-A standard solution is to try to capture these behaviors statically, but this proves
+A standard solution is to capture these behaviors statically, but this is
 unfruitful. The static analysis must be sound, and to be sound in
 light of highly dynamic behaviors is to be conservative: many element or property
 accesses will be marked as possibly undefined, and many integer operations
 will be marked as possibly overflowing.
-The resulting type information will be too imprecise to be useful for
-JIT compilation.
+The resulting type information would be too imprecise to be useful for
+optimization.
 
-Our solution, and our key technical novelty, is to combine static inference
+Our solution, and our key technical novelty, is to combine
+unsound static inference
 of the types of expressions and heap values
 with targeted dynamic type updates.
 Behaviors which are not accounted for statically must be caught dynamically,
-modifying the inferred types to reflect
+modifying inferred types to reflect
 those new behaviors if caught.
 If \code{a[i]} accesses a hole, the inferred types for the result must be
 marked as possibly \code{undefined}.
@@ -143,16 +144,17 @@ marked as possibly a double.
 
 With or without analysis, the generated code needs to test for array holes
 and integer overflow in order to correctly model the semantics of the language.
-These and other dynamic type updates are {\it semantic triggers}:
-they are placed on already existing, rarely taken execution paths
+We call dynamic type updates based on these events {\it semantic triggers}:
+they are placed on rarely taken execution paths
 and incur a cost to update the inferred types only the first time that
-execution path is taken for an operation.
+path is taken.
 
 The presence of these triggers illustrates the key invariant our analysis
 preserves:
 \begin{quote}
 Inferred types must conservatively model all types for
-variables and object properties which currently exist, but not those
+variables and object properties which currently exist and have existed
+in the past, but not those
 which could exist in the future.
 \end{quote}
 This has important implications:
@@ -169,9 +171,8 @@ code and only execute a fraction of it.
 \item Assumptions about types made by the JIT compiler can be invalidated
 at almost any time.
 This affects the correctness of the JIT-compiled code, and the virtual machine
-must be able to support recompiling or discarding that code at any time,
-including (and especially) when that code is on the stack.
-We discuss our handling of this in Section~\ref{sec:recompilation}.
+must be able to recompile or discard code at any time,
+especially when that code is on the stack.
 
 \end{itemize}
 
@@ -189,19 +190,22 @@ Naively, solving the constraints produced by the analysis will mark
 either an integer or a string, even if \code{use}'s runtime behavior is actually monomorphic
 and only works on \code{Box} objects containing integers.
 
-This problem of imprecision leaking across the program is serious. Even
-if a program is by and large monomorphic, the precision of analysis results on
-it can easily be poisoned by a small amount of polymorphic code.
+This problem of imprecision leaking across the program is serious: even
+if a program is mostly monomorphic, analysis precision can
+easily be poisoned by a small amount of polymorphic code.
 
 The reader may question, ``Why not use more sophisticated static analyses that
 produce more precise results?''
 Our choice for the static analysis to not distinguish \code{Box} objects
-created in different places is deliberate. The novelty of our analysis is not
-mere hybridity, but the particular division of what is analyzed statically and
-what is checked dynamically. To be useful in a JIT setting, the analysis must
-be fast: the constraints generated should be $O(n)$ in both time and space. We
-cannot maintain such guarantees given a context-sensitive, or perhaps a even
-more expensive, analysis. Interestingly, \emph{less sophisticated} static
+created in different places is deliberate.
+To be useful in a JIT setting, the analysis must be fast, and the time
+and space used by the analysis quickly degrade as complexity increases.
+Moreover, there is a tremendous variety of polymorphic behavior seen in
+JavaScript code in the wild, and to retain precision even the
+most sophisticated static analysis would need to fall back to dynamic
+checks some of the time.
+
+Interestingly, \emph{less sophisticated} static
 analyses do not fare well either. Unification-based analyses undermine the
 utility of dynamic checks; precision is unrecoverable despite dynamic
 monitoring. We believe that our particular partitioning of static and dynamic
@@ -227,7 +231,8 @@ will be updated, and \code{res} and \code{v} will be marked as possibly
 strings by resolving the analysis constraints.
 
 Type barriers differ from the semantic triggers described earlier in that
-they are not required by the semantics of the language and do not need to
+the tests they perform are not required by the language
+and do not need to
 be performed if our analysis is not being used.
 We are effectively betting that the required barriers
 pay for themselves by enabling generation of better code using more precise type information.
@@ -242,18 +247,19 @@ similar precision to ours,
 but will always require type checks on function arguments or when reading
 heap values.
 With knowledge of all possible types, we only need type checks at accesses
-with type barriers, a difference which can significantly improve performance
+with type barriers, a difference significantly improves performance
 (\Section\ref{sec:barrier_cost}).
 
 Our main technical contribution is a hybrid inference algorithm for the
-entirety of JavaScript, using inclusion constraints to incompletely infer
+entirety of JavaScript, using inclusion constraints to unsoundly infer
 types extended with runtime semantic triggers to generate sound type
 information, as well as type barriers to efficiently and precisely handle
 polymorphic code. Our practical contributions include both an
 implementation of our algorithm and a realistic evaluation. The implementation
 is integrated with the JIT compiler used in Firefox and is of production
 quality. Our evaluation has various metrics showing the effectiveness of the
-analysis and modified compiler on benchmarks as well as popular websites and games.
+analysis and modified compiler on benchmarks as well as popular websites,
+games and demos.
 
 %\begin{itemize}
 

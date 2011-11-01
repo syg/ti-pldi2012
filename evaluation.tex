@@ -21,8 +21,8 @@ and requires additional compilations due to dynamic type changes
 Figure~\ref{fig:sunspider} shows the effect of these changes on the popular
 SunSpider JavaScript benchmark\footnote{\url{http://www.webkit.org/perf/sunspider/sunspider.html}}.
 
-The JM and JM+TI sections of Figure~\ref{fig:sunspider} show the total amount of time
-spent compiling and the total number of compilations for both versions of
+The compilation sections of Figure~\ref{fig:sunspider} show the total amount of time
+spent compiling and the total number of script compilations for both versions of
 the compiler.
 For JM+TI, compilation time also includes time spent generating and solving
 type constraints, which is small: 4ms for the entire benchmark.
@@ -35,8 +35,8 @@ Despite the significant extra compilation cost, the type-based optimizations
 performed by JM+TI quickly pay for themselves. The $\times$1 and
 $\times$20 sections
 of Figure~\ref{fig:sunspider} show the running times of the two versions of the
-compiler on the benchmark run once and modified to run twenty times,
-respectively.
+compiler and generated code on the benchmark run once and modified
+to run twenty times, respectively.
 In the single run case JM+TI is a 6.3\% improvement over JM.
 One run of SunSpider completes in less than 250ms, which makes it
 difficult to get an optimization to pay for itself on this benchmark.
@@ -196,7 +196,7 @@ lights         & 97 & 1 & 2 & 15 & 34 & 66 & 0 & 1 & 95 & 0 & 4 & 1 \\
 FOTN           & 98 & 1 & 1 & 20 & 39 & 61 & 0 & 0 & 96 & 0 & 3 & 0 \\
 monalisa       & 99 & 1 & 0 & 4 & 94 & 3 & 2 & 0 & 100 & 0 & 0 & 0 \\
 \midrule
-Overall        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7 & 27.0 & 7.7 \\
+Average        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7 & 27.0 & 7.7 \\
 \bottomrule
 \end{tabular}
 \nocaptionrule \caption{Website Type Profiling Results}
@@ -406,7 +406,7 @@ lights         & 97 & 3 & 1 & 21 & 78 & 1 \\
 FOTN           & 91 & 6 & 3 & 46 & 54 & 0 \\
 monalisa       & 87 & 0 & 13 & 78 & 22 & 0 \\
 \midrule
-Overall        & 75.2 & 14.8 & 10.1 & 39.4 & 55.1 & 5.5 \\
+Average        & 75.2 & 14.8 & 10.1 & 39.4 & 55.1 & 5.5 \\
 \bottomrule
 \end{tabular}
 \nocaptionrule \caption{Indexed/Property Access Precision}
@@ -446,7 +446,7 @@ lights         & 37 & n/a & 63 & n/a \\
 FOTN           & 28 & n/a & 57 & n/a \\
 monalisa       & 44 & n/a & 41 & n/a \\
 \midrule
-Overall        & 42.1 & 4.3 & 37.4 & 6.0 \\
+Average        & 42.1 & 4.3 & 37.4 & 6.0 \\
 \bottomrule
 \end{tabular}
 \nocaptionrule \caption{Type Profiles Without Barriers}

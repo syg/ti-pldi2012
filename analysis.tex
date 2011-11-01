@@ -3,9 +3,9 @@
 
 We present our analysis in two parts, the static ``may-have-type'' analysis
 and the dynamic ``must-have-type'' analysis. The algorithm is based on
-Andersen-style constraint-based pointer analysis \cite{AndersenPhD}. The
+Andersen-style (inclusion based) pointer analysis \cite{AndersenPhD}. The
 static analysis is
-intentionally \textit{incomplete} with respect to the semantics of
+intentionally unsound with respect to the semantics of
 JavaScript. It does not account for all possible behaviors of expressions and
 statements and only generates constraints that model a ``may-have-type''
 relation. All behaviors excluded by the type constraints must be detected at
@@ -13,7 +13,8 @@ runtime and their effects on types in the program dynamically recorded. The
 analysis runs in the browser as functions are trying to execute: code is
 analyzed function-at-a-time.
 
-Pointer analysis has a worst-case complexity of $O(n^3)$ and is very
+Inclusion based pointer analysis has a worst-case complexity of $O(n^3)$
+and is very
 well studied. It has shown---and we reaffirm this with our evaluation---to
 perform and scale well despite its cubic worst-case complexity
 \cite{Sridharan09}.
@@ -76,13 +77,15 @@ C & ::= T \supseteq T\ |\ T \barrier T && \text{constraints}
 
 To reason about the effects of property accesses, we need type information
 for JavaScript objects and their properties.
-We associate every object with an {\it object type} $o$.
+Each object is immutably assigned an {\it object type} $o$.
 When $o \in T_e$ for some expression $e$, then the possible values
 for $e$ when it is executed include all objects with type $o$.
 
 For the sake of brevity and ease of exposition, our simplified JavaScript core
 only contains the ability to construct \code{Object}-prototyped object
-literals via the \code{\{\}} syntax. In practice, prototypes figure into object types more prominently.\footnote{
+literals via the \code{\{\}} syntax;
+two objects have the same type when they were allocated via the same literal.
+\footnote{
 In full JavaScript, types are assigned to objects according to their prototype:
 all objects with the same type have the same prototype.
 Additionally, objects with the same prototype have the same type,
@@ -90,28 +93,28 @@ except for plain \code{Object}, \code{Array} and \code{Function} objects.
 \code{Object} and \code{Array} objects have the same type if they were
 allocated at the same source location,
 and \code{Function} objects have the same type if they are closures
-for the same script.}
-%\code{Object} and \code{Function} objects which represent builtin objects
-%such as class prototypes, the \code{Math} object and native functions
-%are given singleton types --- object types which correspond to only a single
-%JavaScript object.}
+for the same script.
+\code{Object} and \code{Function} objects which represent builtin objects
+such as class prototypes, the \code{Math} object and native functions
+are given unique types, to aid later optimizations
+(\Section\ref{sec:definite-properties}).}
 
 The type of an object is nominal: it is independent from the properties it
 has. Objects which are structurally identical may have different types, and
 objects with the same type may have different structures. This is crucial for
-efficient analysis. JavaScript allows adding or deletion of object properties
+efficient analysis. JavaScript allows addition or deletion of object properties
 at any time. Using structural typing would make an object's type a
 flow-sensitive property.
 
-Instead, for each object type we compute the \emph{possible} properties which
-objects of that type can have and the \emph{possible} types of those properties.
+Instead, for each object type we compute the possible properties which
+objects of that type can have and the possible types of those properties.
 These are denoted as type sets $\mathit{prop}(o,p)$ and
 $\mathit{index}(o)$. The set $\mathit{prop}(o,p)$ captures the possible types
 of a non-integer property $p$ for objects with type $o$, while
 $\mathit{index}(o)$ captures the possible types of all integer properties of
 all objects with type $o$.
-These sets cover the types of both ``own'' properties --- those directly held
-by the object --- as well as properties inherited from the object's prototype.
+These sets cover the types of both ``own'' properties (those directly held
+by the object) as well as properties inherited from the object's prototype.
 %We do not show how types are propagated from a prototype's type information
 %to the instances; since all objects of a type share the same prototype,
 %this transfer is straightforward.
@@ -200,26 +203,30 @@ T_x \supseteq T_e
 \label{fig:constraint-rules}
 \end{figure}
 
-The static portion of our analysis generates constraints on the flow of types
+The static portion of our analysis generates constraints
+modeling the flow of types
 through the program. We assign to each
-expression a type set which denotes the set of types that it may
-have. It is important to note that these statically-generated constraints are
-incomplete with respect to JavaScript semantics. Each constraint is augmented
+expression a type set representing the set of types it may have at runtime.
+These constraints are
+unsound with respect to JavaScript semantics. Each constraint is augmented
 with triggers to fill in the remaining possible behaviors of the
-operation; we informally describe the required triggers for each rule.
+operation.
+For each rule, we informally describe the required triggers.
 
-The syntax of constraints are shown in Figure~\ref{fig:js-core}. We have the
+The grammar of constraints are shown in Figure~\ref{fig:js-core}. We have the
 standard subset constraint, $\supseteq$, and a \emph{barrier subset
   constraint}, styled $\barrier$. For two type sets $X$ and $Y$, $X \supseteq
 Y$ means that all types in $Y$ are propagated to $X$. On the other hand, $X
 \barrier Y$ means that if $Y$ contains types that are not in $X$, then a
-type barrier is required which can dynamically update the types in $X$.
+type barrier is required which updates the types in $X$
+according to values which are dynamically assigned to the location
+$X$ represents (\Section\label{sec:analysis-barriers}).
 
 Rules for the constraint generation functions, $\mathcal{C}_e(e)$ for
 expressions (styled $\judge^e$) and $\mathcal{C}_s(s)$ for statements (styled $\judge^s$),
 are shown in
-Figure~\ref{fig:constraint-rules}. Statically analyzing a function, then, is
-taking the union of the results from applying $\mathcal{C}_s$ to every
+Figure~\ref{fig:constraint-rules}. Statically analyzing a function takes
+the union of the results from applying $\mathcal{C}_s$ to every
 statement in the method.
 
 The \textsc{Undef}, \textsc{Int}, \textsc{Str}, and \textsc{Obj}
@@ -253,9 +260,9 @@ to by $x$, with the result the union of $\mathit{prop}(o,p)$ for all such
 objects.  This rule is complete only in cases where the object referred to by
 $x$ (or its prototype) actually has the $p$ property. Accesses on properties
 which are not actually part of an object produce \code{undefined}.
-As with integer overflow, accesses on missing properties are rare,
-and yet in most cases it is impractical or impossible to prove that an object
-\emph{definitely} has some property. In such cases we should not dilute the
+Accesses on missing properties are rare,
+and yet in many cases we cannot prove that an object
+definitely has some property. In such cases we do not dilute the
 resulting type sets with \code{undefined}. We instead use a trigger
 on execution paths accessing a missing property to update the result type
 of the access with \code{undefined}.
@@ -298,12 +305,9 @@ we show the effect of always using subset constraints in lieu of
 barrier constraints.
 
 For a barrier constraint $X \barrier Y$, a type barrier is required whenever
-$X \not\supseteq Y$. The barrier dynamically checks that all values
-flowing across the assignment are actually in $X$, and updates $X$ whenever
+$X \not\supseteq Y$. The barrier dynamically checks that the type of each value
+flowing across the assignment is actually in $X$, and updates $X$ whenever
 values of a new type are encountered.
-$X$ will contain only the types of values which
-have ever actually been observed at the assignment, and a barrier will be
-required if there are additional types in $Y$ which could be observed.
 Thought of another way, the vanilla subset constraint propagates
 all types at analysis time. The barrier subset constraint does not propagate
 types at analysis time but defers with dynamic checks, propagating the types
@@ -319,7 +323,7 @@ The presence or absence of type barriers for a given barrier constraint is not
 monotonic with respect to the contents of the type sets in the program.  As
 new types are discovered, new type barriers may be required, and existing ones
 may become unnecessary.  However, it is always safe to perform the runtime
-tests for a given barrier, albeit less efficient.
+tests for a given barrier.
 
 Recall our hypothetical situation from \Section\ref{sec:example} where \code{Box} is
 used as a polymorphic structure containing either an integer or a string in
@@ -381,10 +385,10 @@ bit integers.
 
 \paragraph{Packed Arrays}
 
-Holes in the middle of an array are rare.
 Arrays are usually constructed by writing to their elements in ascending
 order, with no gaps; we call these arrays {\it packed}.
-Packed arrays do not need to be checked for holes.
+Packed arrays do not have holes in the middle, and if an access is statically
+known to be on a packed array then only a bounds check is required.
 There are a large number of ways packed arrays can be constructed, however,
 which makes it difficult to statically prove an array is packed.
 Instead, we dynamically detect out-of-order writes on an array,
@@ -406,12 +410,10 @@ writes, possibly invalidating JIT code.
 %triggers and tripped type barriers do.
 
 \paragraph{Definite Properties}
+\label{sec:definite-properties}
 
-JavaScript objects are conceptually maps
-from property names to values, where properties can be freely added,
-deleted, or reconfigured.
-Internally, objects are laid out as an array of values with a mapping from
-property names to slots in that array.
+JavaScript objects are internally laid out as a map from property names
+to slots in an array of values.
 If a property access can be resolved statically to a particular slot in the
 array, then the access is on a {\it definite} property and can be compiled
 as a direct lookup. This is comparable to
@@ -419,7 +421,7 @@ field accesses on monomorphic receivers in a language with static object layouts
 such as Java or C++.
 
 We identify definite property accesses in three ways.
-First, if the property access is on an object type which is a singleton,
+First, if the property access is on an object with a unique type,
 we know the exact JavaScript object being accessed and can use the slot
 in its property map.
 Second, object literals allocated in the same place have the same type,

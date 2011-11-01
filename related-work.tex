@@ -12,19 +12,19 @@ analysis is purely static and much more sophisticated, utilizing a theory of
 integers to better infer integral types vs floating point types. We eschew
 sophistication in favor of simplicity and speed. Our evaluation shows that
 even a much simpler static analysis, when coupled with dynamic checks, perform
-very well ``in the wild''. While their results show impressive speed ups,
-their results on the SunSpider benchmarks were on the scale of hundreds of
-milliseconds while ours are in the tens of milliseconds. Our analysis is more
+very well ``in the wild''.
+Our analysis is more
 practical: we have improved handling of what Logozzo and Venter termed ``havoc''
 statements, such as \code{eval}, which make static analysis results
 imprecise. As Richards et al. argued in their surveys, real-world use of
 \code{eval} is pervasive, between 50\% and 82\% for popular websites
 \cite{Richards11, Richards10}.
 
-Other works of type inference for JavaScript are more formal. The work of
+Other works on type inference for JavaScript are more formal. The work of
 Anderson et al. describes a structural object type system with subtyping over
-an idealized subset of JavaScript \cite{Anderson05}. As objects in JavaScript
-are extensible, structural object types is a flow-sensitive property. Thiemann
+an idealized subset of JavaScript \cite{Anderson05}. As the properties held
+by JavaScript objects change dynamically,
+the structural type of an object is a flow-sensitive property. Thiemann
 and Jensen et al.'s typing frameworks approach this problem by using recency
 types \cite{Thiemann05, Jensen09}. The work of Jensen et al. is in the context
 of better tooling for JavaScript, and their experiments suggest that the
@@ -38,13 +38,13 @@ the current work are the works of the the implementors of the Self language
 \cite{Ungar87}. In implementing type inference for JavaScript, we faced many
 challenges similar to what they faced decades earlier \cite{Ungar92,
   Agesen94}. Agesen outlines the design space for type inference algorithms
-along the dimensions of efficiency and precision. We, too, strived for an
-algorithm that is both fast and efficient; whereas Plevyak and Chien's
-sweet spot was an iterative algorithm \cite{Plevyak93}, while ours is a
-hybrid one. Our experiences tracing JIT compilers \cite{GalPLDI09} have
+along the dimensions of efficiency and precision. We strived for an
+algorithm that is both fast and efficient, at the expense of requiring
+runtime checks when dealing with complex code.
+Our experience building tracing JIT compilers \cite{GalPLDI09} has
 demonstrated that solely using type feedback limits the optimizations that we
-can perform. The compiled code is frequently overspecialized, resulting
-in frequent compilation and lower efficiency.
+can perform, and reaching peak performance requires static knowledge about
+the possible types of heap values.
 
 Agesen and H\"olzle compared the static approach of type inference with the
 dynamic approach of type feedback and described the strengths and weaknesses
