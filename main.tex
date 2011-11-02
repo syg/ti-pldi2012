@@ -86,11 +86,12 @@ precise using constraint-based static analysis and runtime checks. Our
 production-quality implementation integrated with the JavaScript JIT compiler
 inside Firefox has demonstrated the analysis to be both effective and
 viable. We have presented compelling empirical results: the analysis
-both enables generation of faster code and pays for itself.
+enables generation of much faster code, and infers precise information on
+both benchmarks and real websites.
 
 We hope to look more closely at type barriers in the future with the aim to
-reduce their complexity and support new kinds of barriers. We also hope to
-look at capture more formally the hybridity of our algorithm.
+reduce their frequency without degrading precision. We also hope to
+look at capture more formally the hybrid nature of our algorithm.
 \\
 \\
 {\noindent
