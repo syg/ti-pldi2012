@@ -85,7 +85,7 @@ For the sake of brevity and ease of exposition, our simplified JavaScript core
 only contains the ability to construct \code{Object}-prototyped object
 literals via the \code{\{\}} syntax;
 two objects have the same type when they were allocated via the same literal.
-\footnote{
+
 In full JavaScript, types are assigned to objects according to their prototype:
 all objects with the same type have the same prototype.
 Additionally, objects with the same prototype have the same type,
@@ -97,14 +97,14 @@ for the same script.
 \code{Object} and \code{Function} objects which represent builtin objects
 such as class prototypes, the \code{Math} object and native functions
 are given unique types, to aid later optimizations
-(\Section\ref{sec:definite-properties}).}
+(\Section\ref{sec:definite-properties}).
 
 The type of an object is nominal: it is independent from the properties it
 has. Objects which are structurally identical may have different types, and
 objects with the same type may have different structures. This is crucial for
 efficient analysis. JavaScript allows addition or deletion of object properties
 at any time. Using structural typing would make an object's type a
-flow-sensitive property.
+flow-sensitive property, making precise inference harder to achieve.
 
 Instead, for each object type we compute the possible properties which
 objects of that type can have and the possible types of those properties.
@@ -417,7 +417,7 @@ to slots in an array of values.
 If a property access can be resolved statically to a particular slot in the
 array, then the access is on a {\it definite} property and can be compiled
 as a direct lookup. This is comparable to
-field accesses on monomorphic receivers in a language with static object layouts,
+field accesses on in a language with static object layouts,
 such as Java or C++.
 
 We identify definite property accesses in three ways.

@@ -82,10 +82,11 @@ This is scheduled to become the default compilation mode in Firefox 9.
 \label{sec:conclusion}
 
 We have described a hybrid type inference algorithm that is both fast and
-precise using constraint-based static analysis and runtime checks.  We have
-also demonstrated its effectiveness in generating faster code and viability in
-paying for itself in practice by showcasing an implementation integrated with
-the JavaScript JIT compiler inside Firefox.
+precise using constraint-based static analysis and runtime checks. Our
+production-quality implementation integrated with the JavaScript JIT compiler
+inside Firefox has demonstrated the analysis to be both effective and
+viable. We have presented compelling empirical results: the analysis
+both enables generation of faster code and pays for itself.
 
 We hope to look more closely at type barriers in the future with the aim to
 reduce their complexity and support new kinds of barriers. We also hope to
