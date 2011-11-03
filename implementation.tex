@@ -36,7 +36,7 @@ having static type information.
 Doing so is, however, far more difficult and far less effective than in
 the case where types are known. For example, loop invariant code motion depends
 on knowing whether operations
-are idempotent, while in general JavaScript operations are not,
+are idempotent (in general, JavaScript operations are not),
 and register allocation requires types to determine whether values should
 be stored in general purpose or floating point registers.
 
@@ -238,7 +238,7 @@ The web page being viewed, content being generated, and JavaScript code being
 run are constantly changing.
 The compiler and analysis need to not only quickly adapt to new scripts that are
 running, but also to quickly discard regenerable data associated with
-old scripts that are no longer running much, even if the old scripts are still
+old scripts that are no longer running frequently, even if the old scripts are still
 reachable and not subject to garbage collection.
 
 We do this with a simple trick:
@@ -246,8 +246,8 @@ on every garbage collection, we throw away all JIT code and as much analysis
 information as possible.
 All inferred types are functionally determined from a small core of type
 information:
-type sets for the properties of objects, function arguments, the observed
-type sets associated with barrier constraints and the semantic triggers which
+type sets for the properties of objects, function arguments, and the observed
+type sets associated with barrier constraints and the semantic triggers that
 have been tripped.
 All type constraints and all other type sets are discarded, notably the type sets
 describing the intermediate expressions in a function without barriers on them.

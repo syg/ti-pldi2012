@@ -15,7 +15,7 @@ analyzed function-at-a-time.
 
 Inclusion based pointer analysis has a worst-case complexity of $O(n^3)$
 and is very
-well studied. It has shown---and we reaffirm this with our evaluation---to
+well studied. It has been shown---and we reaffirm this with our evaluation---to
 perform and scale well despite its cubic worst-case complexity
 \cite{Sridharan09}.
 
@@ -348,8 +348,8 @@ place can make barriers in another place unnecessary.
 \subsection{Supplemental Analyses}
 \label{sec:supplemental-analyses}
 
-In many cases type information itself is insufficient to generate code
-which performs comparably to a statically-typed language such as Java.
+%In many cases type information itself is insufficient to generate code
+%which performs comparably to a statically-typed language such as Java.
 Semantic triggers are generally cheap, but they nevertheless incur a cost.
 %Integer addition requires checks for overflow,
 %index operations on arrays require checks for holes in the middle of the array,
@@ -363,7 +363,8 @@ we use supplemental analyses which leverage type information but do not
 modify the set of inferred types.
 %The remainder of this section briefly describes our handling of the above
 %situations.
-We do several other supplemental analyses, but those described below are the most important.
+We describe the three most important supplemental analyses below, but
+our implementation contains many others.
 
 \paragraph{Integer Overflow}
 

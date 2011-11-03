@@ -5,14 +5,14 @@ We evaluate the effectiveness of our analysis in two ways.
 In \Section\ref{sec:benchmarks} we compare the performance on major JavaScript benchmarks
 of a single compiler with and without use of analyzed type information.
 In \Section\ref{sec:websites} we examine the behavior of the analysis on a selection of
-websites which heavily use JavaScript to gauge analysis effectiveness in practice.
+JavaScript-heavy websites to gauge the effectiveness of the analysis in practice.
 
 \subsection{Benchmark Performance}
 \label{sec:benchmarks}
 
 
 As described in \Section\ref{sec:implementation}, we have integrated our analysis into
-the Jaegermonkey JIT compiler used in Firefox.
+the JaegerMonkey JIT compiler used in Firefox.
 We compare performance of the compiler used both without the analysis (JM)
 and with the analysis (JM+TI).
 JM+TI adds several major optimizations to JM,
@@ -37,30 +37,30 @@ $\times$20 sections
 of Figure~\ref{fig:sunspider} show the running times of the two versions of the
 compiler and generated code on the benchmark run once and modified
 to run twenty times, respectively.
-In the single run case JM+TI is a 6.3\% improvement over JM.
+In the single run case JM+TI improves over JM by a factor of 1.06.
 One run of SunSpider completes in less than 250ms, which makes it
 difficult to get an optimization to pay for itself on this benchmark.
-JavaScript heavy webpages are typically viewed for longer than
+JavaScript-heavy webpages are typically viewed for longer than
 1/4 of a second, and longer execution times better show the effect
 of type based optimizations.
-When run twenty times, the speedup given by JM+TI increases to 27.1\%.
+When run twenty times, the speedup given by JM+TI increases to a factor of 1.27.
 
 Figures~\ref{fig:v8bench} and~\ref{fig:kraken} compare the performance of JM and JM+TI
 on two other popular benchmarks, the V8\footnote{\url{http://v8.googlecode.com/svn/data/benchmarks/v6/run.html}}
 and Kraken\footnote{\url{http://krakenbenchmark.mozilla.org}} suites.
 These suites run for several seconds each, far longer than SunSpider,
 and show a larger speedup.
-V8 scores (which are given as a rate, rather than a raw time; larger is better) improve by 50\%,
+V8 scores (which are given as a rate, rather than a raw time; larger is better) improve by a factor of 1.50,
 and Kraken scores improve by a factor of 2.69.
 
-Across the benchmarks, not all tests improved equally, and some regressed over
+Across the benchmarks, not all tests improved equally, and some regressed compared to
 the engine's performance without the analysis.
 These include the date-format-xparb and string-tagcloud tests in SunSpider,
 and the RayTrace and RegExp tests in the V8.
 These are tests which spend little time in JIT code, and perform many side
 effects in VM code itself.
 Changes to objects which happen in the VM due to, e.g., the behavior of
-builtin functions must be tracked to ensure the correctness of type
+builtin functions, must be tracked to ensure the correctness of type
 information for the heap.
 We are working to reduce the overhead incurred by such side effects.
 
@@ -214,13 +214,11 @@ in network latency and other browser effects.
 Since analysis precision directly ties into the quality of
 generated code, it makes a good surrogate for optimization effectiveness.
 
-We modified Firefox to track several precision metrics while running,
+We modified Firefox to track several precision metrics,
 all of which operate at the granularity of individual operations.
 %These metrics are generally useful for debugging performance faults,
 %and will be released with a future version of Firefox.
-A brief description of the websites used is below.
-A full description of the tested websites and methodology used for each
-is available in the appendix of the full version of the paper.
+A brief description of the websites used is included below.
 
 \begin{itemize}
 
@@ -239,26 +237,30 @@ demos, viewed to completion.
 
 \end{itemize}
 
+A full description of the tested websites and methodology used for each
+is available in the appendix of the full version of the paper.
+
 When developing the analysis and compiler we tuned behavior for the three
 covered benchmark suites, as well as various websites.
 Besides the benchmarks, no tuning work has been done for any of the
 websites described here.
 
 We address several questions related to analysis precision,
-listed below. The answers to these sometimes differ significantly
+listed by section below. The answers to these sometimes differ significantly
 across the different categories of websites.
 
 \begin{enumerate}
+\setlength{\itemindent}{2.5em}
 
-\item How polymorphic are values read at access sites?  (\Section\ref{sec:access_polymorphism})
+\item[\Section\ref{sec:access_polymorphism}] How polymorphic are values read at access sites?
 
-\item How often are type barriers required?  (\Section\ref{sec:barriers})
+\item[\Section\ref{sec:barriers}] How often are type barriers required?
 
-\item How polymorphic are performed operations?  (\Section\ref{sec:operations})
+\item[\Section\ref{sec:operations}] How polymorphic are performed operations?
 
-\item How polymorphic are the objects used at access sites?  (\Section\ref{sec:access_objects})
+\item[\Section\ref{sec:access_objects}] How polymorphic are the objects used at access sites?
 
-\item How important are type barriers?  (\Section\ref{sec:without_barriers})
+\item[\Section\ref{sec:without_barriers}] How important are type barriers?
 
 \end{enumerate}
 
@@ -273,7 +275,7 @@ The analysis is sound and will always compute a lower bound on the possible
 types that can appear at the various points in a program,
 so the precision of the generated type information is limited for
 access sites and operations which are polymorphic in practice.
-We draw the following distinction:
+We draw the following distinction for the level of precision obtained:
 
 \begin{description}
 
@@ -286,15 +288,15 @@ just as well as sites containing objects of a single type, as long as
 all the observed object types share common attributes (\Section\ref{sec:access_objects}).
 
 \item[Dimorphic] Sites that have produced either strings or objects (but not both),
-and also at most one of the \code{undefined}, \code{null} or a boolean value.
+and also at most one of the \code{undefined}, \code{null}, or a boolean value.
 Even though multiple kinds are possible at such sites, an untyped
 representation can still be used,
 as a single test on the unboxed form will determine the type.
 The untyped representation of objects and strings are pointers,
-whereas \code{undefined}, \code{null} and booleans are either $0$ or $1$.
+whereas \code{undefined}, \code{null}, and booleans are either $0$ or $1$.
 
-\item[Polymorphic] Sites that have produced values of multiple kinds,
-and compiled code must use a typed representation which keeps track of
+\item[Polymorphic] Sites that have produced values of multiple kinds.
+Compiled code must use a typed representation which keeps track of
 the value's kind.
 
 \end{description}
@@ -325,7 +327,7 @@ Examining the frequency with which type barriers are required
 gives insight to the precision of the model of the heap constructed by
 the analysis.
 
-The barrier section of Figure~\ref{fig:polymorphism} shows the frequencies of
+The {\it Barrier} column of Figure~\ref{fig:polymorphism} shows the frequencies of
 indexed and property accesses on sampled pages which required a barrier.
 Averaged across pages, barriers were required on 41.4\% of such accesses.
 There is a large disparity between websites and other pages.
@@ -362,7 +364,8 @@ These are operations for which precise type information is crucial
 for efficient compilation, and give a sense of the precision of type
 information for operations which do not have associated type barriers.
 
-In the arithmetic section, the integer, double, other, and unknown columns indicate,
+In the arithmetic section, the {\it Int}, {\it Double}, {\it Other},
+and {\it Unknown} columns indicate,
 respectively,
 operations on known integers which give an integer result,
 operations on integers or doubles which give a double result,
@@ -374,8 +377,8 @@ Comparing websites with other pages, websites tend to do far more
 arithmetic on non-numeric values --- 16.8\% vs. 1.6\% ---
 and considerably less arithmetic on doubles --- 14.8\% vs. 37.9\%.
 
-In the indices section, the integer, double, other, and
-unknown columns indicate, respectively, that the type of the index, i.e.,
+In the indices section, the {\it Int}, {\it Double}, {\it Other}, and
+{\it Unknown} columns indicate, respectively, that the type of the index, i.e.,
 the type of \code{i} in an expression such as \code{a[i]}, is known
 to be an integer, a double, any other known type, or unknown. Websites tend to
 have more unknown index types than both benchmarks and games.
@@ -471,13 +474,13 @@ distinction drawn in \Section\ref{sec:access_polymorphism}.
 Figure~\ref{fig:access_objects} shows the fractions of indexed accesses on arrays
 and of all property accesses which were optimized based on static knowledge.
 
-In the indexed access section, the packed column shows the fraction
+In the indexed access section, the {\it Packed} column shows the fraction
 of operations known to be on packed arrays (\Section\ref{sec:supplemental-analyses}),
-while the array column shows the fraction known to be on arrays not
+while the {\it Array} column shows the fraction known to be on arrays not
 known to be packed.
 Indexed operations behave differently on arrays vs. other objects,
 and avoiding dynamic array checks achieves some speedup.
-The ``Uk'' column is the fraction of dynamic accesses on arrays which
+The {\it Uk} column is the fraction of dynamic accesses on arrays which
 are not statically known to be on arrays.
 
 Static detection of array operations is very good on all kinds of sites,
@@ -487,16 +490,16 @@ A few outlier websites are responsible for the great majority of
 accesses in the latter category.
 For example, the V8 Crypto benchmark contains almost all of the benchmark's
 array accesses, and the arrays used are not known to be packed
-due to the top down order they are initialized.
+due to the top down order in which they are initialized.
 Still, speed improvements on this benchmark are very large.
 
 In the property access section of Figure~\ref{fig:access_objects},
-the ``Def'' column shows the fraction
+the {\it Def} column shows the fraction
 of operations which were statically resolved as definite properties
-(\Section\ref{sec:supplemental-analyses}), while the PIC column shows the fraction which
+(\Section\ref{sec:supplemental-analyses}), while the {\it PIC} column shows the fraction which
 were not resolved statically but were matched using a fallback mechanism,
 polymorphic inline caches \cite{Holzle91}.
-The ``Uk'' column is the fraction of operations which were not resolved
+The {\it Uk} column is the fraction of operations which were not resolved
 either statically or with a PIC and required a call into the VM;
 this includes accesses where objects
 with many different layouts are used, and accesses on rare kinds of

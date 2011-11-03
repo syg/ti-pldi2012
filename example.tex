@@ -53,18 +53,18 @@ greatly increases the complexity of the compiler,
 and makes effective implementation of important optimizations like
 register allocation and loop invariant code motion much harder.
 
-If we knew the types of \code{res} and \code{v}, we can compile
+If we knew the types of \code{res} and \code{v}, we could compile
 code which performs an integer addition without the need to check or
 to track the types of \code{res} and \code{v}.
 With static knowledge of all types involved in the program, the compiler can
 in many cases generate code similar to that produced for a statically-typed
  language such as Java, with similar optimizations.
 
-We can infer possible types for \code{res} and \code{v} statically
+We can statically infer possible types for \code{res} and \code{v}
 by reasoning about the effect the program's assignments
 and operations have on values produced later.
-This is illustrated below (for brevity, we do not consider
-the possibility of \code{Box} and \code{use} being overwritten).
+This is illustrated below. For brevity, we do not consider
+the possibility of \code{Box} and \code{use} being overwritten.
 
 \begin{enumerate}
 \item On line 17, \code{main} passes an integer when constructing \code{Box}
@@ -144,7 +144,7 @@ marked as possibly a double.
 
 With or without analysis, the generated code needs to test for array holes
 and integer overflow in order to correctly model the semantics of the language.
-We call dynamic type updates based on these events {\it semantic triggers}:
+We call dynamic type updates based on these events {\it semantic triggers};
 they are placed on rarely taken execution paths
 and incur a cost to update the inferred types only the first time that
 path is taken.
@@ -161,8 +161,9 @@ This has important implications:
 
 \begin{itemize}
 
-\item The program can be analyzed incrementally, as code starts to execute.
-Code which does not execute need not be analyzed.
+\item The program can be analyzed incrementally.
+Code is is not analyzed until it first executes, and
+code which does not execute need not be analyzed.
 This is necessary for JavaScript due to dynamic code loading
 and generation. It is also important for reducing
 analysis time on websites, which often load several megabytes of
@@ -197,7 +198,7 @@ easily be poisoned by a small amount of polymorphic code.
 We deal with uses of polymorphic structures and functions using runtime checks.
 At all element and property accesses, we keep track of both the set of
 types which \emph{could} be observed for the access and the set of types
-which \emph{has been} observed.
+which \emph{have been} observed.
 The former will be a superset of the latter, and if the two are different then
 we insert a runtime check, a {\it type barrier}, to check for conformance
 between the resultant value and the observed type set.
@@ -240,7 +241,7 @@ utility of dynamic checks; precision is unrecoverable despite dynamic
 monitoring.
 
 More dynamic compilation strategies
-generate type specialized code based on profiling
+generate type-specialized code based on profiling
 information, without static knowledge of possible argument or heap types
 \cite{ChambersThesis, Chambers89}.
 Such techniques will determine the types of expressions with similar
