@@ -2,6 +2,15 @@
 \section{The Need for Hybrid Analysis}
 \label{sec:example}
 
+Consider the example JavaScript program in Figure~\ref{fig:motivating-example}.
+This program constructs an array of \code{Box} objects wrapping integer
+values, then calls a \code{use} function which adds up the contents of all
+those \code{Box} objects.
+No types are specified for any of the variables or other values used
+in this program, in keeping with JavaScript's dynamically-typed nature.
+Nevertheless, most operations in this program interact with type information,
+and knowledge of the involved types is needed to compile efficient code.
+
 \begin{figure}
 \begin{lstlisting}[xleftmargin=18pt]
 function Box(v) {
@@ -27,15 +36,6 @@ function main() {
 \caption{Motivating Example}
 \label{fig:motivating-example}
 \end{figure}
-
-Consider the example JavaScript program in Figure~\ref{fig:motivating-example}.
-This program constructs an array of \code{Box} objects wrapping integer
-values, then calls a \code{use} function which adds up the contents of all
-those \code{Box} objects.
-No types are specified for any of the variables or other values used
-in this program, in keeping with JavaScript's dynamically-typed nature.
-Nevertheless, most operations in this program interact with type information,
-and knowledge of the involved types is needed to compile efficient code.
 
 In particular, we are interested in the addition \code{res + v} on line 9.  In
 JavaScript, addition coerces the operands into strings or numbers if

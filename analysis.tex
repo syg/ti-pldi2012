@@ -15,9 +15,12 @@ analyzed function-at-a-time.
 
 Inclusion based pointer analysis has a worst-case complexity of $O(n^3)$
 and is very
-well studied. It has been shown---and we reaffirm this with our evaluation---to
+well studied. It has been shown to
 perform and scale well despite its cubic worst-case complexity
 \cite{Sridharan09}.
+We reaffirm this with our evaluation;
+even when analyzing large amounts of code the presence of runtime checks keeps type sets
+small and constraints easy to resolve.
 
 %% This paragraph and list doesn't seem to fit in the analysis section, this is more about performance. -ed
 %
