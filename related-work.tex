@@ -80,14 +80,14 @@ type inference using subset constraints \cite{Aiken93}.
 Other hybrid approaches to typing exist, such as Cartwright and Fagan's soft
 typing and Taha and Siek's gradual typing \cite{Cartwright91, Siek07}. They
 have been largely for the purposes of correctness and early error
-detection.
+detection, though soft typing has been successfully used to eliminate runtime checks \cite{Wright97}.
 %Soft typing inserts run-time checks, and gradual typing focuses on
 %the interaction of code with type annotation and code without
 %annotation.
-While these approaches may also be used to improve performance of
-compiled code, they are at least partially \emph{prescriptive}, in that they
+We say these approaches are at least partially \emph{prescriptive}, in that they
 help enforce a typing discipline, while ours is entirely \emph{descriptive}, in that
 we are inferring types only to help JIT compilation.
+
 
 % Notes on other things to cite:
 % We take efficiency of analyses to be used in JIT compilers as the ability to pay for themselves, reference chez scheme.
