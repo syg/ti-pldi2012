@@ -331,9 +331,9 @@ tests for a given barrier.
 Recall our hypothetical situation from \Section\ref{sec:example} where \code{Box} is
 used as a polymorphic structure containing either an integer or a string in
 the example program from Figure~\ref{fig:motivating-example}. The subset
-barrier constraint on line 8 is $T_{\code{a[i]}} \barrier T_{\code{Box}}$,
-with $T_{\code{a[i]}} = \{\code{int}\}$ and $T_{\code{Box}} = \{\code{int},
-\code{string}\}$. Since $T_{\code{a[i]}} \not\supseteq T_{\code{Box}}$, a type
+barrier constraint on line 8 is $T_{\code{a[i]}} \barrier \mathit{prop}(\code{Box}, \code{p})$,
+with $T_{\code{a[i]}} = \{\code{int}\}$ and $\mathit{prop}(\code{Box}, \code{p}) = \{\code{int},
+\code{string}\}$. Since $T_{\code{a[i]}} \not\supseteq \mathit{prop}(\code{Box}, \code{p})$, a type
 barrier is required.
 
 In the constraint generation rules in Figure~\ref{fig:constraint-rules} we
