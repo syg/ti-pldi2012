@@ -19,7 +19,7 @@ JM+TI adds several major optimizations to JM,
 and requires additional compilations due to dynamic type changes
 (\Section\ref{sec:recompilation}).
 Figure~\ref{fig:sunspider} shows the effect of these changes on the popular
-SunSpider JavaScript benchmark\footnote{\url{http://www.webkit.org/perf/sunspider/sunspider.html}}.
+SunSpider\footnote{\url{http://www.webkit.org/perf/sunspider/sunspider.html}} JavaScript benchmark.
 
 The compilation sections of Figure~\ref{fig:sunspider} show the total amount of time
 spent compiling and the total number of script compilations for both versions of
@@ -507,7 +507,7 @@ properties such as those with scripted getters or setters.
 
 An average of 39.4\% of property accesses were resolved as definite properties,
 with a much higher average proportion on benchmarks of 80.3\%.
-The remainder were by and large handled by PICs, with only 5.5\% of
+The remainder were mostly handled by PICs, with only 5.5\% of
 accesses requiring a VM call.
 Together, these suggest that objects on websites are by and large
 constructed in a consistent fashion, but that

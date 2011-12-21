@@ -106,7 +106,7 @@ Such holes can also be in the middle of an array;
 assigning to just \code{a[0]} and \code{a[2]} leaves a missing
 value at \code{a[1]}.
 
-\item Similarly, the read of \code{a[i].v} may be accessing a missing property
+\item Similarly, the read of \code{a[i].p} may be accessing a missing property
 and may produce the \code{undefined} value.
 
 \item The addition \code{res + v} may overflow.
@@ -162,7 +162,7 @@ This has important implications:
 \begin{itemize}
 
 \item The program can be analyzed incrementally.
-Code is is not analyzed until it first executes, and
+Code is not analyzed until it first executes, and
 code which does not execute need not be analyzed.
 This is necessary for JavaScript due to dynamic code loading
 and generation. It is also important for reducing
@@ -184,10 +184,10 @@ Doing so will cause \code{Box} objects
 to be created which hold strings,
 illustrating the use of \code{Box} as a polymorphic structure.
 Our analysis does not distinguish \code{Box} objects created in different
-places, and the result of the \code{a[i].v} access in \code{use} will
+places, and the result of the \code{a[i].p} access in \code{use} will
 be regarded as potentially producing a string.
 Naively, solving the constraints produced by the analysis will mark
-\code{a[i].v}, \code{v}, \code{res + v}, and \code{res} as all producing
+\code{a[i].p}, \code{v}, \code{res + v}, and \code{res} as all producing
 either an integer or a string, even if \code{use}'s runtime behavior is actually monomorphic
 and only works on \code{Box} objects containing integers.
 
