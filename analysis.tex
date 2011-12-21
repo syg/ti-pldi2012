@@ -127,35 +127,36 @@ by the object) as well as properties inherited from the object's prototype.
 \label{sec:constraints}
 
 \begin{figure}
+$$\mathcal{C} : (\text{expression} + \text{statement}) \rightarrow \mathcal{P}(C)$$
 \begin{align*}
-& \inferrule{}{\judge^e \code{undefined} : T_{\code{u}}} &&
+& \code{undefined} &&
 \left\{
 \begin{array}{l}
-T_{\code{u}} \supseteq \{\code{undefined}\}
+T_{\code{undefined}} \supseteq \{\code{undefined}\}
 \end{array}
 \right\}
 \tag{\sc Undef}\\
-& \inferrule{}{\judge^e i : T_i} &&
+& i &&
 \left\{
 \begin{array}{l}
 T_i \supseteq \{\code{int}\}
 \end{array}
 \right\} \tag{\sc Int}\\
-& \inferrule{}{\judge^e s : T_s} &&
+& s &&
 \left\{
 \begin{array}{l}
 T_s \supseteq \{\code{string}\}
 \end{array}
 \right\} \tag{\sc Str}\\
-& \inferrule{}{\judge^e \text{\code{\{\}}} : T_{\text{\code{\{\}}}}} &&
+& \text{\code{\{\}}} &&
 \left\{
 \begin{array}{l}
 T_{\text{\code{\{\}}}} \supseteq \{o\}
 \end{array}
 \right\} \text{ where $o$ fresh} \tag{\sc Obj}\\
-& \inferrule{}{\judge^e x : T_x} && \emptyset \tag{\sc Var}\\
-& \inferrule{\judge^e x : T_x ~~~ \judge^e y : T_y}{\judge^e x + y : T_{x+y}} \\
-& \mathrlap{\quad \left\{
+& x && \emptyset \tag{\sc Var}\\
+& x + y \\
+& \mathrlap{\ \ \left\{
 \begin{array}{l}
 \code{int} \in T_x \wedge \code{int} \in T_y \Implies T_{x+y} \supseteq \{\code{int}\},\\
 \code{int} \in T_x \wedge \code{number} \in T_y \Implies T_{x+y} \supseteq \{\code{number}\},\\
@@ -163,18 +164,18 @@ T_{\text{\code{\{\}}}} \supseteq \{o\}
 \code{string} \in T_x \vee \code{string} \in T_y \Implies T_{x+y} \supseteq \{\code{string}\}
 \end{array}
 \right\}} \tag{\sc Add}\\
-& \inferrule{\judge^e x : T_x}{\judge^e x.p : T_{x.p}}
-\mathrlap{\qquad \left\{
+& x.p &&
+\left\{
 \begin{array}{l}
-o \in T_x \Implies T_{x.p} \barrier \mathit{prop}(o,p)
+o \in T_x \Implies T_{x.p} \barrier \mathit{prop}(o,p)\ |\ \text{all } o
 \end{array}
-\right\}} \tag{\sc Prop}\\
-& \inferrule{\judge^e x : T_x}{\judge^e x[i] : T_{x[i]}}
-\mathrlap{\qquad \left\{
+\right\} \tag{\sc Prop}\\
+& x[i] &&
+\left\{
 \begin{array}{l}
-o \in T_x \Implies T_{x[i]} \barrier \mathit{index}(o)
+o \in T_x \Implies T_{x[i]} \barrier \mathit{index}(o)\ |\ \text{all } o
 \end{array}
-\right\}} \tag{\sc Index}\\
+\right\} \tag{\sc Index}\\
 %\rulename{App} & \inferrule{\judge^e f : T_f ~~~ \judge^e x : T_x}{\judge^e f(x) : T_{f(x)}} \quad
 %\left\{
 %\begin{array}{l}
@@ -182,35 +183,35 @@ o \in T_x \Implies T_{x[i]} \barrier \mathit{index}(o)
 %T_{f(x)} \supseteq T_{\mathit{cod}(f)}\ |\ T_{\mathit{dom}(f)} \rightarrow T_{\mathit{cod}(f)} \in T_f
 %\end{array}
 %\right\}\\
-& \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x = e : \text{\textbullet}} &&
+& x = e &&
 \left\{
 \begin{array}{l}
 T_x \supseteq T_e
 \end{array}
 \right\} \tag{\sc A-Var}\\
-& \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x.p = e : \text{\textbullet}} &&
+& x.p = e &&
 \left\{
 \begin{array}{l}
- o \in T_x \Implies \mathit{prop}(o,p) \supseteq T_e
+ o \in T_x \Implies \mathit{prop}(o,p) \supseteq T_e\ |\ \text{all } o
 \end{array}
 \right\} \tag{\sc A-Prop}\\
-& \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x[i] = e : \text{\textbullet}} &&
+& x[i] = e &&
 \left\{
 \begin{array}{l}
-o \in T_x \Implies \mathit{index}(o) \supseteq T_e
+o \in T_x \Implies \mathit{index}(o) \supseteq T_e\ |\ \text{all } o
 \end{array}
 \right\} \tag{\sc A-Index}\\
-& \mathrlap{\inferrule{}{\judge^s \code{if}(x)\ s_1\ \code{else}\ s_2 : \text{\textbullet}} \quad
-\mathcal{C}_s(s_1) \cup \mathcal{C}_s(s_2)} \tag{\sc If}
+& \mathrlap{\code{if}(x)\ s_1\ \code{else}\ s_2 \quad
+\mathcal{C}(s_1) \cup \mathcal{C}(s_2)} \tag{\sc If}
 \end{align*}
-\caption{Constraint Generation Rules}
+\caption{Constraint Generation Function $\mathcal{C}$}
 \label{fig:constraint-rules}
 \end{figure}
 
 The static portion of our analysis generates constraints
 modeling the flow of types
 through the program. We assign to each
-expression a type set representing the set of types it may have at runtime.
+expression $e$ a type set representing the set of types it may have at runtime, denoted $T_e$.
 These constraints are
 unsound with respect to JavaScript semantics. Each constraint is augmented
 with triggers to fill in the remaining possible behaviors of the
@@ -231,12 +232,11 @@ disjunctions of set membership tests. For an antecendent $A$ and a constraint
 $C$, $A \Implies C$ takes on the meaning of $C$ if $A$ holds during
 propagation and is otherwise ignored.
 
-Rules for the constraint generation functions, $\mathcal{C}_e(e)$ for
-expressions (styled $\judge^e$) and $\mathcal{C}_s(s)$ for statements (styled $\judge^s$),
-are shown in
-Figure~\ref{fig:constraint-rules}. Statically analyzing a function takes
-the union of the results from applying $\mathcal{C}_s$ to every
-statement in the method.
+Rules for the constraint generation function $\mathcal{C}$ are shown in
+Figure~\ref{fig:constraint-rules}. On the lefthand column is the expression or
+statement to be analyzed, and on the right hand column is the set of constraints
+generated. Statically analyzing a function takes the union of
+the results from applying $\mathcal{C}$ to every statement in the method.
 
 The \textsc{Undef}, \textsc{Int}, \textsc{Str}, and \textsc{Obj}
 rules for literals and the \textsc{Var} rule for variables are
