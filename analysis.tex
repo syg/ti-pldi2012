@@ -62,7 +62,8 @@ e & ::= v\ |\ x\ |\ e + e\ |\ x.p\ |\ x[i]\ && \text{expressions}\\
 s & ::= \code{if}(x)\ s\ \code{else}\ s\ |\ x = e\ |\ x.p = e\ |\ x[i] = e && \text{statements}\\[0.7ex]
 \tau & ::= \code{undefined}\ |\ \code{int}\ |\ \code{number}\ |\ \code{string}\ |\ o && \text{types}\\
 T & ::= \mathcal{P}(\tau) && \text{type sets}\\[0.8ex]
-C & ::= T \supseteq T\ |\ T \barrier T && \text{constraints}
+A & ::= \tau \in T\ |\ A \wedge A\ |\ A \vee A && \text{antecedents}\\
+C & ::= T \supseteq T\ |\ T \barrier T\ |\ A \Implies T && \text{constraints}
 \end{align*}
 \caption{Simplified JavaScript Core, Types, and Constraints}
 \label{fig:js-core}
@@ -156,24 +157,24 @@ T_{\text{\code{\{\}}}} \supseteq \{o\}
 & \inferrule{\judge^e x : T_x ~~~ \judge^e y : T_y}{\judge^e x + y : T_{x+y}} \\
 & \mathrlap{\quad \left\{
 \begin{array}{l}
-T_{x+y} \supseteq \{\code{int}\}\ |\ \code{int} \in T_x \wedge \code{int} \in T_y,\\
-T_{x+y} \supseteq \{\code{number}\}\ |\ \code{int} \in T_x \wedge \code{number} \in T_y,\\
-T_{x+y} \supseteq \{\code{number}\}\ |\ \code{number} \in T_x \wedge \code{int} \in T_y,\\
-T_{x+y} \supseteq \{\code{string}\}\ |\ \code{string} \in T_x \vee \code{string} \in T_y
+\code{int} \in T_x \wedge \code{int} \in T_y \Implies T_{x+y} \supseteq \{\code{int}\},\\
+\code{int} \in T_x \wedge \code{number} \in T_y \Implies T_{x+y} \supseteq \{\code{number}\},\\
+\code{number} \in T_x \wedge \code{int} \in T_y \Implies T_{x+y} \supseteq \{\code{number}\},\\
+\code{string} \in T_x \vee \code{string} \in T_y \Implies T_{x+y} \supseteq \{\code{string}\}
 \end{array}
 \right\}} \tag{\sc Add}\\
-& \inferrule{\judge^e x : T_x}{\judge^e x.p : T_{x.p}} &&
-\left\{
+& \inferrule{\judge^e x : T_x}{\judge^e x.p : T_{x.p}}
+\mathrlap{\qquad \left\{
 \begin{array}{l}
-T_{x.p} \barrier \mathit{prop}(o,p)\ |\ o \in T_x
+o \in T_x \Implies T_{x.p} \barrier \mathit{prop}(o,p)
 \end{array}
-\right\} \tag{\sc Prop}\\
-& \inferrule{\judge^e x : T_x}{\judge^e x[i] : T_{x[i]}} &&
-\left\{
+\right\}} \tag{\sc Prop}\\
+& \inferrule{\judge^e x : T_x}{\judge^e x[i] : T_{x[i]}}
+\mathrlap{\qquad \left\{
 \begin{array}{l}
-T_{x[i]} \barrier \mathit{index}(o)\ |\ o \in T_x
+o \in T_x \Implies T_{x[i]} \barrier \mathit{index}(o)
 \end{array}
-\right\} \tag{\sc Index}\\
+\right\}} \tag{\sc Index}\\
 %\rulename{App} & \inferrule{\judge^e f : T_f ~~~ \judge^e x : T_x}{\judge^e f(x) : T_{f(x)}} \quad
 %\left\{
 %\begin{array}{l}
@@ -190,13 +191,13 @@ T_x \supseteq T_e
 & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x.p = e : \text{\textbullet}} &&
 \left\{
 \begin{array}{l}
-\mathit{prop}(o,p) \supseteq T_e\ |\ o \in T_x
+ o \in T_x \Implies \mathit{prop}(o,p) \supseteq T_e
 \end{array}
 \right\} \tag{\sc A-Prop}\\
 & \inferrule{\judge^e x : T_x ~~~ \judge^e e : T_e}{\judge^s x[i] = e : \text{\textbullet}} &&
 \left\{
 \begin{array}{l}
-\mathit{index}(o) \supseteq T_e\ |\ o \in T_x
+o \in T_x \Implies \mathit{index}(o) \supseteq T_e
 \end{array}
 \right\} \tag{\sc A-Index}\\
 & \mathrlap{\inferrule{}{\judge^s \code{if}(x)\ s_1\ \code{else}\ s_2 : \text{\textbullet}} \quad
@@ -217,13 +218,18 @@ operation.
 For each rule, we informally describe the required triggers.
 
 The grammar of constraints are shown in Figure~\ref{fig:js-core}. We have the
-standard subset constraint, $\supseteq$, and a \emph{barrier subset
-  constraint}, styled $\barrier$. For two type sets $X$ and $Y$, $X \supseteq
+standard subset constraint, $\supseteq$, a \emph{barrier subset
+  constraint}, styled $\barrier$, and the conditional constraint, $\Implies$.
+For two type sets $X$ and $Y$, $X \supseteq
 Y$ means that all types in $Y$ are propagated to $X$. On the other hand, $X
 \barrier Y$ means that if $Y$ contains types that are not in $X$, then a
 type barrier is required which updates the types in $X$
 according to values which are dynamically assigned to the location
 $X$ represents (\Section\label{sec:analysis-barriers}).
+Conditional constraints' antecedents are limited to conjunctions and
+disjunctions of set membership tests. For an antecendent $A$ and a constraint
+$C$, $A \Implies C$ means that if $A$ holds during propagation, resolve the
+constraint $C$, otherwise do nothing.
 
 Rules for the constraint generation functions, $\mathcal{C}_e(e)$ for
 expressions (styled $\judge^e$) and $\mathcal{C}_s(s)$ for statements (styled $\judge^s$),
