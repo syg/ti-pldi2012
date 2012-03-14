@@ -208,7 +208,7 @@ Mismatches lead to updates of the observed type set.
 %safe to only solve analysis constraints with respect to the observed types.
 
 For the example program, a type barrier is required on the \code{a[i].p} access
-on line 8, and nowhere else. The barrier will test that the value being read
+on line 8. The barrier will test that the value being read
 is an integer. If a string shows up due to a call to \code{use}
 outside of \code{main}, then the possible types of the \code{a[i].p} access
 will be updated, and \code{res} and \code{v} will be marked as possibly
@@ -240,7 +240,7 @@ analyses do not fare well either. Unification-based analyses undermine the
 utility of dynamic checks; precision is unrecoverable despite dynamic
 monitoring.
 
-More dynamic compilation strategies
+More dynamic compilation strategies, such as the technique used by V8's Crankshaft JavaScript engine,
 generate type-specialized code based on profiling
 information, without static knowledge of possible argument or heap types
 \cite{ChambersThesis, Chambers89}.
@@ -248,7 +248,7 @@ Such techniques will determine the types of expressions with similar
 precision to our analysis,
 but will always require type checks on function arguments or when reading
 heap values.
-With knowledge of all possible types, we only need type checks at accesses
+By modeling all possible types of heap values, we only need type checks at accesses
 with type barriers, a difference which significantly improves performance
 (\Section\ref{sec:barrier_cost}).
 

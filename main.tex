@@ -1,4 +1,4 @@
-\documentclass[preprint]{sigplanconf}
+\documentclass{sigplanconf}
 
 \usepackage[T1]{fontenc}
 \usepackage{mathptmx}
@@ -15,9 +15,9 @@
 \usepackage{booktabs}
 \usepackage[small,compact]{titlesec}
 
-\addtolength{\floatsep}{-1.2mm}
-\addtolength{\textfloatsep}{-1.2mm}
-\addtolength{\dbltextfloatsep}{-1.2mm}
+\addtolength{\floatsep}{-1mm}
+\addtolength{\textfloatsep}{-1mm}
+\addtolength{\dbltextfloatsep}{-1mm}
 
 %\newcommand{\code}[1]{{\scriptsize {\tt #1}}}
 \newcommand{\code}[1]{\texttt{#1}}
@@ -43,8 +43,9 @@
 \lstset{captionpos=t,xleftmargin=5pt,columns=flexible,basicstyle=\ttfamily,showstringspaces=false,escapechar=\#,language=JavaScript}
 
 \title{Fast and Precise Hybrid Type Inference for JavaScript}
-% Author info left blank for double blind submission.
-\authorinfo{}{}{}
+\authorinfo{Brian Hackett\and Shu-yu Guo\titlenote{Work partly done at the University of California, Los Angeles, Los Angeles, CA.}}
+{Mozilla}
+{\{bhackett,shu\}@mozilla.com}
 
 \begin{document}
 
@@ -66,7 +67,7 @@ We showcase an implementation for Mozilla Firefox's JavaScript engine,
 demonstrating both performance gains and viability.
 Through integration with the just-in-time (JIT) compiler in Firefox, we have improved
 performance on major benchmarks and JavaScript-heavy websites by up to 50\%.
-Inference-enabled compilation is scheduled to become the default compilation mode in Firefox 9.
+Inference-enabled compilation is the default compilation mode as of Firefox 9.
 \end{abstract}
 
 \input{example.tex}

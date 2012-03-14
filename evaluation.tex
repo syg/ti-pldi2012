@@ -505,6 +505,8 @@ this includes accesses where objects
 with many different layouts are used, and accesses on rare kinds of
 properties such as those with scripted getters or setters.
 
+The {\it Def} column gives a measurement of how many times during execution dynamic checks were avoided. Since our analysis is hybrid, we cannot (nor does it make sense to) measure how many dynamic checks are statically removed, as a site whose dynamic checks have been removed may have them re-added due to invalidation of analysis results.
+
 An average of 39.4\% of property accesses were resolved as definite properties,
 with a much higher average proportion on benchmarks of 80.3\%.
 The remainder were mostly handled by PICs, with only 5.5\% of

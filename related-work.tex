@@ -75,6 +75,15 @@ type inference using subset constraints \cite{Aiken93}.
 %problem \cite{Wand87}.
 %Our work, formally, is much simpler than many such
 %proposed solutions to solving type constraints by choice.
+More recently, Rastogi et al. has described a gradual type inference algorithm
+for ActionScript, an optionally-typed language related to JavaScript
+\cite{Rastogi12}. They recognized that unlike static type systems, hybrid type
+systems need not guarantee that every use of a variable be safe for every
+definition of that variable. As such, their type inference algorithm is also
+encoded as a flow problem. Though their type system itself is hybrid --- it
+admits the \emph{dynamic} type --- their analysis is nevertheless static. As
+it is designed to help evolve an untyped script to a typed one, they do not
+add additional dynamic checks to increase precision.
 
 % No
 %unification is required to arrive a solution --- a solution always exists by
