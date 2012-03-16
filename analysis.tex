@@ -443,8 +443,8 @@ propagation, and code execution. Propagation, due to barriers, can happen
 during analysis and at runtime.
 
 Suppose then that \code{main} is executed and it calls to \code{use}. First,
-the dynamic check we inserted at the argument binding for \code{use} is
-triggered, and the types of $T_{\code{a}}$ is propagated to
+the type barrier we inserted at the argument binding for \code{use} is
+triggered, and the types of $T_{\code{a}}$ are propagated to
 $T_{\code{a}'}$. That is, $T_{\code{a}'} \supseteq \{A\}$.
 
 Line 8 is where we tie together our extant constraints. First it must be
@@ -454,17 +454,17 @@ combine the two to generate (\ref{ct:8}). The second desugared assignment
 matches \textsc{A-Prop}, so we generate (\ref{ct:9}). We need to emit dynamic
 checks for both (\ref{ct:8}) and (\ref{ct:9}). As such, the interesting bits
 happen when \code{use} is actually executed. When execution reaches line 8,
-first the dynamic check emitted by (\ref{ct:8}) is triggered and propagates
+first the type barrier emitted by (\ref{ct:8}) is triggered and propagates
 $\mathit{Box}$ to $T_{\code{tmp2}}$. Now that $\mathit{Box} \in
-T_{\code{tmp2}}$, the dynamic check of (\ref{ct:9}) triggers and propagates
+T_{\code{tmp2}}$, the type barrier of (\ref{ct:9}) triggers and propagates
 \code{int} from $\mathit{prop}(\mathit{Box}, \code{p})$ to $T_{\code{v}}$.
 
 At this point, as we have observed all possible types of the property access
-\code{a'[i].p}, we can remove the emitted dynamic check. But this removal may
+\code{a'[i].p}, we can remove the emitted type barrier. But this removal may
 not be permanent. If we analyze new code which adds new types to the type set
 $\mathit{prop}(\mathit{Box}, \code{p})$, we will need to re-emit the dynamic
 check. For instance, if in the future we were to see \lstinline{new Box("hello!")}
-elsewhere in the code, we would need to re-emit the dynamic check.
+elsewhere in the code, we would need to re-emit the type barrier.
 
 \subsection{Supplemental Analyses}
 \label{sec:supplemental-analyses}
