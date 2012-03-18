@@ -41,8 +41,8 @@ We describe constraint generation and checks required for a simplified core of
 JavaScript expressions and statements, shown in Figure~\ref{fig:js-core}. We
 let $f,x,y$ range over variables, $p$ range over property names, $i$ range over
 integer literals, and $s$ range over string literals. The only control flow in
-the core language is \code{if}, which tests for definedness. The core contains
-simplfied anonymous functions.
+the core language is \code{if}, which tests for definedness, and via anonymous
+functions \code{fn}.
 
 The types over which we are trying to infer are also shown in
 Figure~\ref{fig:js-core}. The types can be primitive or an object type
@@ -122,7 +122,7 @@ These sets cover the types of both ``own'' properties (those directly held
 by the object) as well as properties inherited from the object's prototype.
 \code{Function} objects have two additional type sets
 $\mathit{arg}(o)$ and $\mathit{ret}(o)$, denoting
-the possible types that the function's parameters and return values can have.
+the possible types that the function's single parameter and return value can have.
 %We do not show how types are propagated from a prototype's type information
 %to the instances; since all objects of a type share the same prototype,
 %this transfer is straightforward.
@@ -235,7 +235,7 @@ The grammar of constraints are shown in Figure~\ref{fig:js-core}. We have the
 standard subset constraint, $\supseteq$, a \emph{barrier subset
   constraint}, $\barrier$, the simple conditional constraint, $\Implies$, and the universal conditional constraint.
 For two type sets $X$ and $Y$, $X \supseteq
-Y$ means that all types in $Y$ are propagated to $X$ at the time of constraint generation, i.e. analysis time. On the other hand, $X
+Y$ means that all types in $Y$ are propagated to $X$ at the time of constraint generation, i.e. during analysis. On the other hand, $X
 \barrier Y$ means that if $Y$ contains types that are not in $X$, then a
 type barrier is required which updates the types in $X$
 according to values which are dynamically assigned to the location
@@ -246,10 +246,9 @@ $C$, $A \Implies C$ takes on the meaning of $C$ whenever $A$ holds during
 propagation. The universal conditional constraint $\forall o \in T \Implies C$
 is like the simple conditional constraint, but is always universally
 quantified over all object types of a type set $T$.
-Constraint propagation can happen both during analysis time and run
-time. Barriers may trigger propagation during run time, and the set membership
-antecedent---both universally quantified and not universally quantified---is
-checked \emph{during propagation}. This is a radical departure from the
+Constraint propagation can happen both during analysis and at runtime.
+Barriers may trigger propagation at runtime, and the set membership
+antecedent is checked \emph{during propagation}. This is a radical departure from the
 traditional model of generating a constraint graph then immediately solving
 that graph.
 
@@ -348,9 +347,9 @@ $X \not\supseteq Y$. The barrier dynamically checks that the type of each value
 flowing across the assignment is actually in $X$, and updates $X$ whenever
 values of a new type are encountered.
 Thought of another way, the vanilla subset constraint propagates
-all types at analysis time. The barrier subset constraint does not propagate
-types at analysis time but defers with dynamic checks, propagating the types
-only if necessary during runtime.
+all types during analysis. The barrier subset constraint does not propagate
+types during analysis but defers with dynamic checks, propagating the types
+only if necessary at runtime.
 
 Type barriers are much like dynamic type casts in Java: assignments from a
 more general type to a more specific type are possible as long as a
@@ -426,12 +425,12 @@ $\mathit{Box}$. We can combine the above two rules to generate (\ref{ct:2}).
 The second desugared assignment matches \textsc{A-Prop} and
 \textsc{Int}. Again, we can combine these two rules to generate the
 conditional (\ref{ct:3}).  The third desugared assignment matches
-\textsc{A-Index}. We generate the conditional (\ref{ct:5}). At this point we are able to propagate $\mathit{A}$ through (\ref{ct:3}) and $\mathit{Box}$ through (\ref{ct:5}), as we know those set memberships hold at analysis time.
+\textsc{A-Index}. We generate the conditional (\ref{ct:5}). At this point we are able to propagate $\mathit{A}$ through (\ref{ct:3}) and $\mathit{Box}$ through (\ref{ct:5}), as we know those set memberships hold during analysis.
 
 At line 18, there is a call to \code{use}. This matches \textsc{App} and
 generates the constraints (\ref{ct:6}) and (\ref{ct:7}). Note that
-(\ref{ct:use-arg}) employs a barrier. Barriers conceptually stop propagation
-of types at analysis time, so $T_{\code{a}}$ \emph{does not} propagate to
+(\ref{ct:use-arg}) employs a barrier. Barriers conceptually restrict propagation
+of types to runtime, so $T_{\code{a}}$ \emph{does not} propagate to
 $T_{\code{a}'}$ even though we know statically $\mathit{Use} \in
 T_{\code{use}}$. And at the current time, before \code{use} is actually
 called, $T_{\code{a}'} \not\supseteq T_{\code{a}}$, which means we need to
@@ -440,8 +439,8 @@ observed.
 
 Until \code{main} is executed to the point where \code{use} is called, no
 further analysis is done. That is, we \emph{interleave} constraint generation,
-propagation, and code execution. Propagation, due to barriers, can happen at
-analysis time and run time.
+propagation, and code execution. Propagation, due to barriers, can happen
+during analysis and at runtime.
 
 Suppose then that \code{main} is executed and it calls to \code{use}. First,
 the dynamic check we inserted at the argument binding for \code{use} is
