@@ -432,18 +432,18 @@ through (\ref{ct:5}), as we know those set memberships hold during analysis.
 
 At line 18, there is a call to \code{use}. This matches \textsc{App} and
 generates the constraints (\ref{ct:6}) and (\ref{ct:7}). Note that
-(\ref{ct:use-arg}) employs a barrier. Barriers conceptually restrict propagation
-of types to runtime, so $T_{\code{a}}$ \emph{does not} propagate to
-$T_{\code{a}'}$ even though we know statically $\mathit{Use} \in
-T_{\code{use}}$. And at the current time, before \code{use} is actually
-called, $T_{\code{a}'} \not\supseteq T_{\code{a}}$, which means we need to
-emit a dynamic check that continues the propagation should new types be
-observed.
+(\ref{ct:use-arg}) employs a barrier constraint. Barrier constraints
+conceptually restrict propagation of types to runtime, so $T_{\code{a}}$
+\emph{does not} propagate to $T_{\code{a}'}$ even though we know statically
+$\mathit{Use} \in T_{\code{use}}$. And at the current time, before \code{use}
+is actually called, $T_{\code{a}'} \not\supseteq T_{\code{a}}$, which means we
+need to emit a dynamic check, or type barrier, that continues the propagation
+should new types be observed.
 
 Until \code{main} is executed to the point where \code{use} is called, no
 further analysis is done. That is, we \emph{interleave} constraint generation,
-propagation, and code execution. Propagation, due to barriers, can happen
-during analysis and at runtime.
+propagation, and code execution. Propagation, due to barrier constraints, can
+happen during analysis and at runtime.
 
 Suppose then that \code{main} is executed and it calls to \code{use}. First,
 the type barrier we inserted at the argument binding for \code{use} is
@@ -463,7 +463,7 @@ T_{\code{tmp2}}$, the type barrier of (\ref{ct:9}) triggers and propagates
 \code{int} from $\mathit{prop}(\mathit{Box}, \code{p})$ to $T_{\code{v}}$.
 
 At this point, as we have observed all possible types of the property access
-\code{a'[i].p}, we can remove the emitted type barrier. But this removal may
+\code{a$'$[i].p}, we can remove the emitted type barrier. But this removal may
 not be permanent. If we analyze new code which adds new types to the type set
 $\mathit{prop}(\mathit{Box}, \code{p})$, we will need to re-emit the dynamic
 check. For instance, if in the future we were to see \lstinline{new Box("hello!")}
