@@ -400,7 +400,8 @@ The constraint generation rules as presented are not expressive enough to
 process the motivating example in Figure~\ref{fig:motivating-example} in full;
 we must first desugar the motivating example to look like the simplified
 core. In the interest of space, we will instead focus on a few interesting
-lines and provide the desugaring where needed. In the following walkthrough we will show how the variable \code{v} on line 8 gets the type \code{int}.
+lines and provide the desugaring where needed. In the following walkthrough we
+will show how the variable \code{v} on line 8 gets the type \code{int}.
 
 At line 5, the declaration of the \code{use} function needs to be desugared to
 assigning an anonymous function to a variable named \code{use}.\footnote{We do
@@ -425,7 +426,9 @@ $\mathit{Box}$. We can combine the above two rules to generate (\ref{ct:2}).
 The second desugared assignment matches \textsc{A-Prop} and
 \textsc{Int}. Again, we can combine these two rules to generate the
 conditional (\ref{ct:3}).  The third desugared assignment matches
-\textsc{A-Index}. We generate the conditional (\ref{ct:5}). At this point we are able to propagate $\mathit{A}$ through (\ref{ct:3}) and $\mathit{Box}$ through (\ref{ct:5}), as we know those set memberships hold during analysis.
+\textsc{A-Index}. We generate the conditional (\ref{ct:5}). At this point we
+are able to propagate $\mathit{A}$ through (\ref{ct:3}) and $\mathit{Box}$
+through (\ref{ct:5}), as we know those set memberships hold during analysis.
 
 At line 18, there is a call to \code{use}. This matches \textsc{App} and
 generates the constraints (\ref{ct:6}) and (\ref{ct:7}). Note that
