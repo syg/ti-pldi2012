@@ -181,7 +181,6 @@ grooveshark    & 64 & 15 & 21 & 63 & 65 & 1 & 13 & 21 & 28 & 0 & 56 & 16 \\
 meebo          & 78 & 11 & 10 & 35 & 66 & 9 & 18 & 8 & 17 & 0 & 34 & 49 \\
 reddit         & 71 & 7 & 22 & 51 & 64 & 0 & 29 & 7 & 22 & 0 & 71 & 7 \\
 youtube        & 83 & 11 & 6 & 38 & 50 & 27 & 19 & 4 & 33 & 0 & 38 & 29 \\
-ztype          & 91 & 1 & 9 & 52 & 43 & 41 & 8 & 8 & 79 & 9 & 12 & 0 \\
 280slides      & 79 & 3 & 19 & 64 & 48 & 51 & 1 & 0 & 6 & 0 & 91 & 2 \\
 membench50     & 76 & 11 & 13 & 49 & 65 & 7  & 18 & 10 & 44 & 0 & 47 & 10 \\
 \midrule
@@ -195,6 +194,7 @@ bullet         & 84 & 0 & 16 & 92 & 54 & 38 & 0 & 7 & 79 & 20 & 0 & 1 \\
 lights         & 97 & 1 & 2 & 15 & 34 & 66 & 0 & 1 & 95 & 0 & 4 & 1 \\
 FOTN           & 98 & 1 & 1 & 20 & 39 & 61 & 0 & 0 & 96 & 0 & 3 & 0 \\
 monalisa       & 99 & 1 & 0 & 4 & 94 & 3 & 2 & 0 & 100 & 0 & 0 & 0 \\
+ztype          & 91 & 1 & 9 & 52 & 43 & 41 & 8 & 8 & 79 & 9 & 12 & 0 \\
 \midrule
 Average        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7 & 27.0 & 7.7 \\
 \bottomrule
@@ -222,7 +222,7 @@ A brief description of the websites used is included below.
 
 \begin{itemize}
 
-\item Ten popular websites which use JavaScript extensively.
+\item Nine popular websites which use JavaScript extensively.
 Each site was used for several minutes, exercising various features.
 
 \item The membench50 suite\footnote{\url{http://gregor-wagner.com/tmp/mem50}},
@@ -231,7 +231,7 @@ which loads the front pages of 50 popular websites.
 
 \item The three benchmark suites described in \Section\ref{sec:benchmarks}.
 
-\item Six games and demos which are bound on JavaScript performance.
+\item Seven games and demos which are bound on JavaScript performance.
 Each was used for several minutes or, in the case of non-interactive
 demos, viewed to completion.
 
@@ -316,8 +316,8 @@ columns over time.
 
 Averaged across pages, 84.7\% of reads were at monomorphic
 sites, and 90.2\% were at monomorphic or dimorphic sites.
-The latter figure is 85.9\% for websites, 97.3\% for benchmarks,
-and 94.7\% for games and demos; websites are more polymorphic than games
+The latter figure is 85.4\% for websites, 97.3\% for benchmarks,
+and 94.3\% for games and demos; websites are more polymorphic than games
 and demos, but by and large behave in a monomorphic fashion.
 
 \subsubsection{Barrier Frequency}
@@ -334,7 +334,7 @@ There is a large disparity between websites and other pages.
 Websites were fairly homogenous, requiring barriers on between 35\%
 and 74\% of accesses (averaging 50\%), while benchmarks,
 games and demos were generally
-much lower, averaging 13\% except for two outliers above 90\%.
+much lower, averaging 17.9\% except for two outliers above 90\%.
 
 The larger proportion of barriers required for websites indicates that
 heap layouts and types tend to be more complicated for websites than for
@@ -374,8 +374,8 @@ and operations where at least one of the operand types is unknown.
 Overall, precise types were found for 93.8\% of arithmetic operations,
 including 90.2\% of operations performed by websites.
 Comparing websites with other pages, websites tend to do far more
-arithmetic on non-numeric values --- 16.8\% vs. 1.6\% ---
-and considerably less arithmetic on doubles --- 14.8\% vs. 37.9\%.
+arithmetic on non-numeric values --- 27.8\% vs. 0.5\% ---
+and considerably less arithmetic on doubles --- 13.1\% vs. 46.1\%.
 
 In the indices section, the {\it Int}, {\it Double}, {\it Other}, and
 {\it Unknown} columns indicate, respectively, that the type of the index, i.e.,
@@ -402,7 +402,6 @@ grooveshark    & 90 & 2 & 8 & 20 & 66 & 14 \\
 meebo          & 57 & 0 & 43 & 40 & 57 & 3 \\
 reddit         & 97 & 0 & 3 & 45 & 51 & 4 \\
 youtube        & 100 & 0 & 0 & 32 & 49 & 19 \\
-ztype          & 100 & 0 & 0 & 23 & 76 & 0 \\
 280slides      & 88 & 12 & 0 & 23 & 56 & 21 \\
 membench50     & 80 & 4 & 16 & 35 & 58 & 6 \\
 \midrule
@@ -416,6 +415,7 @@ bullet         & 4 & 96 & 0 & 32 & 65 & 3 \\
 lights         & 97 & 3 & 1 & 21 & 78 & 1 \\
 FOTN           & 91 & 6 & 3 & 46 & 54 & 0 \\
 monalisa       & 87 & 0 & 13 & 78 & 22 & 0 \\
+ztype          & 100 & 0 & 0 & 23 & 76 & 0 \\
 \midrule
 Average        & 75.2 & 14.8 & 10.1 & 39.4 & 55.1 & 5.5 \\
 \bottomrule
@@ -442,7 +442,6 @@ grooveshark    & 58 & 2.8 & 30 & 1.4 \\
 meebo          & 36 & 3.6 & 28 & 3.5 \\
 reddit         & 37 & 1.7 & 13 & 1.9 \\
 youtube        & 40 & 6.7 & 28 & 7.0 \\
-ztype          & 54 & 6.0 & 63 & 7.9 \\
 280slides      & 76 & 4.0 & 93 & --- \\
 membench50     & 47 & 3.6 & 29 & 2.9 \\
 \midrule
@@ -456,6 +455,7 @@ bullet         & 62 & 3.9 & 79 & 11.3 \\
 lights         & 37 & --- & 63 & --- \\
 FOTN           & 28 & --- & 57 & --- \\
 monalisa       & 44 & --- & 41 & --- \\
+ztype          & 54 & 6.0 & 63 & 7.9 \\
 \midrule
 Average        & 42.1 & 4.3 & 37.4 & 6.0 \\
 \bottomrule
