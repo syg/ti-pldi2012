@@ -368,7 +368,7 @@ present three rules which employ type barriers:
 \textsc{Prop}, \textsc{Index}, and \textsc{Fun}. We use barriers on function
 argument binding to precisely model polymorphic call sites where
 only certain combinations of argument types and callee functions are possible.
-Barriers could be used for other types of assignments, such as return types, but we do not do so.
+Barriers could be used for other types of assignments, such as at return sites, but we do not do so.
 Allowing barriers in new places is unlikely to significantly change the total
 number of required barriers --- improving precision by adding barriers in one
 place can make barriers in another place unnecessary.
@@ -417,11 +417,13 @@ objects. Thus, this will match \textsc{Obj} and \textsc{A-Var}. Let us call
 the fresh object type for this source location $A$. We generate (\ref{ct:1}).
 
 At line 17, \code{Box} objects are created. Though the core does not handle
-\lstinline{new} constructions, it is easy to see that in this case we may
-desugar \lstinline{a[i] = new Box(10);} to \code{tmp = \{\}; tmp.p = 10; a[i]
+\lstinline{new} constructions, we may desugar
+\lstinline{a[i] = new Box(10);} to \code{tmp = \{\}; tmp.p = 10; a[i]
   = tmp}. The first desugared assignment matches \textsc{Obj} and
 \textsc{A-Var}. Let us call the fresh object type for this source location
-$\mathit{Box}$. We can combine the above two rules to generate (\ref{ct:2}).
+$\mathit{Box}$ (this desugaring is approximate; in practice for `new' we assign
+object types to the new object according to the called function's prototype).
+We can combine the above two rules to generate (\ref{ct:2}).
 The second desugared assignment matches \textsc{A-Prop} and
 \textsc{Int}. Again, we can combine these two rules to generate the
 conditional (\ref{ct:3}).  The third desugared assignment matches
@@ -429,7 +431,7 @@ conditional (\ref{ct:3}).  The third desugared assignment matches
 
 At line 18, there is a call to \code{use}. This matches \textsc{App} and
 generates the constraints (\ref{ct:6}) and (\ref{ct:7}). Note that
-(\ref{ct:use-arg}) employs a barrier. Barriers conceptually restrict propagation
+(\ref{ct:use-arg}) employs a barrier. Barriers restrict propagation
 of types to runtime, so $T_{\code{a}}$ \emph{does not} propagate to
 $T_{\code{a}'}$ even though we know statically $\mathit{Use} \in
 T_{\code{use}}$. And at the current time, before \code{use} is actually
@@ -442,7 +444,7 @@ further analysis is done. That is, we \emph{interleave} constraint generation,
 propagation, and code execution. Propagation, due to barriers, can happen
 during analysis and at runtime.
 
-Suppose then that \code{main} is executed and it calls to \code{use}. First,
+Suppose then that \code{main} is executed and it calls \code{use}. First,
 the dynamic check we inserted at the argument binding for \code{use} is
 triggered, and the types of $T_{\code{a}}$ is propagated to
 $T_{\code{a}'}$. That is, $T_{\code{a}'} \supseteq \{A\}$.
@@ -451,16 +453,18 @@ Line 8 is where we tie together our extant constraints. First it must be
 desugared to use a temporary: \lstinline{tmp2 = a$'$[i]; v = tmp2.p}. The
 first desugared assignment matches \textsc{Index} and \textsc{A-Var}. We
 combine the two to generate (\ref{ct:8}). The second desugared assignment
-matches \textsc{A-Prop}, so we generate (\ref{ct:9}). We need to emit dynamic
-checks for both (\ref{ct:8}) and (\ref{ct:9}). As such, the interesting bits
-happen when \code{use} is actually executed. When execution reaches line 8,
-first the dynamic check emitted by (\ref{ct:8}) is triggered and propagates
+matches \textsc{Prop}, so we generate (\ref{ct:9}). Both
+(\ref{ct:8}) and (\ref{ct:9}) use type barriers, so no propagation occurs
+until line 8 executes.
+The dynamic check required by (\ref{ct:8}) is triggered and propagates
 $\mathit{Box}$ to $T_{\code{tmp2}}$. Now that $\mathit{Box} \in
-T_{\code{tmp2}}$, the dynamic check of (\ref{ct:9}) triggers and propagates
+T_{\code{tmp2}}$, the dynamic check for (\ref{ct:9}) triggers and propagates
 \code{int} from $\mathit{prop}(\mathit{Box}, \code{p})$ to $T_{\code{v}}$.
 
 At this point, as we have observed all possible types of the property access
-\code{a'[i].p}, we can remove the emitted dynamic check. But this removal may
+\code{a'[i].p}, no dynamic checks are required by the type barriers
+in (\ref{ct:8}) and (\ref{ct:9}).
+But this removal may
 not be permanent. If we analyze new code which adds new types to the type set
 $\mathit{prop}(\mathit{Box}, \code{p})$, we will need to re-emit the dynamic
 check. For instance, if in the future we were to see \lstinline{new Box("hello!")}
