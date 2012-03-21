@@ -441,13 +441,12 @@ restrict propagation of types to runtime, so $T_{\code{a}}$
 $\mathit{Use} \in T_{\code{use}}$. And at the current time, before \code{use}
 is actually called, $T_{\code{a}'} \not\supseteq T_{\code{a}}$, which means we
 need to emit a dynamic check, or type barrier, that continues the propagation
-should new types be observed.
+should new types be observed during runtime.
 
 Until \code{main} is executed to the point where \code{use} is called, no
 further analysis is done. That is, we \emph{interleave} constraint generation,
 propagation, and code execution. Propagation, due to barrier constraints, can
 happen during analysis and at runtime.
-
 Suppose then that \code{main} is executed and it calls \code{use}. First,
 the type barrier we inserted at the argument binding for \code{use} is
 triggered, and the types of $T_{\code{a}}$ are propagated to

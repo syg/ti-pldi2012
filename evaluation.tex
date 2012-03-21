@@ -156,53 +156,6 @@ V8 (version 6)      & 4317   & 1.17 & 0.78 \\
 \label{fig:benchmarks100}
 \end{figure}
 
-\begin{figure*}
-\centering
-\begin{tabular}{lrrrrrrrrrrrrrrr}
-\toprule
-& \multicolumn{3}{c}{Inferred Precision (\%)} &
-& \multicolumn{4}{c}{Arithmetic (\%)}
-& \multicolumn{4}{c}{Indices (\%)} \\
-
-\cmidrule(r){2-4}
-\cmidrule(r){6-9}
-\cmidrule{10-13}
-
-Test
-& Mono & Di & Poly & Barrier (\%)
-& Int & Double & Other & Unknown
-& Int & Double & Other & Unknown \\
-\midrule
-gmail          & 78 & 5  & 17 & 47 & 62 & 9  & 7  & 21 & 44 & 0 & 47 & 8 \\
-googlemaps     & 81 & 7  & 12 & 36 & 66 & 26 & 3  & 5  & 60 & 6 & 30 & 4 \\
-facebook       & 73 & 11 & 16 & 42 & 43 & 0 & 40 & 16 & 62 & 0 & 32 & 6 \\
-flickr         & 71 & 19 & 10 & 74 & 61 & 1 & 30 & 8 & 27 & 0 & 70 & 3 \\
-grooveshark    & 64 & 15 & 21 & 63 & 65 & 1 & 13 & 21 & 28 & 0 & 56 & 16 \\
-meebo          & 78 & 11 & 10 & 35 & 66 & 9 & 18 & 8 & 17 & 0 & 34 & 49 \\
-reddit         & 71 & 7 & 22 & 51 & 64 & 0 & 29 & 7 & 22 & 0 & 71 & 7 \\
-youtube        & 83 & 11 & 6 & 38 & 50 & 27 & 19 & 4 & 33 & 0 & 38 & 29 \\
-280slides      & 79 & 3 & 19 & 64 & 48 & 51 & 1 & 0 & 6 & 0 & 91 & 2 \\
-membench50     & 76 & 11 & 13 & 49 & 65 & 7  & 18 & 10 & 44 & 0 & 47 & 10 \\
-\midrule
-sunspider      & 99 & 0  & 1  & 7  & 72 & 21 & 7  & 0  & 95 & 0 & 4  & 1  \\
-v8bench        & 86 & 7  & 7  & 26 & 98 & 1  & 0  & 0  & 100 & 0 & 0 & 0  \\
-kraken         & 100 & 0 & 0  & 3  & 61 & 37 & 2  & 0  & 100 & 0 & 0 & 0  \\
-\midrule
-angrybirds     & 97 & 2 & 1 & 93 & 22 & 78 & 0 & 0 & 88 & 8 & 0 & 5 \\
-gameboy        & 88 & 0 & 12 & 16 & 54 & 36 & 3 & 7 & 88 & 0 & 0 & 12 \\
-bullet         & 84 & 0 & 16 & 92 & 54 & 38 & 0 & 7 & 79 & 20 & 0 & 1 \\
-lights         & 97 & 1 & 2 & 15 & 34 & 66 & 0 & 1 & 95 & 0 & 4 & 1 \\
-FOTN           & 98 & 1 & 1 & 20 & 39 & 61 & 0 & 0 & 96 & 0 & 3 & 0 \\
-monalisa       & 99 & 1 & 0 & 4 & 94 & 3 & 2 & 0 & 100 & 0 & 0 & 0 \\
-ztype          & 91 & 1 & 9 & 52 & 43 & 41 & 8 & 8 & 79 & 9 & 12 & 0 \\
-\midrule
-Average        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7 & 27.0 & 7.7 \\
-\bottomrule
-\end{tabular}
-\nocaptionrule \caption{Website Type Profiling Results}
-\label{fig:polymorphism}
-\end{figure*}
-
 \subsection{Website Performance}
 \label{sec:websites}
 
@@ -264,7 +217,52 @@ across the different categories of websites.
 
 \end{enumerate}
 
+\begin{figure*}
+\centering
+\begin{tabular}{lrrrrrrrrrrrrrrr}
+\toprule
+& \multicolumn{3}{c}{Inferred Precision (\%)} &
+& \multicolumn{4}{c}{Arithmetic (\%)}
+& \multicolumn{4}{c}{Indices (\%)} \\
 
+\cmidrule(r){2-4}
+\cmidrule(r){6-9}
+\cmidrule{10-13}
+
+Test
+& Mono & Di & Poly & Barrier (\%)
+& Int & Double & Other & Unknown
+& Int & Double & Other & Unknown \\
+\midrule
+gmail          & 78 & 5  & 17 & 47 & 62 & 9  & 7  & 21 & 44 & 0 & 47 & 8 \\
+googlemaps     & 81 & 7  & 12 & 36 & 66 & 26 & 3  & 5  & 60 & 6 & 30 & 4 \\
+facebook       & 73 & 11 & 16 & 42 & 43 & 0 & 40 & 16 & 62 & 0 & 32 & 6 \\
+flickr         & 71 & 19 & 10 & 74 & 61 & 1 & 30 & 8 & 27 & 0 & 70 & 3 \\
+grooveshark    & 64 & 15 & 21 & 63 & 65 & 1 & 13 & 21 & 28 & 0 & 56 & 16 \\
+meebo          & 78 & 11 & 10 & 35 & 66 & 9 & 18 & 8 & 17 & 0 & 34 & 49 \\
+reddit         & 71 & 7 & 22 & 51 & 64 & 0 & 29 & 7 & 22 & 0 & 71 & 7 \\
+youtube        & 83 & 11 & 6 & 38 & 50 & 27 & 19 & 4 & 33 & 0 & 38 & 29 \\
+280slides      & 79 & 3 & 19 & 64 & 48 & 51 & 1 & 0 & 6 & 0 & 91 & 2 \\
+membench50     & 76 & 11 & 13 & 49 & 65 & 7  & 18 & 10 & 44 & 0 & 47 & 10 \\
+\midrule
+sunspider      & 99 & 0  & 1  & 7  & 72 & 21 & 7  & 0  & 95 & 0 & 4  & 1  \\
+v8bench        & 86 & 7  & 7  & 26 & 98 & 1  & 0  & 0  & 100 & 0 & 0 & 0  \\
+kraken         & 100 & 0 & 0  & 3  & 61 & 37 & 2  & 0  & 100 & 0 & 0 & 0  \\
+\midrule
+angrybirds     & 97 & 2 & 1 & 93 & 22 & 78 & 0 & 0 & 88 & 8 & 0 & 5 \\
+gameboy        & 88 & 0 & 12 & 16 & 54 & 36 & 3 & 7 & 88 & 0 & 0 & 12 \\
+bullet         & 84 & 0 & 16 & 92 & 54 & 38 & 0 & 7 & 79 & 20 & 0 & 1 \\
+lights         & 97 & 1 & 2 & 15 & 34 & 66 & 0 & 1 & 95 & 0 & 4 & 1 \\
+FOTN           & 98 & 1 & 1 & 20 & 39 & 61 & 0 & 0 & 96 & 0 & 3 & 0 \\
+monalisa       & 99 & 1 & 0 & 4 & 94 & 3 & 2 & 0 & 100 & 0 & 0 & 0 \\
+ztype          & 91 & 1 & 9 & 52 & 43 & 41 & 8 & 8 & 79 & 9 & 12 & 0 \\
+\midrule
+Average        & 84.7 & 5.7 & 9.8 & 41.4 & 58.1 & 25.7 & 10.0 & 6.2 & 63.2 & 1.7 & 27.0 & 7.7 \\
+\bottomrule
+\end{tabular}
+\nocaptionrule \caption{Website Type Profiling Results}
+\label{fig:polymorphism}
+\end{figure*}
 
 \subsubsection{Access Site Polymorphism}
 \label{sec:access_polymorphism}

@@ -1,9 +1,5 @@
 \documentclass{sigplanconf}
 
-\conferenceinfo{PLDI'12,} {June 11--16, 2012, Beijing, China.}
-\CopyrightYear{2012}
-\copyrightdata{978-1-4503-1205-9/12/06}
-
 \usepackage[T1]{fontenc}
 \usepackage{mathptmx}
 \usepackage[scaled=0.80]{beramono}
@@ -53,6 +49,10 @@
 
 \begin{document}
 
+\conferenceinfo{PLDI'12,} {June 11--16, 2012, Beijing, China.}
+\CopyrightYear{2012}
+\copyrightdata{978-1-4503-1205-9/12/06}
+
 \maketitle
 
 \begin{abstract}
@@ -73,6 +73,10 @@ Through integration with the just-in-time (JIT) compiler in Firefox, we have imp
 performance on major benchmarks and JavaScript-heavy websites by up to 50\%.
 Inference-enabled compilation is the default compilation mode as of Firefox 9.
 \end{abstract}
+
+\category{D.3.4}{Processors}{Compilers, optimization}
+
+\keywords type inference, hybrid, just-in-time compilation
 
 \input{example.tex}
 \input{analysis.tex}
@@ -103,6 +107,7 @@ and Sam Tobin-Hochstadt for draft reading and helpful discussion.
 
 % When uncommenting for full version be sure to comment out line that says the
 % full version has the appendix in evaluation.tex
+%\appendix
 %\input{methodology.tex}
 
 \bibliographystyle{abbrvnat}
