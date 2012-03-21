@@ -51,7 +51,7 @@ $o$.\footnote{In full JavaScript, we also have the primitive types \code{bool}
 signed 32-bit integer and is subsumed by \code{number} --- \code{int} is added
 to all type sets containing \code{number}. There is no arrow type for
 functions, as functions are treated as objects with special argument and
-return properties, as we will show below. Finally, we have sets of types
+return properties, as we show below. Finally, we have sets of types
 which the analysis computes.
 
 \newcommand{\barrier}{\supseteq_\mathcal{B}}
@@ -401,7 +401,7 @@ process the motivating example in Figure~\ref{fig:motivating-example} in full;
 we must first desugar the motivating example to look like the simplified
 core. In the interest of space, we will instead focus on a few interesting
 lines and provide the desugaring where needed. In the following walkthrough we
-will show how the variable \code{v} on line 8 gets the type \code{int}.
+show how the variable \code{v} on line 8 gets the type \code{int}.
 
 At line 5, the declaration of the \code{use} function needs to be desugared to
 assigning an anonymous function to a variable named \code{use}.\footnote{We do
@@ -415,7 +415,8 @@ $\code{a}'$.
 At line 15, an empty array is created. The core does not handle arrays, but
 for the purposes of constraint generation it is enough to treat them as
 objects. Thus, this will match \textsc{Obj} and \textsc{A-Var}. Let us call
-the fresh object type for this source location $A$. We generate (\ref{ct:1}).
+the fresh object type for this source location $A$. Combining both rules,
+we generate (\ref{ct:1}).
 
 At line 17, \code{Box} objects are created. Though the core does not handle
 \lstinline{new} constructions, we may desugar
@@ -429,7 +430,7 @@ The second desugared assignment matches \textsc{A-Prop} and
 \textsc{Int}. Again, we can combine these two rules to generate the
 conditional (\ref{ct:3}).  The third desugared assignment matches
 \textsc{A-Index}. We generate the conditional (\ref{ct:5}). At this point we
-are able to propagate $\mathit{A}$ through (\ref{ct:3}) and $\mathit{Box}$
+propagate $\mathit{Box}$ through (\ref{ct:3}) and $\mathit{A}$
 through (\ref{ct:5}), as we know those set memberships hold during analysis.
 
 At line 18, there is a call to \code{use}. This matches \textsc{App} and
@@ -456,16 +457,16 @@ Line 8 is where we tie together our extant constraints. First it must be
 desugared to use a temporary: \lstinline{tmp2 = a$'$[i]; v = tmp2.p}. The
 first desugared assignment matches \textsc{Index} and \textsc{A-Var}. We
 combine the two to generate (\ref{ct:8}). The second desugared assignment
-matches \textsc{Prop}, so we generate (\ref{ct:9}). Both
+matches \textsc{Prop} and \textsc{A-Var}, so we generate (\ref{ct:9}). Both
 (\ref{ct:8}) and (\ref{ct:9}) emit type barriers, so no propagation occurs
 until line 8 executes.
-The dynamic check required by (\ref{ct:8}) is triggered and propagates
+The type barrier required by (\ref{ct:8}) is triggered and propagates
 $\mathit{Box}$ to $T_{\code{tmp2}}$. Now that $\mathit{Box} \in
-T_{\code{tmp2}}$, the dynamic check for (\ref{ct:9}) triggers and propagates
+T_{\code{tmp2}}$, the type barrier for (\ref{ct:9}) triggers and propagates
 \code{int} from $\mathit{prop}(\mathit{Box}, \code{p})$ to $T_{\code{v}}$.
 
 At this point, as we have observed all possible types of the property access
-\code{a'[i].p}, no dynamic checks are required by the barrier constraints
+\code{a$'$[i].p}, no dynamic checks are required by the barrier constraints
 in (\ref{ct:8}) and (\ref{ct:9}).
 But this removal may
 not be permanent. If we analyze new code which adds new types to the type set
